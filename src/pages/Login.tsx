@@ -8,30 +8,39 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user, login } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { user, session, login } = useAuth();
 
-  if (user) {
+  // If user is authenticated and has a valid session, redirect
+  if (user && session) {
+    console.log('User authenticated, redirecting to dashboard');
     return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError(null);
 
     try {
       if (isSignUp) {
+        // Clean up before signup
+        cleanupAuthState();
+        
         const { error } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (error) {
+          setAuthError(error.message);
           toast({
             title: 'Registrering feilet',
             description: error.message,
@@ -44,16 +53,28 @@ const Login = () => {
           });
         }
       } else {
+        console.log('Attempting login...');
         const success = await login(email, password);
+        
         if (!success) {
+          setAuthError('Ugyldig e-post eller passord.');
           toast({
             title: 'Innlogging feilet',
             description: 'Ugyldig e-post eller passord.',
             variant: 'destructive',
           });
+        } else {
+          console.log('Login successful, user should be redirected');
+          // Force page reload to ensure clean state
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1000);
         }
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'En ukjent feil oppstod';
+      setAuthError(errorMessage);
+      console.error('Auth error:', error);
       toast({
         title: 'En feil oppstod',
         description: 'Prøv igjen senere.',
@@ -77,6 +98,12 @@ const Login = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {authError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm">
+                <p className="text-red-800">{authError}</p>
+              </div>
+            )}
+            
             <div>
               <Label htmlFor="email">E-post</Label>
               <Input
@@ -86,6 +113,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="din.epost@example.com"
                 required
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -98,6 +126,7 @@ const Login = () => {
                 placeholder="Skriv inn passord"
                 required
                 minLength={6}
+                disabled={isLoading}
               />
             </div>
             <Button 
@@ -114,6 +143,7 @@ const Login = () => {
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-myhrvold-primary hover:underline"
+              disabled={isLoading}
             >
               {isSignUp 
                 ? 'Har du allerede en konto? Logg inn' 
@@ -127,6 +157,14 @@ const Login = () => {
               <p className="text-blue-800 mb-2"><strong>Eksisterende bruker:</strong></p>
               <p className="text-blue-700">
                 Hvis du allerede har opprettet en konto, bruk e-posten og passordet du registrerte deg med.
+              </p>
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded text-sm">
+              <p className="text-gray-700">
+                Behandler forespørsel... Hvis dette tar lang tid, prøv å oppdatere siden.
               </p>
             </div>
           )}
