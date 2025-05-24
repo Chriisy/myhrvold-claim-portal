@@ -33,8 +33,8 @@ const Reports = () => {
           *,
           supplier:suppliers(*),
           technician:users!claims_technician_id_fkey(*),
-          cost_lines(*),
-          credit_notes(*)
+          cost_line(*),
+          credit_note(*)
         `)
         .gte('created_at', filters.date_range.start.toISOString())
         .lte('created_at', filters.date_range.end.toISOString());
@@ -49,11 +49,7 @@ const Reports = () => {
         query = query.eq('technician_id', filters.technician_id);
       }
       if (statusFilter && statusFilter !== 'all') {
-        // Type assertion to ensure the statusFilter is a valid claim status
-        const validStatuses = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'] as const;
-        if (validStatuses.includes(statusFilter as any)) {
-          query = query.eq('status', statusFilter);
-        }
+        query = query.eq('status', statusFilter);
       }
 
       const { data, error } = await query;
@@ -79,8 +75,12 @@ const Reports = () => {
       ].join(','));
 
       data.forEach(claim => {
-        const totalCost = claim.cost_lines?.reduce((sum: number, line: any) => sum + line.amount, 0) || 0;
-        const totalCredit = claim.credit_notes?.reduce((sum: number, note: any) => sum + note.amount, 0) || 0;
+        const totalCost = Array.isArray(claim.cost_line) 
+          ? claim.cost_line.reduce((sum: number, line: any) => sum + line.amount, 0) 
+          : 0;
+        const totalCredit = Array.isArray(claim.credit_note) 
+          ? claim.credit_note.reduce((sum: number, note: any) => sum + note.amount, 0) 
+          : 0;
 
         const row = [
           claim.id,
