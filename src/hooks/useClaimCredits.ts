@@ -3,14 +3,35 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export function useClaimCredits(claimId: string) {
+export function useClaimCredits(claimIdOrNumber: string) {
   return useQuery({
-    queryKey: ['credits', claimId],
+    queryKey: ['credits', claimIdOrNumber],
     queryFn: async () => {
+      // First, check if we're dealing with a UUID or a claim number
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
+      
+      let actualClaimId = claimIdOrNumber;
+      
+      if (!isUUID) {
+        // Look up the claim by identifier
+        const { data: claimData, error: claimError } = await supabase
+          .from('claims')
+          .select('id')
+          .eq('id', claimIdOrNumber)
+          .single();
+          
+        if (claimError) {
+          console.warn('Could not find claim with identifier:', claimIdOrNumber);
+          return [];
+        }
+        
+        actualClaimId = claimData.id;
+      }
+      
       const { data, error } = await supabase
         .from('credit_note')
         .select('*')
-        .eq('claim_id', claimId)
+        .eq('claim_id', actualClaimId)
         .order('created_at', { ascending: true });
       
       if (error) throw error;
