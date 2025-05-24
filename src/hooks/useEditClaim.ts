@@ -2,6 +2,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+type ClaimCategory = Database['public']['Enums']['claim_category'];
+type ClaimStatus = Database['public']['Enums']['claim_status'];
 
 export function useEditClaim() {
   const queryClient = useQueryClient();
@@ -17,13 +21,13 @@ export function useEditClaim() {
       machine_serial?: string;
       warranty?: boolean;
       quantity?: number;
-      category?: string;
+      category?: ClaimCategory;
       description?: string;
       visma_order_no?: string;
       customer_po?: string;
       reported_by?: string;
       internal_note?: string;
-      status?: string;
+      status?: ClaimStatus;
     }) => {
       const { id, ...updateData } = data;
       const { data: result, error } = await supabase
