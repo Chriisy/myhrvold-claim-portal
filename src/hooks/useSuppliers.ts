@@ -25,6 +25,17 @@ export const useCreateSupplier = () => {
 
   return useMutation({
     mutationFn: async (supplierData: NewSupplierData) => {
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        console.error('Authentication error:', authError);
+        throw new Error('Du må være innlogget for å opprette leverandører');
+      }
+
+      console.log('Creating supplier with data:', supplierData);
+      console.log('Authenticated user:', user.id);
+
       const { data, error } = await supabase
         .from('suppliers')
         .insert({
@@ -36,7 +47,12 @@ export const useCreateSupplier = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supplier creation error:', error);
+        throw error;
+      }
+      
+      console.log('Supplier created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -46,13 +62,22 @@ export const useCreateSupplier = () => {
         description: 'Den nye leverandøren har blitt lagt til.',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Error creating supplier:', error);
+      
+      let errorMessage = 'Kunne ikke opprette leverandør. Prøv igjen.';
+      
+      if (error.message === 'Du må være innlogget for å opprette leverandører') {
+        errorMessage = error.message;
+      } else if (error.code === '42501') {
+        errorMessage = 'Du har ikke tilgang til å opprette leverandører. Kontakt administrator.';
+      }
+      
       toast({
         title: 'Feil',
-        description: 'Kunne ikke opprette leverandør. Prøv igjen.',
+        description: errorMessage,
         variant: 'destructive',
       });
-      console.error('Error creating supplier:', error);
     },
   });
 };
