@@ -3,12 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSuppliers } from '../useSuppliers';
+import React from 'react';
 
 // Mock Supabase client
 const mockSupabase = {
   from: vi.fn(() => ({
     select: vi.fn(() => ({
-      eq: vi.fn(() => ({
+      is: vi.fn(() => ({
         order: vi.fn(() => Promise.resolve({
           data: [
             { id: '1', name: 'Test Supplier', contact_name: 'John Doe' }
@@ -33,7 +34,7 @@ const createWrapper = () => {
     },
   });
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
   );
 };
 
