@@ -27,7 +27,12 @@ export const useCreateSupplier = () => {
     mutationFn: async (supplierData: NewSupplierData) => {
       const { data, error } = await supabase
         .from('suppliers')
-        .insert(supplierData)
+        .insert({
+          name: supplierData.name,
+          contact_name: supplierData.contact_name || null,
+          contact_phone: supplierData.contact_phone || null,
+          contact_email: supplierData.contact_email || null,
+        })
         .select()
         .single();
 
