@@ -38,14 +38,14 @@ export const DashboardFilters = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Supplier Filter */}
           <Select 
-            value={filters.supplier_id || ""} 
-            onValueChange={(value) => updateFilter('supplier_id', value || undefined)}
+            value={filters.supplier_id || "all"} 
+            onValueChange={(value) => updateFilter('supplier_id', value === "all" ? undefined : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Leverandør" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle leverandører</SelectItem>
+              <SelectItem value="all">Alle leverandører</SelectItem>
               {suppliers?.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}

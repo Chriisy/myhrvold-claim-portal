@@ -173,7 +173,7 @@ const Reports = () => {
         {/* Status Filter */}
         <div>
           <Label>Status</Label>
-          <Select onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[280px]">
               <SelectValue placeholder="Alle Statuser" />
             </SelectTrigger>
