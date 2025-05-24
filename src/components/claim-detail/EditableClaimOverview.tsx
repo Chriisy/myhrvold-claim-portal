@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
+import { Database } from '@/integrations/supabase/types';
+
+type ClaimCategory = Database['public']['Enums']['claim_category'];
+type ClaimStatus = Database['public']['Enums']['claim_status'];
 
 interface ClaimData {
   id: string;
@@ -19,13 +23,13 @@ interface ClaimData {
   machine_serial?: string;
   warranty?: boolean;
   quantity?: number;
-  category?: string;
+  category?: ClaimCategory;
   description?: string;
   visma_order_no?: string;
   customer_po?: string;
   reported_by?: string;
   internal_note?: string;
-  status?: string;
+  status?: ClaimStatus;
 }
 
 interface EditableClaimOverviewProps {
@@ -168,7 +172,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               </div>
               <div>
                 <Label htmlFor="category">Kategori</Label>
-                <Select value={formData.category || ''} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                <Select value={formData.category || ''} onValueChange={(value: ClaimCategory) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Velg kategori" />
                   </SelectTrigger>
@@ -183,7 +187,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status || ''} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Select value={formData.status || ''} onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Velg status" />
                   </SelectTrigger>
