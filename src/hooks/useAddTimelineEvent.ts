@@ -1,6 +1,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 import { useToast } from '@/hooks/use-toast';
 
 export function useAddTimelineEvent() {
@@ -13,14 +14,24 @@ export function useAddTimelineEvent() {
       message: string;
       created_by: string;
     }) => {
-      const { data: result, error } = await supabase
-        .from('timeline_item')
-        .insert(data)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return result;
+      return withRetry(async () => {
+        const { data: result, error } = await supabase
+          .from('timeline_item')
+          .insert({
+            claim_id: data.claim_id,
+            message: data.message,
+            created_by: data.created_by,
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          handleSupabaseError(error, 'legge til hendelse');
+          throw error;
+        }
+        
+        return result;
+      });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['timeline', variables.claim_id] });
@@ -30,11 +41,7 @@ export function useAddTimelineEvent() {
       });
     },
     onError: (error) => {
-      toast({
-        title: "Feil",
-        description: "Kunne ikke legge til hendelse.",
-        variant: "destructive",
-      });
+      console.error('Error adding timeline event:', error);
     }
   });
 }

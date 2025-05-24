@@ -1,42 +1,55 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 import { useToast } from '@/hooks/use-toast';
 
 export function useClaimCosts(claimIdOrNumber: string) {
   return useQuery({
     queryKey: ['costs', claimIdOrNumber],
     queryFn: async () => {
-      // First, check if we're dealing with a UUID or a claim number
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
-      
-      let actualClaimId = claimIdOrNumber;
-      
-      if (!isUUID) {
-        // Look up the claim by identifier
-        const { data: claimData, error: claimError } = await supabase
-          .from('claims')
-          .select('id')
-          .eq('id', claimIdOrNumber)
-          .single();
+      return withRetry(async () => {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
+        
+        let actualClaimId = claimIdOrNumber;
+        
+        if (!isUUID) {
+          const { data: claimData, error: claimError } = await supabase
+            .from('claims')
+            .select('id')
+            .is('deleted_at', null)
+            .eq('id', claimIdOrNumber)
+            .maybeSingle();
+            
+          if (claimError) {
+            handleSupabaseError(claimError, 'finne reklamasjon');
+            return [];
+          }
           
-        if (claimError) {
-          console.warn('Could not find claim with identifier:', claimIdOrNumber);
-          return [];
+          if (!claimData) {
+            console.warn('Could not find claim with identifier:', claimIdOrNumber);
+            return [];
+          }
+          
+          actualClaimId = claimData.id;
         }
         
-        actualClaimId = claimData.id;
-      }
-      
-      const { data, error } = await supabase
-        .from('cost_line')
-        .select('*')
-        .eq('claim_id', actualClaimId)
-        .order('created_at', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    }
+        const { data, error } = await supabase
+          .from('cost_line')
+          .select('*')
+          .eq('claim_id', actualClaimId)
+          .order('created_at', { ascending: true });
+        
+        if (error) {
+          handleSupabaseError(error, 'laste kostnader');
+          throw error;
+        }
+        
+        return data || [];
+      });
+    },
+    enabled: !!claimIdOrNumber,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -51,14 +64,25 @@ export function useAddCostLine() {
       amount: number;
       konto_nr?: number;
     }) => {
-      const { data: result, error } = await supabase
-        .from('cost_line')
-        .insert(data)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return result;
+      return withRetry(async () => {
+        const { data: result, error } = await supabase
+          .from('cost_line')
+          .insert({
+            claim_id: data.claim_id,
+            description: data.description,
+            amount: data.amount,
+            konto_nr: data.konto_nr || null,
+          })
+          .select()
+          .single();
+        
+        if (error) {
+          handleSupabaseError(error, 'legge til kostnad');
+          throw error;
+        }
+        
+        return result;
+      });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['costs', variables.claim_id] });
@@ -68,11 +92,7 @@ export function useAddCostLine() {
       });
     },
     onError: (error) => {
-      toast({
-        title: "Feil",
-        description: "Kunne ikke legge til kostnad.",
-        variant: "destructive",
-      });
+      console.error('Error adding cost line:', error);
     }
   });
 }

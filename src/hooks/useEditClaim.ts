@@ -1,6 +1,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
@@ -29,30 +30,35 @@ export function useEditClaim() {
       internal_note?: string;
       status?: ClaimStatus;
     }) => {
-      const { id, ...updateData } = data;
-      const { data: result, error } = await supabase
-        .from('claims')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return result;
+      return withRetry(async () => {
+        const { id, ...updateData } = data;
+        
+        const { data: result, error } = await supabase
+          .from('claims')
+          .update(updateData)
+          .eq('id', id)
+          .is('deleted_at', null)
+          .select()
+          .single();
+        
+        if (error) {
+          handleSupabaseError(error, 'oppdatere reklamasjon');
+          throw error;
+        }
+        
+        return result;
+      });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['claim', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
       toast({
         title: "Reklamasjon oppdatert",
         description: "Endringene har blitt lagret.",
       });
     },
     onError: (error) => {
-      toast({
-        title: "Feil",
-        description: "Kunne ikke oppdatere reklamasjonen.",
-        variant: "destructive",
-      });
+      console.error('Error updating claim:', error);
     }
   });
 }

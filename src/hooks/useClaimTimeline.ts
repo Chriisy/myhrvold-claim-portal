@@ -1,43 +1,54 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 
 export function useClaimTimeline(claimIdOrNumber: string) {
   return useQuery({
     queryKey: ['timeline', claimIdOrNumber],
     queryFn: async () => {
-      // First, check if we're dealing with a UUID or a claim number
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
-      
-      let actualClaimId = claimIdOrNumber;
-      
-      if (!isUUID) {
-        // Look up the claim by a claim number field - assuming you have one
-        // Since I don't see a claim_number field in your schema, I'll use the id field directly
-        // You might need to adjust this based on your actual claim number field
-        const { data: claimData, error: claimError } = await supabase
-          .from('claims')
-          .select('id')
-          .eq('id', claimIdOrNumber)
-          .single();
+      return withRetry(async () => {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
+        
+        let actualClaimId = claimIdOrNumber;
+        
+        if (!isUUID) {
+          // For non-UUID identifiers, try to find the claim
+          const { data: claimData, error: claimError } = await supabase
+            .from('claims')
+            .select('id')
+            .is('deleted_at', null)
+            .eq('id', claimIdOrNumber)
+            .maybeSingle();
+            
+          if (claimError) {
+            handleSupabaseError(claimError, 'finne reklamasjon');
+            return [];
+          }
           
-        if (claimError) {
-          // If direct lookup fails, this might be a display number - return empty array for now
-          console.warn('Could not find claim with identifier:', claimIdOrNumber);
-          return [];
+          if (!claimData) {
+            console.warn('Could not find claim with identifier:', claimIdOrNumber);
+            return [];
+          }
+          
+          actualClaimId = claimData.id;
         }
         
-        actualClaimId = claimData.id;
-      }
-      
-      const { data, error } = await supabase
-        .from('timeline_item')
-        .select('*')
-        .eq('claim_id', actualClaimId)
-        .order('created_at', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    }
+        const { data, error } = await supabase
+          .from('timeline_item')
+          .select('*')
+          .eq('claim_id', actualClaimId)
+          .order('created_at', { ascending: true });
+        
+        if (error) {
+          handleSupabaseError(error, 'laste tidslinje');
+          throw error;
+        }
+        
+        return data || [];
+      });
+    },
+    enabled: !!claimIdOrNumber,
+    staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
