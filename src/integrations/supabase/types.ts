@@ -9,7 +9,202 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      claims: {
+        Row: {
+          category: Database["public"]["Enums"]["claim_category"] | null
+          closed_at: string | null
+          corrective_action: string | null
+          created_at: string | null
+          created_by: string
+          customer_name: string | null
+          customer_no: string | null
+          customer_po: string | null
+          deleted_at: string | null
+          department: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          improvement_action:
+            | Database["public"]["Enums"]["improvement_action"]
+            | null
+          improvement_cost: number | null
+          improvement_done: boolean | null
+          improvement_due: string | null
+          improvement_owner: string | null
+          improvement_toggle: boolean | null
+          internal_note: string | null
+          learning_note: string | null
+          machine_model: string | null
+          machine_serial: string | null
+          preventive_action: string | null
+          quantity: number | null
+          reported_by: string | null
+          root_cause: string | null
+          salesperson_id: string | null
+          source: string
+          status: Database["public"]["Enums"]["claim_status"]
+          supplier_id: string | null
+          technician_id: string | null
+          visma_order_no: string | null
+          warranty: boolean | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["claim_category"] | null
+          closed_at?: string | null
+          corrective_action?: string | null
+          created_at?: string | null
+          created_by: string
+          customer_name?: string | null
+          customer_no?: string | null
+          customer_po?: string | null
+          deleted_at?: string | null
+          department?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          improvement_action?:
+            | Database["public"]["Enums"]["improvement_action"]
+            | null
+          improvement_cost?: number | null
+          improvement_done?: boolean | null
+          improvement_due?: string | null
+          improvement_owner?: string | null
+          improvement_toggle?: boolean | null
+          internal_note?: string | null
+          learning_note?: string | null
+          machine_model?: string | null
+          machine_serial?: string | null
+          preventive_action?: string | null
+          quantity?: number | null
+          reported_by?: string | null
+          root_cause?: string | null
+          salesperson_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          supplier_id?: string | null
+          technician_id?: string | null
+          visma_order_no?: string | null
+          warranty?: boolean | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["claim_category"] | null
+          closed_at?: string | null
+          corrective_action?: string | null
+          created_at?: string | null
+          created_by?: string
+          customer_name?: string | null
+          customer_no?: string | null
+          customer_po?: string | null
+          deleted_at?: string | null
+          department?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          improvement_action?:
+            | Database["public"]["Enums"]["improvement_action"]
+            | null
+          improvement_cost?: number | null
+          improvement_done?: boolean | null
+          improvement_due?: string | null
+          improvement_owner?: string | null
+          improvement_toggle?: boolean | null
+          internal_note?: string | null
+          learning_note?: string | null
+          machine_model?: string | null
+          machine_serial?: string | null
+          preventive_action?: string | null
+          quantity?: number | null
+          reported_by?: string | null
+          root_cause?: string | null
+          salesperson_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          supplier_id?: string | null
+          technician_id?: string | null
+          visma_order_no?: string | null
+          warranty?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          role: string
+          seller_no: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          role: string
+          seller_no?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          seller_no?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +213,25 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      claim_category:
+        | "ServiceJobb"
+        | "Installasjon"
+        | "Montasje"
+        | "Produkt"
+        | "Del"
+      claim_status:
+        | "Ny"
+        | "Avventer"
+        | "Godkjent"
+        | "Avslått"
+        | "Bokført"
+        | "Lukket"
+      import_status: "new" | "validating" | "ready" | "error"
+      improvement_action:
+        | "Ingen"
+        | "ForbedreProsess"
+        | "ErstatteKomponent"
+        | "StopSale"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +346,29 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      claim_category: [
+        "ServiceJobb",
+        "Installasjon",
+        "Montasje",
+        "Produkt",
+        "Del",
+      ],
+      claim_status: [
+        "Ny",
+        "Avventer",
+        "Godkjent",
+        "Avslått",
+        "Bokført",
+        "Lukket",
+      ],
+      import_status: ["new", "validating", "ready", "error"],
+      improvement_action: [
+        "Ingen",
+        "ForbedreProsess",
+        "ErstatteKomponent",
+        "StopSale",
+      ],
+    },
   },
 } as const
