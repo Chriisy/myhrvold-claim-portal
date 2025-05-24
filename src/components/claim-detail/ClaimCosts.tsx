@@ -3,10 +3,14 @@ import { useState } from 'react';
 import { useClaimCosts, useAddCostLine } from '@/hooks/useClaimCosts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 
 interface ClaimCostsProps {
   claimId: string;
@@ -21,6 +25,8 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
     amount: '',
     konto_nr: ''
   });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +40,29 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
 
     setFormData({ description: '', amount: '', konto_nr: '' });
     setOpen(false);
+  };
+
+  const handleDelete = async (costId: string) => {
+    try {
+      const { error } = await supabase
+        .from('cost_line')
+        .delete()
+        .eq('id', costId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['costs', claimId] });
+      toast({
+        title: "Kostnad slettet",
+        description: "Kostnaden har blitt slettet.",
+      });
+    } catch (error) {
+      toast({
+        title: "Feil",
+        description: "Kunne ikke slette kostnaden.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -114,6 +143,7 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
               <TableHead>Beskrivelse</TableHead>
               <TableHead>Beløp</TableHead>
               <TableHead>Konto</TableHead>
+              <TableHead>Handlinger</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -123,6 +153,29 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
                 <TableCell>{cost.description}</TableCell>
                 <TableCell>{formatCurrency(cost.amount)}</TableCell>
                 <TableCell>{cost.konto_nr || '-'}</TableCell>
+                <TableCell>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Slett kostnad</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Er du sikker på at du vil slette denne kostnaden? Denne handlingen kan ikke angres.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(cost.id)} className="bg-red-600 hover:bg-red-700">
+                          Slett
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
