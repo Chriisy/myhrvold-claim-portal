@@ -49,7 +49,11 @@ const Reports = () => {
         query = query.eq('technician_id', filters.technician_id);
       }
       if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        // Type assertion to ensure the statusFilter is a valid claim status
+        const validStatuses = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'] as const;
+        if (validStatuses.includes(statusFilter as any)) {
+          query = query.eq('status', statusFilter as typeof validStatuses[number]);
+        }
       }
 
       const { data, error } = await query;
