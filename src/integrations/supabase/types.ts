@@ -148,6 +148,124 @@ export type Database = {
           },
         ]
       }
+      cost_line: {
+        Row: {
+          amount: number
+          claim_id: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          konto_nr: number | null
+          source: string
+          voucher_no: string | null
+        }
+        Insert: {
+          amount: number
+          claim_id: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          konto_nr?: number | null
+          source?: string
+          voucher_no?: string | null
+        }
+        Update: {
+          amount?: number
+          claim_id?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          konto_nr?: number | null
+          source?: string
+          voucher_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_line_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_note: {
+        Row: {
+          amount: number
+          claim_id: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          konto_nr: number | null
+          source: string
+          voucher_no: string | null
+        }
+        Insert: {
+          amount: number
+          claim_id: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          konto_nr?: number | null
+          source?: string
+          voucher_no?: string | null
+        }
+        Update: {
+          amount?: number
+          claim_id?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          konto_nr?: number | null
+          source?: string
+          voucher_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_note_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_import: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_id: string
+          id: string
+          meta_json: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          file_id: string
+          id?: string
+          meta_json?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_id?: string
+          id?: string
+          meta_json?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           contact_email: string | null
@@ -177,6 +295,38 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      timeline_item: {
+        Row: {
+          claim_id: string
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_item_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {

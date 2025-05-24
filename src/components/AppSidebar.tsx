@@ -39,6 +39,11 @@ const menuItems = [
     icon: Users,
   },
   {
+    title: 'Importer faktura',
+    url: '/import',
+    icon: Upload,
+  },
+  {
     title: 'Rapporter',
     url: '/reports',
     icon: BarChart3,
