@@ -1,17 +1,17 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { NewSupplierModal } from '@/components/claim-wizard/NewSupplierModal';
+import { SuppliersTable } from '@/components/SuppliersTable';
 
 const Suppliers = () => {
   const [newSupplierModalOpen, setNewSupplierModalOpen] = useState(false);
 
   const handleSupplierCreated = (supplierId: string) => {
     console.log('New supplier created with ID:', supplierId);
-    // Could add additional logic here if needed
+    // The suppliers list will automatically refresh due to React Query
   };
 
   return (
@@ -33,17 +33,7 @@ const Suppliers = () => {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Leverandør Oversikt</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">Leverandør administrasjon vil bli implementert i neste fase.</p>
-            <p className="text-sm text-gray-500">Dette vil inkludere CRUD operasjoner for leverandører med kontaktinformasjon.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <SuppliersTable />
 
       <NewSupplierModal
         open={newSupplierModalOpen}
