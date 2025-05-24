@@ -1,17 +1,19 @@
 
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { user, login } = useAuth();
 
   if (user) {
@@ -20,76 +22,112 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (!success) {
-        toast({
-          title: 'Pålogging feilet',
-          description: 'Ugyldig e-post eller passord.',
-          variant: 'destructive',
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
         });
+
+        if (error) {
+          toast({
+            title: 'Registrering feilet',
+            description: error.message,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Registrering vellykket',
+            description: 'Sjekk e-posten din for bekreftelseslenke.',
+          });
+        }
+      } else {
+        const success = await login(email, password);
+        if (!success) {
+          toast({
+            title: 'Innlogging feilet',
+            description: 'Ugyldig e-post eller passord.',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       toast({
-        title: 'Feil',
-        description: 'En uventet feil oppstod. Prøv igjen.',
+        title: 'En feil oppstod',
+        description: 'Prøv igjen senere.',
         variant: 'destructive',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-myhrvold-bg">
+    <div className="min-h-screen bg-myhrvold-bg flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-myhrvold-primary rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-2xl">M</span>
-          </div>
-          <div>
-            <CardTitle className="text-2xl text-myhrvold-primary">Myhrvold Portal</CardTitle>
-            <CardDescription>Logg inn til reklamasjon systemet</CardDescription>
-          </div>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-myhrvold-primary">
+            Myhrvold Reklamasjonssystem
+          </CardTitle>
+          <p className="text-gray-600">
+            {isSignUp ? 'Opprett ny konto' : 'Logg inn for å fortsette'}
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="email">E-post</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="din.epost@myhrvold.no"
+                placeholder="din.epost@example.com"
                 required
-                className="rounded-input"
               />
             </div>
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="password">Passord</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Skriv inn passord"
                 required
-                className="rounded-input"
               />
             </div>
             <Button 
               type="submit" 
               className="w-full btn-primary"
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
-              {isSubmitting ? 'Logger inn...' : 'Logg inn'}
+              {isLoading ? 'Behandler...' : (isSignUp ? 'Registrer' : 'Logg inn')}
             </Button>
-            <div className="text-center text-sm text-gray-600 mt-4">
-              <p>Demo: admin@myhrvold.no / admin123</p>
-            </div>
           </form>
+          
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-myhrvold-primary hover:underline"
+            >
+              {isSignUp 
+                ? 'Har du allerede en konto? Logg inn' 
+                : 'Trenger du en konto? Registrer deg'
+              }
+            </button>
+          </div>
+
+          {!isSignUp && (
+            <div className="mt-4 p-3 bg-gray-100 rounded text-sm">
+              <strong>Test bruker:</strong><br />
+              E-post: test@myhrvold.no<br />
+              Passord: test123456
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
