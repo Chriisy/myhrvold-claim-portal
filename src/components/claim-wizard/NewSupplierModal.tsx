@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -21,20 +21,28 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { newSupplierSchema, type NewSupplierData } from '@/lib/validations/claim';
-import { useCreateSupplier } from '@/hooks/useSuppliers';
+import { useCreateSupplier, useUpdateSupplier } from '@/hooks/useSuppliers';
+import { Database } from '@/integrations/supabase/types';
+
+type Supplier = Database['public']['Tables']['suppliers']['Row'];
 
 interface NewSupplierModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSupplierCreated: (supplierId: string) => void;
+  onSupplierCreated?: (supplierId: string) => void;
+  supplier?: Supplier | null;
+  mode?: 'create' | 'edit';
 }
 
 export function NewSupplierModal({
   open,
   onOpenChange,
   onSupplierCreated,
+  supplier = null,
+  mode = 'create',
 }: NewSupplierModalProps) {
   const createSupplier = useCreateSupplier();
+  const updateSupplier = useUpdateSupplier();
 
   const form = useForm<NewSupplierData>({
     resolver: zodResolver(newSupplierSchema),
@@ -46,10 +54,33 @@ export function NewSupplierModal({
     },
   });
 
+  // Reset form when supplier prop changes or modal opens/closes
+  useEffect(() => {
+    if (open && supplier && mode === 'edit') {
+      form.reset({
+        name: supplier.name,
+        contact_name: supplier.contact_name || '',
+        contact_phone: supplier.contact_phone || '',
+        contact_email: supplier.contact_email || '',
+      });
+    } else if (open && mode === 'create') {
+      form.reset({
+        name: '',
+        contact_name: '',
+        contact_phone: '',
+        contact_email: '',
+      });
+    }
+  }, [open, supplier, mode, form]);
+
   const onSubmit = async (data: NewSupplierData) => {
     try {
-      const newSupplier = await createSupplier.mutateAsync(data);
-      onSupplierCreated(newSupplier.id);
+      if (mode === 'edit' && supplier) {
+        await updateSupplier.mutateAsync({ id: supplier.id, data });
+      } else {
+        const newSupplier = await createSupplier.mutateAsync(data);
+        onSupplierCreated?.(newSupplier.id);
+      }
       onOpenChange(false);
       form.reset();
     } catch (error) {
@@ -57,13 +88,20 @@ export function NewSupplierModal({
     }
   };
 
+  const isLoading = createSupplier.isPending || updateSupplier.isPending;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Legg til ny leverandør</DialogTitle>
+          <DialogTitle>
+            {mode === 'edit' ? 'Rediger leverandør' : 'Legg til ny leverandør'}
+          </DialogTitle>
           <DialogDescription>
-            Opprett en ny leverandør som kan brukes i reklamasjoner.
+            {mode === 'edit' 
+              ? 'Oppdater leverandørinformasjonen nedenfor.'
+              : 'Opprett en ny leverandør som kan brukes i reklamasjoner.'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -137,11 +175,11 @@ export function NewSupplierModal({
               >
                 Avbryt
               </Button>
-              <Button
-                type="submit"
-                disabled={createSupplier.isPending}
-              >
-                {createSupplier.isPending ? 'Oppretter...' : 'Opprett leverandør'}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading 
+                  ? (mode === 'edit' ? 'Oppdaterer...' : 'Oppretter...') 
+                  : (mode === 'edit' ? 'Oppdater leverandør' : 'Opprett leverandør')
+                }
               </Button>
             </DialogFooter>
           </form>

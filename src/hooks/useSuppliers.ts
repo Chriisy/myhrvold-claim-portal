@@ -81,3 +81,82 @@ export const useCreateSupplier = () => {
     },
   });
 };
+
+export const useUpdateSupplier = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: NewSupplierData }) => {
+      const { data: supplier, error } = await supabase
+        .from('suppliers')
+        .update({
+          name: data.name,
+          contact_name: data.contact_name || null,
+          contact_phone: data.contact_phone || null,
+          contact_email: data.contact_email || null,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supplier update error:', error);
+        throw error;
+      }
+
+      return supplier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({
+        title: 'Leverandør oppdatert',
+        description: 'Leverandørinformasjonen har blitt oppdatert.',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error updating supplier:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke oppdatere leverandør. Prøv igjen.',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+export const useArchiveSupplier = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supplier archive error:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({
+        title: 'Leverandør arkivert',
+        description: 'Leverandøren har blitt arkivert.',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error archiving supplier:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke arkivere leverandør. Prøv igjen.',
+        variant: 'destructive',
+      });
+    },
+  });
+};
