@@ -192,7 +192,7 @@ export const useRecentClaims = (filters: DashboardFilters) => {
           supplier_id,
           technician_id,
           suppliers(name),
-          users(name)
+          users!claims_technician_id_fkey(name)
         `)
         .gte('created_at', filters.date_range.start.toISOString())
         .lte('created_at', filters.date_range.end.toISOString())

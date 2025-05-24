@@ -11,7 +11,7 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { format } from 'date-fns';
 import { useState } from 'react';
 
-const DashboardFilters = () => {
+export const DashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);

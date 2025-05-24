@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -5,17 +6,18 @@ import { CalendarIcon, FileDown, X } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { addDays, format } from 'date-fns';
-import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
+import DashboardFilters from '@/components/dashboard/DashboardFilters';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { DateRange } from 'react-day-picker';
 
 const Reports = () => {
   const [isExporting, setIsExporting] = useState(false);
-  const [date, setDate] = React.useState<{ from?: Date; to?: Date }>({
+  const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2023, 0, 1),
     to: addDays(new Date(), 0),
   });
@@ -30,7 +32,7 @@ const Reports = () => {
         .select(`
           *,
           supplier:suppliers(*),
-          technician:users!claims_assigned_to_fkey(*),
+          technician:users!claims_technician_id_fkey(*),
           cost_lines(*),
           credit_notes(*)
         `)
@@ -43,14 +45,11 @@ const Reports = () => {
       if (filters.machine_model) {
         query = query.ilike('machine_model', `%${filters.machine_model}%`);
       }
-      if (filters.konto_nr) {
-        query = query.eq('konto_nr', filters.konto_nr);
-      }
       if (filters.technician_id) {
-        query = query.eq('assigned_to', filters.technician_id);
+        query = query.eq('technician_id', filters.technician_id);
       }
       if (statusFilter && statusFilter !== 'all') {
-        // Ensure statusFilter is a valid status value
+        // Type assertion to ensure the statusFilter is a valid claim status
         const validStatuses = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'] as const;
         if (validStatuses.includes(statusFilter as any)) {
           query = query.eq('status', statusFilter);
@@ -75,20 +74,19 @@ const Reports = () => {
 
       // Headers
       csvRows.push([
-        "Reklamasjons ID", "Opprettet Dato", "Status", "Maskin Modell", "Konto Nr",
+        "Reklamasjons ID", "Opprettet Dato", "Status", "Maskin Modell",
         "Leverandør Navn", "Tekniker Navn", "Total Kostnad", "Total Kreditnota"
       ].join(','));
 
       data.forEach(claim => {
-        const totalCost = claim.cost_lines?.reduce((sum, line) => sum + line.amount, 0) || 0;
-        const totalCredit = claim.credit_notes?.reduce((sum, note) => sum + note.amount, 0) || 0;
+        const totalCost = claim.cost_lines?.reduce((sum: number, line: any) => sum + line.amount, 0) || 0;
+        const totalCredit = claim.credit_notes?.reduce((sum: number, note: any) => sum + note.amount, 0) || 0;
 
         const row = [
           claim.id,
           claim.created_at,
           claim.status,
-          claim.machine_model,
-          claim.konto_nr,
+          claim.machine_model || 'N/A',
           claim.supplier?.name || 'N/A',
           claim.technician?.name || 'N/A',
           totalCost,
