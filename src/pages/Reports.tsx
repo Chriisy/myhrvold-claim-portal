@@ -1,273 +1,192 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarIcon, FileDown, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { addDays, format } from 'date-fns';
+import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
+import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Download, CalendarIcon, Filter } from 'lucide-react';
-import { format, subDays } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
-import { useSuppliers } from '@/hooks/useSuppliers';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Reports = () => {
   const [isExporting, setIsExporting] = useState(false);
-  const [filters, setFilters] = useState({
-    supplier_id: '',
-    machine_model: '',
-    status: '',
-    date_range: {
-      start: subDays(new Date(), 30),
-      end: new Date()
-    }
+  const [date, setDate] = React.useState<{ from?: Date; to?: Date }>({
+    from: new Date(2023, 0, 1),
+    to: addDays(new Date(), 0),
   });
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  
-  const { data: suppliers } = useSuppliers();
-  const { toast } = useToast();
+  const { filters } = useDashboardFilters();
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
-    if (range?.from && range?.to) {
-      setFilters(prev => ({
-        ...prev,
-        date_range: {
-          start: range.from,
-          end: range.to
-        }
-      }));
-      setIsDatePickerOpen(false);
-    }
-  };
-
-  const exportClaimsToCSV = async () => {
+  const exportToCSV = async () => {
     setIsExporting(true);
     try {
-      // Build query
       let query = supabase
         .from('claims')
         .select(`
-          id,
-          created_at,
-          status,
-          customer_name,
-          customer_no,
-          machine_model,
-          machine_serial,
-          description,
-          category,
-          warranty,
-          department,
-          suppliers(name),
-          users!claims_technician_id_fkey(name),
-          cost_line(amount, description, date, konto_nr),
-          credit_note(amount, description, date, konto_nr)
+          *,
+          supplier:suppliers(*),
+          technician:users!claims_assigned_to_fkey(*),
+          cost_lines(*),
+          credit_notes(*)
         `)
         .gte('created_at', filters.date_range.start.toISOString())
-        .lte('created_at', filters.date_range.end.toISOString())
-        .order('created_at', { ascending: false });
+        .lte('created_at', filters.date_range.end.toISOString());
 
-      // Apply filters
       if (filters.supplier_id) {
         query = query.eq('supplier_id', filters.supplier_id);
       }
       if (filters.machine_model) {
         query = query.ilike('machine_model', `%${filters.machine_model}%`);
       }
-      if (filters.status) {
-        query = query.eq('status', filters.status);
+      if (filters.konto_nr) {
+        query = query.eq('konto_nr', filters.konto_nr);
+      }
+      if (filters.technician_id) {
+        query = query.eq('assigned_to', filters.technician_id);
+      }
+      if (statusFilter && statusFilter !== 'all') {
+        // Ensure statusFilter is a valid status value
+        const validStatuses = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'] as const;
+        if (validStatuses.includes(statusFilter as any)) {
+          query = query.eq('status', statusFilter);
+        }
       }
 
-      const { data: claims, error } = await query;
+      const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // Transform data for CSV
-      const csvData = claims?.map(claim => ({
-        'Reklamasjon ID': claim.id,
-        'Opprettet': format(new Date(claim.created_at || ''), 'dd.MM.yyyy'),
-        'Status': claim.status,
-        'Kunde': claim.customer_name || '',
-        'Kundenr': claim.customer_no || '',
-        'Maskin': claim.machine_model || '',
-        'Serienr': claim.machine_serial || '',
-        'Beskrivelse': claim.description || '',
-        'Kategori': claim.category || '',
-        'Garanti': claim.warranty ? 'Ja' : 'Nei',
-        'Avdeling': claim.department || '',
-        'Leverandør': claim.suppliers?.name || '',
-        'Tekniker': claim.users?.name || '',
-        'Totale kostnader': claim.cost_line?.reduce((sum, line) => sum + Number(line.amount), 0) || 0,
-        'Totale kreditnotaer': claim.credit_note?.reduce((sum, note) => sum + Number(note.amount), 0) || 0
-      })) || [];
+      if (!data || data.length === 0) {
+        toast({
+          title: "Ingen data",
+          description: "Fant ingen reklamasjoner med de valgte filtrene.",
+        });
+        return;
+      }
 
-      // Convert to CSV
-      const csvContent = convertToCSV(csvData);
-      
-      // Download file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `reklamasjoner_${format(filters.date_range.start, 'ddMMyyyy')}_${format(filters.date_range.end, 'ddMMyyyy')}.csv`;
-      link.click();
-      
-      toast({
-        title: 'Eksport fullført',
-        description: `${csvData.length} reklamasjoner eksportert til CSV.`,
+      const csvRows = [];
+
+      // Headers
+      csvRows.push([
+        "Reklamasjons ID", "Opprettet Dato", "Status", "Maskin Modell", "Konto Nr",
+        "Leverandør Navn", "Tekniker Navn", "Total Kostnad", "Total Kreditnota"
+      ].join(','));
+
+      data.forEach(claim => {
+        const totalCost = claim.cost_lines?.reduce((sum, line) => sum + line.amount, 0) || 0;
+        const totalCredit = claim.credit_notes?.reduce((sum, note) => sum + note.amount, 0) || 0;
+
+        const row = [
+          claim.id,
+          claim.created_at,
+          claim.status,
+          claim.machine_model,
+          claim.konto_nr,
+          claim.supplier?.name || 'N/A',
+          claim.technician?.name || 'N/A',
+          totalCost,
+          totalCredit
+        ];
+        csvRows.push(row.join(','));
       });
+
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'reklamasjoner.csv');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Export error:', error);
       toast({
-        title: 'Eksport feilet',
-        description: 'Det oppstod en feil under eksporten.',
-        variant: 'destructive',
+        title: "Feil",
+        description: "Kunne ikke eksportere data",
+        variant: "destructive",
       });
     } finally {
       setIsExporting(false);
     }
   };
 
-  const convertToCSV = (data: any[]) => {
-    if (data.length === 0) return '';
-    
-    const headers = Object.keys(data[0]);
-    const csvHeaders = headers.join(';');
-    
-    const csvRows = data.map(row => 
-      headers.map(header => {
-        const value = row[header];
-        // Escape values that contain semicolons or quotes
-        if (typeof value === 'string' && (value.includes(';') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value || '';
-      }).join(';')
-    );
-    
-    return [csvHeaders, ...csvRows].join('\n');
-  };
+  const { toast } = useToast();
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-3xl font-bold text-myhrvold-primary">Rapporter</h1>
-            <p className="text-gray-600">Eksporter og analyser data</p>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold">Rapporter</h1>
+        <Button onClick={exportToCSV} disabled={isExporting}>
+          {isExporting && <FileDown className="mr-2 h-4 w-4 animate-spin" />}
+          Eksporter til CSV
+        </Button>
       </div>
 
-      {/* Export Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Eksportfiltre
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Supplier Filter */}
-            <Select 
-              value={filters.supplier_id} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, supplier_id: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Leverandør" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Alle leverandører</SelectItem>
-                {suppliers?.map(supplier => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Machine Model Filter */}
-            <Input
-              placeholder="Maskinmodell..."
-              value={filters.machine_model}
-              onChange={(e) => setFilters(prev => ({ ...prev, machine_model: e.target.value }))}
-            />
-
-            {/* Status Filter */}
-            <Select 
-              value={filters.status} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Alle statuser</SelectItem>
-                <SelectItem value="Ny">Ny</SelectItem>
-                <SelectItem value="Avventer">Avventer</SelectItem>
-                <SelectItem value="Godkjent">Godkjent</SelectItem>
-                <SelectItem value="Avslått">Avslått</SelectItem>
-                <SelectItem value="Bokført">Bokført</SelectItem>
-                <SelectItem value="Lukket">Lukket</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Date Range Filter */}
-            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.date_range.start && filters.date_range.end
-                    ? `${format(filters.date_range.start, 'dd.MM.yyyy')} - ${format(filters.date_range.end, 'dd.MM.yyyy')}`
-                    : "Velg datoperiode"
-                  }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={{
-                    from: filters.date_range.start,
-                    to: filters.date_range.end
-                  }}
-                  onSelect={handleDateRangeChange}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Export Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Eksporter Data</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h3 className="font-medium">Reklamasjonsrapport (CSV)</h3>
-                <p className="text-sm text-gray-600">
-                  Eksporter alle reklamasjoner med kostnader og kreditnotaer basert på valgte filtre
-                </p>
-              </div>
-              <Button 
-                onClick={exportClaimsToCSV}
-                disabled={isExporting}
-                className="btn-primary"
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Date Range Picker */}
+        <div>
+          <Label>Velg Periode</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-[280px] justify-start text-left font-normal',
+                  !date?.from && 'text-muted-foreground'
+                )}
               >
-                <Download className="w-4 h-4 mr-2" />
-                {isExporting ? 'Eksporterer...' : 'Eksporter CSV'}
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    `${format(date.from, 'dd/MM/yyyy')} - ${format(date.to, 'dd/MM/yyyy')}`
+                  ) : (
+                    format(date.from, 'dd/MM/yyyy')
+                  )
+                ) : (
+                  <span>Velg en dato</span>
+                )}
               </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Status Filter */}
+        <div>
+          <Label>Status</Label>
+          <Select onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Alle Statuser" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle</SelectItem>
+              <SelectItem value="Ny">Ny</SelectItem>
+              <SelectItem value="Avventer">Avventer</SelectItem>
+              <SelectItem value="Godkjent">Godkjent</SelectItem>
+              <SelectItem value="Avslått">Avslått</SelectItem>
+              <SelectItem value="Bokført">Bokført</SelectItem>
+              <SelectItem value="Lukket">Lukket</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
   );
 };

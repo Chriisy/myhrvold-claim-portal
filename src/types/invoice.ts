@@ -2,27 +2,20 @@
 export interface ParsedInvoiceLine {
   description: string;
   amount: number;
-  voucher?: string;
-  konto?: number;
+  konto: number;
+  voucher: string;
+  [key: string]: string | number; // Add index signature for Json compatibility
 }
 
-export interface InvoiceImportData {
+export interface ImportedFile {
   id: string;
-  file_id: string;
-  meta_json: {
-    filename?: string;
-    uploaded_at?: string;
-    lines?: ParsedInvoiceLine[];
-    error?: string;
-  };
-  status: 'validating' | 'ready' | 'error';
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+  filename: string;
+  uploadedAt: string;
+  lines: ParsedInvoiceLine[];
 }
 
-export interface MappedInvoiceLine extends ParsedInvoiceLine {
-  claim_id?: string;
-  type: 'cost' | 'credit';
-  note?: string;
+export interface ImportResult {
+  success: boolean;
+  claimId?: string;
+  message: string;
 }
