@@ -14,6 +14,7 @@ import ClaimDetail from "./pages/ClaimDetail";
 import ClaimWizard from "./pages/ClaimWizard";
 import Suppliers from "./pages/Suppliers";
 import Reports from "./pages/Reports";
+import InvoiceImport from "./pages/InvoiceImport";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -42,6 +43,7 @@ const App = () => (
                           <Route path="/claim/new" element={<ClaimWizard />} />
                           <Route path="/claim/:id" element={<ClaimDetail />} />
                           <Route path="/suppliers" element={<Suppliers />} />
+                          <Route path="/import" element={<InvoiceImport />} />
                           <Route path="/reports" element={<Reports />} />
                           <Route path="/404" element={<NotFound />} />
                           <Route path="*" element={<Navigate to="/404" replace />} />
