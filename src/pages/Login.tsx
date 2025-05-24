@@ -97,6 +97,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Skriv inn passord"
                 required
+                minLength={6}
               />
             </div>
             <Button 
@@ -122,10 +123,11 @@ const Login = () => {
           </div>
 
           {!isSignUp && (
-            <div className="mt-4 p-3 bg-gray-100 rounded text-sm">
-              <strong>Test bruker:</strong><br />
-              E-post: test@myhrvold.no<br />
-              Passord: test123456
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+              <p className="text-blue-800 mb-2"><strong>Eksisterende bruker:</strong></p>
+              <p className="text-blue-700">
+                Hvis du allerede har opprettet en konto, bruk e-posten og passordet du registrerte deg med.
+              </p>
             </div>
           )}
         </CardContent>
