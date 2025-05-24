@@ -35,18 +35,21 @@ const ClaimDetail = () => {
             <div>
               <h3 className="font-semibold mb-2">Grunnleggende informasjon</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Status:</span> <Badge className="bg-orange-100 text-orange-800">Ny</Badge></p>
-                <p><span className="font-medium">Kunde:</span> TM Service Oslo</p>
-                <p><span className="font-medium">Maskin:</span> Comenda FC45</p>
-                <p><span className="font-medium">Serienummer:</span> MS123456</p>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Status:</span> 
+                  <Badge className="bg-orange-100 text-orange-800">Ny</Badge>
+                </div>
+                <div><span className="font-medium">Kunde:</span> TM Service Oslo</div>
+                <div><span className="font-medium">Maskin:</span> Comenda FC45</div>
+                <div><span className="font-medium">Serienummer:</span> MS123456</div>
               </div>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Ansvarlige</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Tekniker:</span> Erik Moe</p>
-                <p><span className="font-medium">Selger:</span> Mylnvold AS</p>
-                <p><span className="font-medium">Leverandør:</span> Comenda</p>
+                <div><span className="font-medium">Tekniker:</span> Erik Moe</div>
+                <div><span className="font-medium">Selger:</span> Mylnvold AS</div>
+                <div><span className="font-medium">Leverandør:</span> Comenda</div>
               </div>
             </div>
           </div>
