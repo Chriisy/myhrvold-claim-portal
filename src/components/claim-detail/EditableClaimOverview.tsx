@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +29,9 @@ interface ClaimData {
   reported_by?: string;
   internal_note?: string;
   status?: ClaimStatus;
+  suppliers?: { name: string } | null;
+  technician?: { name: string } | null;
+  salesperson?: { name: string } | null;
 }
 
 interface EditableClaimOverviewProps {
@@ -104,6 +106,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <div><span className="font-medium">Avdeling:</span> {claim.department || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Maskin:</span> {claim.machine_model || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Serienummer:</span> {claim.machine_serial || 'Ikke angitt'}</div>
+                <div><span className="font-medium">Leverandør:</span> {claim.suppliers?.name || 'Ikke angitt'}</div>
+                <div><span className="font-medium">Tekniker:</span> {claim.technician?.name || 'Ikke angitt'}</div>
+                <div><span className="font-medium">Selger:</span> {claim.salesperson?.name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kategori:</span> {claim.category || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Antall:</span> {claim.quantity || 'Ikke angitt'}</div>
               </div>
