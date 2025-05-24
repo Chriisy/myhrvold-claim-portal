@@ -7,6 +7,12 @@ export interface ParsedInvoiceLine {
   [key: string]: string | number; // Add index signature for Json compatibility
 }
 
+export interface MappedInvoiceLine extends ParsedInvoiceLine {
+  type: 'cost' | 'credit';
+  claim_id?: string;
+  note?: string;
+}
+
 export interface ImportedFile {
   id: string;
   filename: string;
