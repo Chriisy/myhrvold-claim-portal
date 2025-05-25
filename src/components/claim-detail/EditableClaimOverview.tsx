@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,26 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const editClaim = useEditClaim();
 
   const handleSave = async () => {
-    await editClaim.mutateAsync(formData);
+    // Only send the database columns, not the joined relationship data
+    const updateData = {
+      id: formData.id,
+      customer_name: formData.customer_name,
+      customer_no: formData.customer_no,
+      department: formData.department,
+      machine_model: formData.machine_model,
+      machine_serial: formData.machine_serial,
+      warranty: formData.warranty,
+      quantity: formData.quantity,
+      category: formData.category,
+      description: formData.description,
+      visma_order_no: formData.visma_order_no,
+      customer_po: formData.customer_po,
+      reported_by: formData.reported_by,
+      internal_note: formData.internal_note,
+      status: formData.status,
+    };
+    
+    await editClaim.mutateAsync(updateData);
     setIsEditing(false);
   };
 
