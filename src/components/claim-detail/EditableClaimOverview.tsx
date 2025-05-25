@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
+import { AccountCodeSelector } from './AccountCodeSelector';
 import { Database } from '@/integrations/supabase/types';
 
 type ClaimCategory = Database['public']['Enums']['claim_category'];
@@ -29,6 +30,7 @@ interface ClaimData {
   reported_by?: string;
   internal_note?: string;
   status?: ClaimStatus;
+  account_code_id?: number;
   suppliers?: { name: string } | null;
   technician?: { name: string } | null;
   salesperson?: { name: string } | null;
@@ -61,6 +63,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       reported_by: formData.reported_by,
       internal_note: formData.internal_note,
       status: formData.status,
+      account_code_id: formData.account_code_id,
     };
     
     await editClaim.mutateAsync(updateData);
@@ -133,6 +136,14 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <div><span className="font-medium">Selger:</span> {claim.salesperson?.name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kategori:</span> {claim.category || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Antall:</span> {claim.quantity || 'Ikke angitt'}</div>
+              </div>
+
+              <div className="mt-6">
+                <AccountCodeSelector
+                  selectedAccountCodeId={claim.account_code_id}
+                  onAccountCodeChange={() => {}} // Read-only in view mode
+                  isEditing={false}
+                />
               </div>
             </div>
             <div>
@@ -261,6 +272,12 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 />
               </div>
             </div>
+            <AccountCodeSelector
+              selectedAccountCodeId={formData.account_code_id}
+              onAccountCodeChange={(accountCodeId) => setFormData({ ...formData, account_code_id: accountCodeId })}
+              isEditing={true}
+            />
+
             <div>
               <Label htmlFor="description">Beskrivelse</Label>
               <Textarea

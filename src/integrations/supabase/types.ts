@@ -59,6 +59,7 @@ export type Database = {
       }
       claims: {
         Row: {
+          account_code_id: number | null
           category: Database["public"]["Enums"]["claim_category"] | null
           closed_at: string | null
           corrective_action: string | null
@@ -97,6 +98,7 @@ export type Database = {
           warranty: boolean | null
         }
         Insert: {
+          account_code_id?: number | null
           category?: Database["public"]["Enums"]["claim_category"] | null
           closed_at?: string | null
           corrective_action?: string | null
@@ -135,6 +137,7 @@ export type Database = {
           warranty?: boolean | null
         }
         Update: {
+          account_code_id?: number | null
           category?: Database["public"]["Enums"]["claim_category"] | null
           closed_at?: string | null
           corrective_action?: string | null
@@ -173,6 +176,13 @@ export type Database = {
           warranty?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "claims_account_code_id_fkey"
+            columns: ["account_code_id"]
+            isOneToOne: false
+            referencedRelation: "account_codes"
+            referencedColumns: ["konto_nr"]
+          },
           {
             foreignKeyName: "claims_salesperson_id_fkey"
             columns: ["salesperson_id"]

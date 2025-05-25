@@ -29,6 +29,7 @@ export function useEditClaim() {
       reported_by?: string;
       internal_note?: string;
       status?: ClaimStatus;
+      account_code_id?: number;
     }) => {
       return withRetry(async () => {
         const { id, ...updateData } = data;

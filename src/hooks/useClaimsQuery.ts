@@ -14,7 +14,8 @@ export const useClaimsQuery = () => {
             *,
             suppliers(name),
             technician:users!claims_technician_id_fkey(name),
-            salesperson:users!claims_salesperson_id_fkey(name)
+            salesperson:users!claims_salesperson_id_fkey(name),
+            account_codes(konto_nr, type, seller_flag, comment)
           `)
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
@@ -55,7 +56,8 @@ export const useClaimQuery = (claimId: string) => {
             *,
             suppliers(name),
             technician:users!claims_technician_id_fkey(name),
-            salesperson:users!claims_salesperson_id_fkey(name)
+            salesperson:users!claims_salesperson_id_fkey(name),
+            account_codes(konto_nr, type, seller_flag, comment)
           `)
           .is('deleted_at', null);
 
