@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DashboardFiltersProvider } from "@/contexts/DashboardFiltersContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import ClaimsList from "./pages/ClaimsList";
@@ -33,24 +34,26 @@ const App = () => (
               path="/*"
               element={
                 <ProtectedRoute>
-                  <SidebarProvider>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-6 bg-myhrvold-bg">
-                        <Routes>
-                          <Route path="/" element={<Dashboard />} />
-                          <Route path="/claims" element={<ClaimsList />} />
-                          <Route path="/claim/new" element={<ClaimWizard />} />
-                          <Route path="/claim/:id" element={<ClaimDetail />} />
-                          <Route path="/suppliers" element={<Suppliers />} />
-                          <Route path="/import" element={<InvoiceImport />} />
-                          <Route path="/reports" element={<Reports />} />
-                          <Route path="/404" element={<NotFound />} />
-                          <Route path="*" element={<Navigate to="/404" replace />} />
-                        </Routes>
-                      </main>
-                    </div>
-                  </SidebarProvider>
+                  <DashboardFiltersProvider>
+                    <SidebarProvider>
+                      <div className="min-h-screen flex w-full">
+                        <AppSidebar />
+                        <main className="flex-1 p-6 bg-myhrvold-bg">
+                          <Routes>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/claims" element={<ClaimsList />} />
+                            <Route path="/claim/new" element={<ClaimWizard />} />
+                            <Route path="/claim/:id" element={<ClaimDetail />} />
+                            <Route path="/suppliers" element={<Suppliers />} />
+                            <Route path="/import" element={<InvoiceImport />} />
+                            <Route path="/reports" element={<Reports />} />
+                            <Route path="/404" element={<NotFound />} />
+                            <Route path="*" element={<Navigate to="/404" replace />} />
+                          </Routes>
+                        </main>
+                      </div>
+                    </SidebarProvider>
+                  </DashboardFiltersProvider>
                 </ProtectedRoute>
               }
             />
