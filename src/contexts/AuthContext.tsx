@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
@@ -62,16 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile:', error);
-            // Set fallback user data
-            const fallbackUser: User = {
-              id: session.user.id,
-              name: session.user.email?.split('@')[0] || 'User',
-              email: session.user.email || '',
-              role: 'admin',
-              user_role: 'admin',
-              department: 'oslo'
-            };
-            setUser(fallbackUser);
+            setUser(null);
           }
         }, 0);
       } else {
@@ -99,15 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile on init:', error);
-            const fallbackUser: User = {
-              id: session.user.id,
-              name: session.user.email?.split('@')[0] || 'User',
-              email: session.user.email || '',
-              role: 'admin',
-              user_role: 'admin',
-              department: 'oslo'
-            };
-            setUser(fallbackUser);
+            setUser(null);
           }
         }, 0);
       }
@@ -129,15 +113,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Loading user profile for:', supabaseUser.email);
       }
       
-      // Use .maybeSingle() instead of .single() to prevent errors when no user found
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
-        .eq('email', supabaseUser.email)
+        .eq('id', supabaseUser.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error loading user profile:', error);
+        throw error;
       }
 
       // If user exists in users table, use that data
@@ -155,32 +139,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           seller_no: userData.seller_no,
         });
       } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('User not found in database, creating fallback user');
-        }
-        // Create a default user profile if not found
-        const mockUser: User = {
-          id: supabaseUser.id,
-          name: supabaseUser.email?.split('@')[0] || 'User',
-          email: supabaseUser.email || '',
-          role: 'admin',
-          user_role: 'admin',
-          department: 'oslo'
-        };
-        setUser(mockUser);
+        // User not found - this shouldn't happen with the trigger, but handle it
+        console.warn('User not found in database after auth - trigger may have failed');
+        setUser(null);
       }
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
-      // Fallback to basic user info
-      const fallbackUser: User = {
-        id: supabaseUser.id,
-        name: supabaseUser.email?.split('@')[0] || 'User',
-        email: supabaseUser.email || '',
-        role: 'admin',
-        user_role: 'admin',
-        department: 'oslo'
-      };
-      setUser(fallbackUser);
+      setUser(null);
+      throw error;
     }
   };
 

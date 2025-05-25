@@ -13,6 +13,7 @@ import { cleanupAuthState } from '@/utils/authUtils';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -39,6 +40,11 @@ const Login = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              name: name || email.split('@')[0]
+            }
+          }
         });
 
         if (error) {
@@ -51,8 +57,11 @@ const Login = () => {
         } else {
           toast({
             title: 'Registrering vellykket',
-            description: 'Sjekk e-posten din for bekreftelseslenke.',
+            description: 'Du kan nå logge inn med din nye konto.',
           });
+          // Switch to login mode after successful signup
+          setIsSignUp(false);
+          setPassword('');
         }
       } else {
         if (process.env.NODE_ENV === 'development') {
@@ -110,6 +119,20 @@ const Login = () => {
               </div>
             )}
             
+            {isSignUp && (
+              <div>
+                <Label htmlFor="name">Navn</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ditt fulle navn"
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+            
             <div>
               <Label htmlFor="email">E-post</Label>
               <Input
@@ -147,7 +170,11 @@ const Login = () => {
           <div className="mt-4 text-center">
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setAuthError(null);
+                setPassword('');
+              }}
               className="text-myhrvold-primary hover:underline"
               disabled={isLoading}
             >
@@ -158,19 +185,19 @@ const Login = () => {
             </button>
           </div>
 
-          {!isSignUp && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
-              <p className="text-blue-800 mb-2"><strong>Eksisterende bruker:</strong></p>
-              <p className="text-blue-700">
-                Hvis du allerede har opprettet en konto, bruk e-posten og passordet du registrerte deg med.
-              </p>
-            </div>
-          )}
-
           {isLoading && (
             <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded text-sm">
               <p className="text-gray-700">
                 Behandler forespørsel... Hvis dette tar lang tid, prøv å oppdatere siden.
+              </p>
+            </div>
+          )}
+
+          {!isSignUp && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+              <p className="text-blue-800 mb-2"><strong>Test-bruker:</strong></p>
+              <p className="text-blue-700">
+                Du kan registrere deg med en ny e-post, eller bruke eksisterende brukerkontoer hvis du har dem.
               </p>
             </div>
           )}
