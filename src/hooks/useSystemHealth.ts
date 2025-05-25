@@ -1,0 +1,73 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface SystemMetrics {
+  dbConnectionTime: number;
+  memoryUsage: number;
+  errorRate: number;
+  activeUsers: number;
+  lastUpdate: Date;
+}
+
+export const useSystemHealth = () => {
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const collectMetrics = async () => {
+    try {
+      setIsLoading(true);
+      const startTime = performance.now();
+      
+      // Test database connection
+      const { error: dbError } = await supabase.from('claims').select('count').limit(1);
+      const dbConnectionTime = performance.now() - startTime;
+      
+      if (dbError) {
+        throw new Error(`Database connection failed: ${dbError.message}`);
+      }
+
+      // Get memory usage (if available)
+      const memoryUsage = (performance as any).memory?.usedJSHeapSize / 1024 / 1024 || 0;
+
+      // Simulate error rate (in real app, this would come from monitoring)
+      const errorRate = 0;
+
+      // Get active session
+      const { data: session } = await supabase.auth.getSession();
+      const activeUsers = session.session ? 1 : 0;
+
+      setMetrics({
+        dbConnectionTime,
+        memoryUsage,
+        errorRate,
+        activeUsers,
+        lastUpdate: new Date()
+      });
+      
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error('System health check failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    collectMetrics();
+    
+    // Refresh metrics every 30 seconds
+    const interval = setInterval(collectMetrics, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    metrics,
+    isLoading,
+    error,
+    refresh: collectMetrics
+  };
+};

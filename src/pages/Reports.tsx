@@ -1,195 +1,128 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, FileDown, X } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { addDays, format } from 'date-fns';
-import DashboardFilters from '@/components/dashboard/DashboardFilters';
-import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { DateRange } from 'react-day-picker';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SystemHealthCheck } from '@/components/dashboard/SystemHealthCheck';
+import { PerformanceMonitor } from '@/components/dashboard/PerformanceMonitor';
+import { ErrorBoundaryWrapper } from '@/components/dashboard/ErrorBoundaryWrapper';
+import { BarChart3, Activity, Settings, Download } from 'lucide-react';
 
 const Reports = () => {
-  const [isExporting, setIsExporting] = useState(false);
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2023, 0, 1),
-    to: addDays(new Date(), 0),
-  });
-  const { filters } = useDashboardFilters();
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-
-  const exportToCSV = async () => {
-    setIsExporting(true);
-    try {
-      let query = supabase
-        .from('claims')
-        .select(`
-          *,
-          supplier:suppliers(*),
-          technician:users!claims_technician_id_fkey(*),
-          cost_line(*),
-          credit_note(*)
-        `)
-        .gte('created_at', filters.date_range.start.toISOString())
-        .lte('created_at', filters.date_range.end.toISOString());
-
-      if (filters.supplier_id) {
-        query = query.eq('supplier_id', filters.supplier_id);
-      }
-      if (filters.machine_model) {
-        query = query.ilike('machine_model', `%${filters.machine_model}%`);
-      }
-      if (filters.technician_id) {
-        query = query.eq('technician_id', filters.technician_id);
-      }
-      if (statusFilter && statusFilter !== 'all') {
-        // Type assertion to ensure the statusFilter is a valid claim status
-        const validStatuses = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'] as const;
-        if (validStatuses.includes(statusFilter as any)) {
-          query = query.eq('status', statusFilter as typeof validStatuses[number]);
-        }
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        toast({
-          title: "Ingen data",
-          description: "Fant ingen reklamasjoner med de valgte filtrene.",
-        });
-        return;
-      }
-
-      const csvRows = [];
-
-      // Headers
-      csvRows.push([
-        "Reklamasjons ID", "Opprettet Dato", "Status", "Maskin Modell",
-        "Leverandør Navn", "Tekniker Navn", "Total Kostnad", "Total Kreditnota"
-      ].join(','));
-
-      data.forEach(claim => {
-        const totalCost = Array.isArray(claim.cost_line) 
-          ? claim.cost_line.reduce((sum: number, line: any) => sum + line.amount, 0) 
-          : 0;
-        const totalCredit = Array.isArray(claim.credit_note) 
-          ? claim.credit_note.reduce((sum: number, note: any) => sum + note.amount, 0) 
-          : 0;
-
-        const row = [
-          claim.id,
-          claim.created_at,
-          claim.status,
-          claim.machine_model || 'N/A',
-          claim.supplier?.name || 'N/A',
-          claim.technician?.name || 'N/A',
-          totalCost,
-          totalCredit
-        ];
-        csvRows.push(row.join(','));
-      });
-
-      const csvString = csvRows.join('\n');
-      const blob = new Blob([csvString], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'reklamasjoner.csv');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Export error:', error);
-      toast({
-        title: "Feil",
-        description: "Kunne ikke eksportere data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const { toast } = useToast();
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Rapporter</h1>
-        <Button onClick={exportToCSV} disabled={isExporting}>
-          {isExporting && <FileDown className="mr-2 h-4 w-4 animate-spin" />}
-          Eksporter til CSV
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Date Range Picker */}
-        <div>
-          <Label>Velg Periode</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={'outline'}
-                className={cn(
-                  'w-[280px] justify-start text-left font-normal',
-                  !date?.from && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date?.from ? (
-                  date.to ? (
-                    `${format(date.from, 'dd/MM/yyyy')} - ${format(date.to, 'dd/MM/yyyy')}`
-                  ) : (
-                    format(date.from, 'dd/MM/yyyy')
-                  )
-                ) : (
-                  <span>Velg en dato</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={setDate}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
+    <ErrorBoundaryWrapper title="Feil ved lasting av rapporter">
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          <div>
+            <h1 className="text-3xl font-bold text-myhrvold-primary">Rapporter & System</h1>
+            <p className="text-gray-600">Detaljerte rapporter og systemovervåking</p>
+          </div>
         </div>
 
-        {/* Status Filter */}
-        <div>
-          <Label>Status</Label>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Alle Statuser" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle</SelectItem>
-              <SelectItem value="Ny">Ny</SelectItem>
-              <SelectItem value="Avventer">Avventer</SelectItem>
-              <SelectItem value="Godkjent">Godkjent</SelectItem>
-              <SelectItem value="Avslått">Avslått</SelectItem>
-              <SelectItem value="Bokført">Bokført</SelectItem>
-              <SelectItem value="Lukket">Lukket</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="reports" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Rapporter
+            </TabsTrigger>
+            <TabsTrigger value="system" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Systemhelse
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Ytelse
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="reports" className="mt-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Tilgjengelige Rapporter
+                  </CardTitle>
+                  <CardDescription>
+                    Last ned detaljerte rapporter i ulike formater
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Reklamasjonsrapport</h3>
+                        <p className="text-sm text-gray-600">Komplett oversikt over alle reklamasjoner</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          CSV
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          PDF
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Kostnadsrapport</h3>
+                        <p className="text-sm text-gray-600">Detaljert kostnadsanalyse per periode</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          CSV
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          PDF
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-semibold">Leverandørrapport</h3>
+                        <p className="text-sm text-gray-600">Ytelse og kostnader per leverandør</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          CSV
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-2 text-sm border rounded hover:bg-gray-50">
+                          <Download className="w-4 h-4" />
+                          PDF
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system" className="mt-6">
+            <div className="grid gap-6">
+              <ErrorBoundaryWrapper title="Feil ved lasting av systemhelse">
+                <SystemHealthCheck />
+              </ErrorBoundaryWrapper>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance" className="mt-6">
+            <div className="grid gap-6">
+              <ErrorBoundaryWrapper title="Feil ved lasting av ytelsesmonitor">
+                <PerformanceMonitor />
+              </ErrorBoundaryWrapper>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </ErrorBoundaryWrapper>
   );
 };
 
