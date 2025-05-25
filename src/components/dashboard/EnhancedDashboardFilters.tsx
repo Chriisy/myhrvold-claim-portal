@@ -123,14 +123,14 @@ const EnhancedDashboardFilters = () => {
           <div className="space-y-2">
             <Label>Leverandør</Label>
             <Select
-              value={filters.supplier_id || ''}
-              onValueChange={(value) => updateFilter('supplier_id', value || undefined)}
+              value={filters.supplier_id || 'all'}
+              onValueChange={(value) => updateFilter('supplier_id', value === 'all' ? undefined : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Alle leverandører" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle leverandører</SelectItem>
+                <SelectItem value="all">Alle leverandører</SelectItem>
                 {suppliers?.map((supplier) => (
                   <SelectItem key={supplier.id} value={supplier.id}>
                     {supplier.name}
@@ -164,14 +164,14 @@ const EnhancedDashboardFilters = () => {
           <div className="space-y-2">
             <Label>Tekniker</Label>
             <Select
-              value={filters.technician_id || ''}
-              onValueChange={(value) => updateFilter('technician_id', value || undefined)}
+              value={filters.technician_id || 'all'}
+              onValueChange={(value) => updateFilter('technician_id', value === 'all' ? undefined : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Alle teknikere" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle teknikere</SelectItem>
+                <SelectItem value="all">Alle teknikere</SelectItem>
                 {technicians?.map((technician) => (
                   <SelectItem key={technician.id} value={technician.id}>
                     {technician.name}
