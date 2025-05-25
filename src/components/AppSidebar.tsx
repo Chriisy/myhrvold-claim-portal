@@ -1,5 +1,5 @@
 
-import { Home, FileText, Plus, Users, BarChart3, Upload, Settings, LogOut } from 'lucide-react';
+import { Home, FileText, Plus, Users, BarChart3, Upload, Settings, LogOut, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
@@ -50,9 +51,26 @@ const menuItems = [
   },
 ];
 
+// Admin-only menu items
+const adminMenuItems = [
+  {
+    title: 'Brukere',
+    url: '/admin/users',
+    icon: Shield,
+    requiresAdmin: true,
+  },
+];
+
 export function AppSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { isAdmin, canManageUsers } = usePermissions();
+
+  // Combine regular menu items with admin items based on permissions
+  const allMenuItems = [
+    ...menuItems,
+    ...(isAdmin() || canManageUsers() ? adminMenuItems : [])
+  ];
 
   return (
     <Sidebar className="border-r border-myhrvold-border">
@@ -73,7 +91,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Hovedmeny</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {allMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <Link to={item.url} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
