@@ -18,6 +18,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useUpdateUserRole, useUpdateUserPermissions, UserWithPermissions } from '@/hooks/useUsers';
 import { Database } from '@/integrations/supabase/types';
+import { departmentOptions } from '@/lib/constants/departments';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
@@ -34,15 +35,6 @@ const roleOptions: { value: UserRole; label: string }[] = [
   { value: 'saksbehandler', label: 'Saksbehandler' },
   { value: 'tekniker', label: 'Tekniker' },
   { value: 'avdelingsleder', label: 'Avdelingsleder' },
-];
-
-const departmentOptions: { value: Department; label: string }[] = [
-  { value: 'oslo', label: 'Oslo' },
-  { value: 'bergen', label: 'Bergen' },
-  { value: 'trondheim', label: 'Trondheim' },
-  { value: 'kristiansand', label: 'Kristiansand' },
-  { value: 'sornorge', label: 'Sør-Norge' },
-  { value: 'nord', label: 'Nord' },
 ];
 
 const permissionOptions: { value: PermissionType; label: string; description: string }[] = [

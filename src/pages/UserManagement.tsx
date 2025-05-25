@@ -9,24 +9,15 @@ import { useUsers } from '@/hooks/useUsers';
 import { UserEditModal } from '@/components/user-management/UserEditModal';
 import { UserWithPermissions } from '@/hooks/useUsers';
 import { Database } from '@/integrations/supabase/types';
+import { getDepartmentLabel } from '@/lib/constants/departments';
 
 type UserRole = Database['public']['Enums']['user_role'];
-type Department = Database['public']['Enums']['department'];
 
 const roleLabels: Record<UserRole, string> = {
   admin: 'Administrator',
   saksbehandler: 'Saksbehandler',
   tekniker: 'Tekniker',
   avdelingsleder: 'Avdelingsleder',
-};
-
-const departmentLabels: Record<Department, string> = {
-  oslo: 'Oslo',
-  bergen: 'Bergen',
-  trondheim: 'Trondheim',
-  kristiansand: 'Kristiansand',
-  sornorge: 'Sør-Norge',
-  nord: 'Nord',
 };
 
 const UserManagement = () => {
@@ -103,7 +94,7 @@ const UserManagement = () => {
                         {roleLabels[user.user_role]}
                       </Badge>
                       <Badge variant="outline">
-                        {departmentLabels[user.department]}
+                        {getDepartmentLabel(user.department)}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600">{user.email}</p>

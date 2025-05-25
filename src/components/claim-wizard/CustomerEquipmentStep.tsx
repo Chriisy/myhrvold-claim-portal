@@ -1,4 +1,3 @@
-
 import { useFormContext } from 'react-hook-form';
 import {
   FormControl,
@@ -11,19 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClaimFormData } from '@/lib/validations/claim';
+import { departmentOptions } from '@/lib/constants/departments';
 
 export function CustomerEquipmentStep() {
   const form = useFormContext<ClaimFormData>();
-
-  // Avdelingsopsjoner
-  const departmentOptions = [
-    { value: 'oslo', label: 'Oslo' },
-    { value: 'bergen', label: 'Bergen' },
-    { value: 'trondheim', label: 'Trondheim' },
-    { value: 'kristiansand', label: 'Kristiansand' },
-    { value: 'sornorge', label: 'Sør-Norge' },
-    { value: 'nord', label: 'Nord' },
-  ];
 
   return (
     <div className="space-y-6">

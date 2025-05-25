@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
+import { usePermissions } from '@/hooks/usePermissions';
 import { AccountCodeSelector } from './AccountCodeSelector';
 import { Database } from '@/integrations/supabase/types';
+import { departmentOptions, getDepartmentLabel } from '@/lib/constants/departments';
 
 type ClaimCategory = Database['public']['Enums']['claim_category'];
 type ClaimStatus = Database['public']['Enums']['claim_status'];
@@ -36,6 +37,7 @@ interface ClaimData {
   suppliers?: { name: string } | null;
   technician?: { name: string } | null;
   salesperson?: { name: string } | null;
+  created_by?: string;
 }
 
 interface EditableClaimOverviewProps {
@@ -46,6 +48,10 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(claim);
   const editClaim = useEditClaim();
+  const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
+
+  // Check if user can edit this claim
+  const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
 
   const handleSave = async () => {
     // Only send the database columns, not the joined relationship data
@@ -109,12 +115,12 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Reklamasjon Detaljer</CardTitle>
-          {!isEditing ? (
+          {!isEditing && canEdit ? (
             <Button variant="outline" onClick={() => setIsEditing(true)}>
               <Edit className="w-4 h-4 mr-2" />
               Rediger
             </Button>
-          ) : (
+          ) : isEditing ? (
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleCancel}>
                 <X className="w-4 h-4 mr-2" />
@@ -124,7 +130,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 {editClaim.isPending ? 'Lagrer...' : 'Lagre'}
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
       </CardHeader>
       <CardContent>
@@ -139,9 +145,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 </div>
                 <div><span className="font-medium">Kunde:</span> {claim.customer_name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kundenummer:</span> {claim.customer_no || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Avdeling:</span> {
-                  departmentOptions.find(dept => dept.value === claim.department)?.label || claim.department || 'Ikke angitt'
-                }</div>
+                <div><span className="font-medium">Avdeling:</span> {getDepartmentLabel(claim.department as Department)}</div>
                 <div><span className="font-medium">Maskin:</span> {claim.machine_model || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Serienummer:</span> {claim.machine_serial || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Leverandør:</span> {claim.suppliers?.name || 'Ikke angitt'}</div>
@@ -201,7 +205,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <Label htmlFor="department">Avdeling</Label>
                 <Select 
                   value={formData.department || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, department: value })}
+                  onValueChange={(value: Department) => setFormData({ ...formData, department: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg avdeling" />
