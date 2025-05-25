@@ -34,7 +34,7 @@ const ClaimCredits = ({ claimId }: ClaimCreditsProps) => {
         claim_id: claimId,
         description: newCredit.description,
         amount: parseFloat(newCredit.amount),
-        konto_nr: newCredit.konto_nr ? parseInt(newCredit.konto_nr) : undefined,
+        konto_nr: newCredit.konto_nr && newCredit.konto_nr !== 'none' ? parseInt(newCredit.konto_nr) : undefined,
         voucher_no: newCredit.voucher_no || undefined
       });
       
@@ -105,7 +105,7 @@ const ClaimCredits = ({ claimId }: ClaimCreditsProps) => {
               <SelectValue placeholder="Velg konto" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Ingen konto</SelectItem>
+              <SelectItem value="none">Ingen konto</SelectItem>
               {accountCodes?.map(account => (
                 <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
                   {account.konto_nr} - {account.type}

@@ -33,7 +33,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
         claim_id: claimId,
         description: newCost.description,
         amount: parseFloat(newCost.amount),
-        konto_nr: newCost.konto_nr ? parseInt(newCost.konto_nr) : undefined
+        konto_nr: newCost.konto_nr && newCost.konto_nr !== 'none' ? parseInt(newCost.konto_nr) : undefined
       });
       
       setNewCost({ description: '', amount: '', konto_nr: '' });
@@ -103,7 +103,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
               <SelectValue placeholder="Velg konto" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Ingen konto</SelectItem>
+              <SelectItem value="none">Ingen konto</SelectItem>
               {accountCodes?.map(account => (
                 <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
                   {account.konto_nr} - {account.type}
