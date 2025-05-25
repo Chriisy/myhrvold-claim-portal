@@ -9,10 +9,21 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClaimFormData } from '@/lib/validations/claim';
 
 export function CustomerEquipmentStep() {
   const form = useFormContext<ClaimFormData>();
+
+  // Avdelingsopsjoner
+  const departmentOptions = [
+    { value: 'oslo', label: 'Oslo' },
+    { value: 'bergen', label: 'Bergen' },
+    { value: 'trondheim', label: 'Trondheim' },
+    { value: 'kristiansand', label: 'Kristiansand' },
+    { value: 'sornorge', label: 'Sør-Norge' },
+    { value: 'nord', label: 'Nord' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -59,9 +70,20 @@ export function CustomerEquipmentStep() {
           name="department"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Avdeling/Lokasjon</FormLabel>
+              <FormLabel>Avdeling</FormLabel>
               <FormControl>
-                <Input placeholder="Avdeling eller lokasjon" {...field} />
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg avdeling" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departmentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
