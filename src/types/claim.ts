@@ -8,9 +8,11 @@ export interface ClaimFormData {
   // Step 1: Customer & Equipment
   customer_name: string;
   customer_no?: string;
+  customer_address?: string;
   department?: string;
   machine_model?: string;
   machine_serial?: string;
+  part_number?: string;
   warranty: boolean;
   quantity?: number;
   

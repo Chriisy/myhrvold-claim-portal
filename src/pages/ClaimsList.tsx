@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,17 +28,20 @@ const ClaimsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Alle');
   const [categoryFilter, setCategoryFilter] = useState('Alle');
+  const [partNumberFilter, setPartNumberFilter] = useState('');
   
   const { data: claims, isLoading, error } = useClaimsQuery();
 
   const filteredClaims = claims?.filter(claim => {
     const matchesSearch = claim.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          claim.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         claim.machine_model?.toLowerCase().includes(searchTerm.toLowerCase());
+                         claim.machine_model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         claim.customer_address?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'Alle' || claim.status === statusFilter;
     const matchesCategory = categoryFilter === 'Alle' || claim.category === categoryFilter;
+    const matchesPartNumber = !partNumberFilter || claim.part_number?.toLowerCase().includes(partNumberFilter.toLowerCase());
     
-    return matchesSearch && matchesStatus && matchesCategory;
+    return matchesSearch && matchesStatus && matchesCategory && matchesPartNumber;
   }) || [];
 
   return (
@@ -69,16 +71,21 @@ const ClaimsList = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Søk kunde, ID eller maskin..."
+                placeholder="Søk kunde, ID, maskin eller adresse..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
+            <Input
+              placeholder="Søk på delenummer..."
+              value={partNumberFilter}
+              onChange={(e) => setPartNumberFilter(e.target.value)}
+            />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
@@ -186,6 +193,9 @@ const ClaimsList = () => {
                       <div>
                         <p className="font-medium">{claim.customer_name || 'Ukjent kunde'}</p>
                         <p className="text-sm text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
+                        {claim.part_number && (
+                          <p className="text-xs text-blue-600 font-mono">Del: {claim.part_number}</p>
+                        )}
                       </div>
                       <div>
                         <Badge className={getStatusColor(claim.status)}>

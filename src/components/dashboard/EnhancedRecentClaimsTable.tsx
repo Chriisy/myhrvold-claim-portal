@@ -1,13 +1,10 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Eye, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 import { useRecentClaims } from '@/hooks/api/dashboard/useRecentClaims';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { Link } from 'react-router-dom';
-import { format, formatDistanceToNow } from 'date-fns';
-import { nb } from 'date-fns/locale';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -21,137 +18,93 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const EnhancedRecentClaimsTable = () => {
+export const EnhancedRecentClaimsTable = () => {
   const { filters } = useDashboardFilters();
-  const { data: recentClaims, isLoading } = useRecentClaims(filters);
-
-  const exportToCSV = () => {
-    if (!recentClaims?.length) return;
-
-    const headers = ['ID', 'Kunde', 'Maskinmodell', 'Status', 'Opprettet', 'Kostnad'];
-    const csvContent = [
-      headers.join(','),
-      ...recentClaims.map(claim => [
-        claim.id,
-        `"${claim.customer_name || 'Ukjent kunde'}"`,
-        `"${claim.machine_model || ''}"`,
-        claim.status,
-        format(new Date(claim.created_at), 'dd.MM.yyyy'),
-        claim.totalCost
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reklamasjoner-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
+  const { data: claims, isLoading, error } = useRecentClaims(filters);
 
   if (isLoading) {
     return (
-      <Card className="card-hover">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-myhrvold-primary" />
-                Siste Reklamasjoner
-              </CardTitle>
-              <CardDescription>Oversikt over nylig opprettede reklamasjoner</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" disabled>
-              <Download className="w-4 h-4 mr-2" />
-              Eksporter
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="w-24 h-4 bg-gray-200 rounded"></div>
-                    <div className="w-32 h-3 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="w-16 h-6 bg-gray-200 rounded"></div>
-                </div>
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="animate-pulse border rounded-lg p-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-3 bg-gray-200 rounded w-20"></div>
               </div>
-            ))}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                <div className="h-3 bg-gray-200 rounded w-28"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-6 bg-gray-200 rounded w-16"></div>
+                <div className="h-3 bg-gray-200 rounded w-20"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+              </div>
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Feil ved lasting av nylige reklamasjoner</p>
+      </div>
+    );
+  }
+
+  if (!claims || claims.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Ingen nylige reklamasjoner funnet</p>
+      </div>
     );
   }
 
   return (
-    <Card className="card-hover">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-myhrvold-primary" />
-              Siste Reklamasjoner
-            </CardTitle>
-            <CardDescription>Oversikt over nylig opprettede reklamasjoner</CardDescription>
-          </div>
-          <Button variant="outline" size="sm" onClick={exportToCSV}>
-            <Download className="w-4 h-4 mr-2" />
-            Eksporter
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {recentClaims?.map((claim) => (
-            <div key={claim.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-2 h-2 bg-myhrvold-primary rounded-full"></div>
-                <div>
-                  <p className="font-medium text-myhrvold-primary">{claim.id}</p>
-                  <p className="text-sm text-gray-600">{claim.customer_name || 'Ukjent kunde'}</p>
-                  <p className="text-xs text-gray-500">{claim.machine_model}</p>
-                </div>
-              </div>
-              <div className="text-right flex items-center gap-4">
-                <div>
-                  <Badge className={getStatusColor(claim.status)}>
-                    {claim.status}
-                  </Badge>
-                  <div className="text-xs text-gray-500 mt-1">
-                    <div>{format(new Date(claim.created_at), 'dd.MM.yyyy')}</div>
-                    <div className="text-xs text-gray-400">
-                      {formatDistanceToNow(new Date(claim.created_at), { addSuffix: true, locale: nb })}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">Kostnad</p>
-                  <p className="font-semibold">{claim.totalCost.toLocaleString('nb-NO')} kr</p>
-                </div>
-                <Link to={`/claim/${claim.id}`}>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    Se
-                  </Button>
-                </Link>
-              </div>
+    <div className="space-y-3">
+      {claims.map((claim) => (
+        <div key={claim.id} className="border rounded-lg p-3 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+            <div>
+              <p className="font-semibold text-myhrvold-primary text-sm">{claim.id.slice(0, 8)}...</p>
+              <p className="text-xs text-gray-600">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
             </div>
-          ))}
+            <div>
+              <p className="font-medium text-sm">{claim.customer_name || 'Ukjent kunde'}</p>
+              <p className="text-xs text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
+              {claim.part_number && (
+                <p className="text-xs text-blue-600 font-mono">Del: {claim.part_number}</p>
+              )}
+            </div>
+            <div>
+              <Badge className={`${getStatusColor(claim.status)} text-xs`}>
+                {claim.status}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-xs text-gray-600">Leverandør</p>
+              <p className="font-medium text-sm">{claim.suppliers?.name || 'Ingen'}</p>
+              <p className="text-xs text-gray-600">Tekniker: {claim.technician?.name || 'Ingen'}</p>
+            </div>
+            <div className="flex justify-end">
+              <Link to={`/claim/${claim.id}`}>
+                <Button variant="outline" size="sm">
+                  <Eye className="w-3 h-3 mr-1" />
+                  Se
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="mt-4 text-center">
-          <Link to="/claims">
-            <Button variant="outline">
-              Se alle reklamasjoner
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 };
-
-export default EnhancedRecentClaimsTable;

@@ -20,9 +20,11 @@ export const useCreateClaim = () => {
       const claimData = {
         customer_name: data.customer_name,
         customer_no: data.customer_no || null,
+        customer_address: data.customer_address || null,
         department: data.department || null,
         machine_model: data.machine_model || null,
         machine_serial: data.machine_serial || null,
+        part_number: data.part_number || null,
         warranty: data.warranty || false,
         quantity: data.quantity || null,
         category: data.category || null,

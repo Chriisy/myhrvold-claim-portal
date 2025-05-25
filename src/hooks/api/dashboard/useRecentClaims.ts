@@ -15,6 +15,7 @@ export const useRecentClaims = (filters: DashboardFilters) => {
           created_at,
           customer_name,
           machine_model,
+          part_number,
           status,
           supplier_id,
           technician_id,
@@ -35,6 +36,9 @@ export const useRecentClaims = (filters: DashboardFilters) => {
       }
       if (filters.machine_model) {
         query = query.ilike('machine_model', `%${filters.machine_model}%`);
+      }
+      if (filters.part_number) {
+        query = query.ilike('part_number', `%${filters.part_number}%`);
       }
 
       const { data: claims, error } = await query;

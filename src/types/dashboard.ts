@@ -1,6 +1,8 @@
+
 export interface DashboardFilters {
   supplier_id?: string;
   machine_model?: string;
+  part_number?: string;
   konto_nr?: number;
   technician_id?: string;
   date_range: {
@@ -54,6 +56,7 @@ export interface RecentClaimData {
   created_at: string;
   customer_name: string;
   machine_model: string;
+  part_number?: string;
   status: string;
   supplier_id: string;
   technician_id: string;

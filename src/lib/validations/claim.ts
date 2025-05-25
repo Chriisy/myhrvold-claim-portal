@@ -5,9 +5,11 @@ export const claimFormSchema = z.object({
   // Step 1: Customer & Equipment
   customer_name: z.string().min(1, 'Kundenavn er påkrevd'),
   customer_no: z.string().optional(),
+  customer_address: z.string().optional(),
   department: z.string().optional(),
   machine_model: z.string().optional(),
   machine_serial: z.string().optional(),
+  part_number: z.string().optional(),
   warranty: z.boolean().default(false),
   quantity: z.number().positive().optional(),
   

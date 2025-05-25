@@ -112,6 +112,7 @@ export type Database = {
           corrective_action: string | null
           created_at: string | null
           created_by: string
+          customer_address: string | null
           customer_name: string | null
           customer_no: string | null
           customer_po: string | null
@@ -132,6 +133,7 @@ export type Database = {
           learning_note: string | null
           machine_model: string | null
           machine_serial: string | null
+          part_number: string | null
           preventive_action: string | null
           quantity: number | null
           reported_by: string | null
@@ -151,6 +153,7 @@ export type Database = {
           corrective_action?: string | null
           created_at?: string | null
           created_by: string
+          customer_address?: string | null
           customer_name?: string | null
           customer_no?: string | null
           customer_po?: string | null
@@ -171,6 +174,7 @@ export type Database = {
           learning_note?: string | null
           machine_model?: string | null
           machine_serial?: string | null
+          part_number?: string | null
           preventive_action?: string | null
           quantity?: number | null
           reported_by?: string | null
@@ -190,6 +194,7 @@ export type Database = {
           corrective_action?: string | null
           created_at?: string | null
           created_by?: string
+          customer_address?: string | null
           customer_name?: string | null
           customer_no?: string | null
           customer_po?: string | null
@@ -210,6 +215,7 @@ export type Database = {
           learning_note?: string | null
           machine_model?: string | null
           machine_serial?: string | null
+          part_number?: string | null
           preventive_action?: string | null
           quantity?: number | null
           reported_by?: string | null
