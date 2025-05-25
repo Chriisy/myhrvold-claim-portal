@@ -10,6 +10,7 @@ import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBar
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
 import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
+import ErrorBoundary from '@/components/ui/error-boundary';
 
 const DashboardContent = () => {
   return (
@@ -30,22 +31,34 @@ const DashboardContent = () => {
         </Link>
       </div>
 
-      {/* KPI Cards */}
-      <KpiCards />
+      {/* KPI Cards with Error Boundary */}
+      <ErrorBoundary title="Feil ved lasting av nøkkeltall">
+        <KpiCards />
+      </ErrorBoundary>
 
       {/* Enhanced Filters */}
-      <EnhancedDashboardFilters />
+      <ErrorBoundary title="Feil ved lasting av filtre">
+        <EnhancedDashboardFilters />
+      </ErrorBoundary>
 
-      {/* Charts */}
+      {/* Charts with Error Boundaries */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <OptimizedStackedBarChart />
-        <SupplierDistributionChart />
+        <ErrorBoundary title="Feil ved lasting av kostnadsdiagram">
+          <OptimizedStackedBarChart />
+        </ErrorBoundary>
+        <ErrorBoundary title="Feil ved lasting av leverandørfordeling">
+          <SupplierDistributionChart />
+        </ErrorBoundary>
       </div>
 
-      {/* Root Cause Chart and Recent Claims */}
+      {/* Root Cause Chart and Recent Claims with Error Boundaries */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <OptimizedDonutChart />
-        <EnhancedRecentClaimsTable />
+        <ErrorBoundary title="Feil ved lasting av årsaksanalyse">
+          <OptimizedDonutChart />
+        </ErrorBoundary>
+        <ErrorBoundary title="Feil ved lasting av siste reklamasjoner">
+          <EnhancedRecentClaimsTable />
+        </ErrorBoundary>
       </div>
     </div>
   );

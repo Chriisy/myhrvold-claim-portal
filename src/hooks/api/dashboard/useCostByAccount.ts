@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { queryKeys } from '@/lib/queryKeys';
+import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
 import { useMemo } from 'react';
 
 interface DashboardFilters {
@@ -60,17 +61,17 @@ export const useCostByAccount = (filters: DashboardFilters) => {
         return acc;
       }, {} as Record<number, number>) || {};
 
-      // Convert to array and sort by amount (top 5)
+      // Convert to array and sort by amount (top accounts)
       return Object.entries(accountTotals)
         .map(([account, amount]) => ({
           account: Number(account),
           amount
         }))
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5);
+        .slice(0, DASHBOARD_CONSTANTS.QUERY_LIMITS.TOP_ACCOUNTS);
     },
-    staleTime: 15 * 60 * 1000, // Increased to 15 minutes
-    gcTime: 30 * 60 * 1000, // Increased to 30 minutes
+    staleTime: DASHBOARD_CONSTANTS.CACHE_TIMES.STALE_TIME,
+    gcTime: DASHBOARD_CONSTANTS.CACHE_TIMES.GC_TIME,
   });
 
   // Enrich data with account information - memoized for performance

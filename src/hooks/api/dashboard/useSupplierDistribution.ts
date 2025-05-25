@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
+import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
 
 interface DashboardFilters {
   supplier_id?: string;
@@ -14,9 +15,9 @@ interface DashboardFilters {
   };
 }
 
-// Helper function to assign colors to suppliers
+// Helper function to assign colors to suppliers using constants
 const getSupplierColor = (supplierName: string) => {
-  const colors = ['#223368', '#4050a1', '#6366f1', '#8b5cf6', '#a855f7'];
+  const colors = DASHBOARD_CONSTANTS.COLORS.CHART_PALETTE;
   const hash = supplierName.split('').reduce((a, b) => {
     a = ((a << 5) - a) + b.charCodeAt(0);
     return a & a;
@@ -76,7 +77,7 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         }))
         .sort((a, b) => b.amount - a.amount);
     },
-    staleTime: 15 * 60 * 1000, // Increased to 15 minutes
-    gcTime: 30 * 60 * 1000, // Increased to 30 minutes
+    staleTime: DASHBOARD_CONSTANTS.CACHE_TIMES.STALE_TIME,
+    gcTime: DASHBOARD_CONSTANTS.CACHE_TIMES.GC_TIME,
   });
 };

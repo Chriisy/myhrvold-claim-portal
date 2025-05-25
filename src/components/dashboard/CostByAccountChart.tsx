@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/api/dashboard/useCostByAccount';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
 import { memo } from 'react';
 
 const CostByAccountChart = memo(() => {
@@ -39,7 +40,10 @@ const CostByAccountChart = memo(() => {
         <CardDescription>Reklamasjonskostnader fordelt på kontoer</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer 
+          width={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.WIDTH} 
+          height={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.HEIGHT}
+        >
           <BarChart data={enrichedData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
@@ -57,7 +61,11 @@ const CostByAccountChart = memo(() => {
                 return item?.displayName || `Konto ${account}`;
               }}
             />
-            <Bar dataKey="amount" fill="#223368" radius={[4, 4, 0, 0]} />
+            <Bar 
+              dataKey="amount" 
+              fill={DASHBOARD_CONSTANTS.COLORS.PRIMARY} 
+              radius={[4, 4, 0, 0]} 
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

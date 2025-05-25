@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useSupplierDistribution } from '@/hooks/api/dashboard/useSupplierDistribution';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
 import { memo } from 'react';
 
 const SupplierDistributionChart = memo(() => {
@@ -39,7 +40,10 @@ const SupplierDistributionChart = memo(() => {
         <CardDescription>Andel reklamasjonskostnader per leverandør</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer 
+          width={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.WIDTH} 
+          height={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.HEIGHT}
+        >
           <PieChart>
             <Pie
               data={supplierData}

@@ -2,6 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { memo } from 'react';
 
 interface KpiCardProps {
   title: string;
@@ -13,7 +14,7 @@ interface KpiCardProps {
   loading?: boolean;
 }
 
-const KpiCard = ({ title, value, icon: Icon, color, bgColor, link, loading }: KpiCardProps) => {
+const KpiCard = memo(({ title, value, icon: Icon, color, bgColor, link, loading }: KpiCardProps) => {
   if (loading) {
     return (
       <Card className="animate-pulse">
@@ -55,6 +56,8 @@ const KpiCard = ({ title, value, icon: Icon, color, bgColor, link, loading }: Kp
   }
 
   return <CardComponent />;
-};
+});
+
+KpiCard.displayName = 'KpiCard';
 
 export default KpiCard;
