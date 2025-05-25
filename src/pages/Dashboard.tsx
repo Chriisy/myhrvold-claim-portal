@@ -1,106 +1,27 @@
 
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import KpiCardsGrid from '@/components/dashboard/KpiCardsGrid';
-import AdditionalKpiCards from '@/components/dashboard/AdditionalKpiCards';
-import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { DashboardKpiSection } from '@/components/dashboard/DashboardKpiSection';
+import { DashboardChartsGrid } from '@/components/dashboard/DashboardChartsGrid';
 import { MobileOptimizedFilters } from '@/components/dashboard/MobileOptimizedFilters';
-import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
-import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
-import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
-import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
-import { InteractiveChartWrapper } from '@/components/dashboard/InteractiveChartWrapper';
 import { NotificationToasts } from '@/components/dashboard/NotificationToasts';
 import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardContent = () => {
-  const isMobile = useIsMobile();
-
   return (
     <div className="space-y-6 animate-fade-in">
       <NotificationToasts />
       
-      <div className={`flex items-center justify-between ${isMobile ? 'flex-col gap-4' : ''}`}>
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-3xl font-bold text-myhrvold-primary">Dashboard</h1>
-            <p className="text-gray-600">Oversikt over reklamasjoner og nøkkeltall</p>
-          </div>
-        </div>
-        <Link to="/claim/new">
-          <Button className="btn-primary">
-            <Plus className="w-4 h-4 mr-2" />
-            Ny Reklamasjon
-          </Button>
-        </Link>
-      </div>
+      <DashboardHeader />
 
-      {/* Quick Stats Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
-        <QuickStatsCards />
-      </ImprovedErrorBoundary>
-
-      {/* Main KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av nøkkeltall">
-        <KpiCardsGrid />
-      </ImprovedErrorBoundary>
-
-      {/* Additional KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
-        <AdditionalKpiCards />
-      </ImprovedErrorBoundary>
+      <DashboardKpiSection />
 
       {/* Mobile Optimized Filters */}
       <ImprovedErrorBoundary title="Feil ved lasting av filtre">
         <MobileOptimizedFilters />
       </ImprovedErrorBoundary>
 
-      {/* Charts with Interactive Wrappers */}
-      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-        <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
-          <InteractiveChartWrapper 
-            title="Kostnader per Konto"
-            description="Månedlig oversikt over kostnader fordelt på kontoer"
-          >
-            <OptimizedStackedBarChart />
-          </InteractiveChartWrapper>
-        </ImprovedErrorBoundary>
-        
-        <ImprovedErrorBoundary title="Feil ved lasting av leverandørfordeling">
-          <InteractiveChartWrapper 
-            title="Leverandørfordeling"
-            description="Prosentvis fordeling av kostnader per leverandør"
-          >
-            <SupplierDistributionChart />
-          </InteractiveChartWrapper>
-        </ImprovedErrorBoundary>
-      </div>
-
-      {/* Root Cause Chart and Recent Claims */}
-      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-        <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
-          <InteractiveChartWrapper 
-            title="Årsaksanalyse"
-            description="Fordeling av reklamasjoner etter rotårsak"
-          >
-            <OptimizedDonutChart />
-          </InteractiveChartWrapper>
-        </ImprovedErrorBoundary>
-        
-        <ImprovedErrorBoundary title="Feil ved lasting av siste reklamasjoner">
-          <InteractiveChartWrapper 
-            title="Siste Reklamasjoner"
-            description="Oversikt over nyeste reklamasjoner"
-          >
-            <EnhancedRecentClaimsTable />
-          </InteractiveChartWrapper>
-        </ImprovedErrorBoundary>
-      </div>
+      <DashboardChartsGrid />
     </div>
   );
 };

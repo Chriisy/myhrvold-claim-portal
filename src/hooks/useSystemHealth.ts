@@ -1,40 +1,19 @@
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SystemHealthService, SystemMetrics } from '@/services/systemHealth/systemHealthService';
 import { ErrorService } from '@/services/errorHandling/errorService';
+import { queryKeys } from '@/lib/queryKeys';
 
 export const useSystemHealth = () => {
-  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const collectMetrics = async () => {
-    try {
-      setIsLoading(true);
-      const metrics = await ErrorService.withRetry(() => SystemHealthService.collectMetrics());
-      setMetrics(metrics);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      console.error('System health check failed:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    collectMetrics();
-    
-    // Refresh metrics every 30 seconds
-    const interval = setInterval(collectMetrics, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  return {
-    metrics,
-    isLoading,
-    error,
-    refresh: collectMetrics
-  };
+  return useQuery({
+    queryKey: queryKeys.systemHealth.metrics(),
+    queryFn: async () => {
+      return ErrorService.withRetry(() => SystemHealthService.collectMetrics());
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 30 * 1000, // Refresh every 30 seconds
+    retry: ErrorService.shouldRetryQuery
+  });
 };
