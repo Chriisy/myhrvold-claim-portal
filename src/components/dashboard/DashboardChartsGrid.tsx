@@ -4,7 +4,7 @@ import { InteractiveChartWrapper } from '@/components/dashboard/InteractiveChart
 import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
-import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
+import { EnhancedRecentClaimsTable } from '@/components/dashboard/EnhancedRecentClaimsTable';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CHART_DEFINITIONS } from '@/config/dashboardConfig';
 
