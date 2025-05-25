@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,23 @@ interface EditableClaimOverviewProps {
   claim: ClaimData;
 }
 
+// Category and status options remain here as they're specific to claim business logic
+const categoryOptions = [
+  { value: 'Service', label: 'Service' },
+  { value: 'Installasjon', label: 'Installasjon' },
+  { value: 'Produkt', label: 'Produkt' },
+  { value: 'Del', label: 'Del' },
+];
+
+const statusOptions = [
+  { value: 'Ny', label: 'Ny' },
+  { value: 'Avventer', label: 'Avventer' },
+  { value: 'Godkjent', label: 'Godkjent' },
+  { value: 'Avslått', label: 'Avslått' },
+  { value: 'Bokført', label: 'Bokført' },
+  { value: 'Lukket', label: 'Lukket' },
+];
+
 export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(claim);
@@ -82,33 +100,6 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setFormData(claim);
     setIsEditing(false);
   };
-
-  // Kategoriopsjoner
-  const categoryOptions = [
-    { value: 'Service', label: 'Service' },
-    { value: 'Installasjon', label: 'Installasjon' },
-    { value: 'Produkt', label: 'Produkt' },
-    { value: 'Del', label: 'Del' },
-  ];
-
-  const statusOptions = [
-    { value: 'Ny', label: 'Ny' },
-    { value: 'Avventer', label: 'Avventer' },
-    { value: 'Godkjent', label: 'Godkjent' },
-    { value: 'Avslått', label: 'Avslått' },
-    { value: 'Bokført', label: 'Bokført' },
-    { value: 'Lukket', label: 'Lukket' },
-  ];
-
-  // Avdelingsopsjoner
-  const departmentOptions = [
-    { value: 'oslo', label: 'Oslo' },
-    { value: 'bergen', label: 'Bergen' },
-    { value: 'trondheim', label: 'Trondheim' },
-    { value: 'kristiansand', label: 'Kristiansand' },
-    { value: 'sornorge', label: 'Sør-Norge' },
-    { value: 'nord', label: 'Nord' },
-  ];
 
   return (
     <Card>

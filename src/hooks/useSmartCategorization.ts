@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CategorySuggestion {
@@ -30,6 +30,29 @@ interface SmartSuggestions {
   };
 }
 
+// Define proper types for historical data to improve type safety
+interface HistoricalClaim {
+  id: string;
+  category: string | null;
+  supplier_id: string | null;
+  warranty: boolean | null;
+  description: string | null;
+  machine_model: string | null;
+  part_number: string | null;
+  suppliers?: {
+    name: string;
+  } | null;
+}
+
+interface CostRange {
+  min: number;
+  max: number;
+}
+
+interface CategoryKeywords {
+  [key: string]: string[];
+}
+
 export const useSmartCategorization = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -41,15 +64,25 @@ export const useSmartCategorization = () => {
     setIsAnalyzing(true);
 
     try {
-      // Get historical data for pattern matching
-      const { data: historicalClaims } = await supabase
+      // Get historical data for pattern matching with proper typing
+      const { data: historicalClaims, error } = await supabase
         .from('claims')
-        .select('category, supplier_id, warranty, description, machine_model, part_number, suppliers(name)')
+        .select('id, category, supplier_id, warranty, description, machine_model, part_number, suppliers(name)')
         .not('category', 'is', null)
         .limit(100);
 
-      // Simple pattern matching based on keywords and historical data
-      const suggestions = analyzePatterns(description, machineModel, partNumber, historicalClaims || []);
+      if (error) {
+        console.error('Error fetching historical claims:', error);
+        return {};
+      }
+
+      // Type-safe pattern matching with proper fallback
+      const suggestions = analyzePatterns(
+        description, 
+        machineModel, 
+        partNumber, 
+        historicalClaims as HistoricalClaim[] || []
+      );
       
       return suggestions;
     } catch (error) {
@@ -66,18 +99,18 @@ export const useSmartCategorization = () => {
   };
 };
 
-// Simple but effective pattern matching logic
+// Improved pattern matching with proper typing and error handling
 function analyzePatterns(
   description: string, 
   machineModel?: string, 
   partNumber?: string, 
-  historicalData: any[] = []
+  historicalData: HistoricalClaim[] = []
 ): SmartSuggestions {
   const desc = description.toLowerCase();
   const suggestions: SmartSuggestions = {};
 
-  // Category analysis based on keywords
-  const categoryKeywords = {
+  // Category analysis with type-safe keyword mapping
+  const categoryKeywords: CategoryKeywords = {
     'Service': ['service', 'reparasjon', 'vedlikehold', 'feil', 'defekt', 'ødelagt', 'ikke fungerer'],
     'Installasjon': ['installasjon', 'montering', 'oppsett', 'installere', 'montere'],
     'Produkt': ['produkt', 'kvalitet', 'material', 'design', 'spesifikasjon'],
@@ -105,7 +138,7 @@ function analyzePatterns(
     };
   }
 
-  // Warranty analysis
+  // Warranty analysis with null safety
   const warrantyKeywords = ['garanti', 'warranty', 'ny', 'nytt', 'kjøpt', 'installation'];
   const warrantyMatches = warrantyKeywords.filter(keyword => desc.includes(keyword));
   
@@ -117,7 +150,7 @@ function analyzePatterns(
     };
   }
 
-  // Supplier suggestion based on machine model and historical data
+  // Supplier suggestion with proper null checking and type safety
   if (machineModel && historicalData.length > 0) {
     const machineSpecificClaims = historicalData.filter(claim => 
       claim.machine_model && 
@@ -125,7 +158,7 @@ function analyzePatterns(
     );
 
     if (machineSpecificClaims.length > 0) {
-      // Find most common supplier for this machine type
+      // Find most common supplier for this machine type with proper type checking
       const supplierCounts = machineSpecificClaims.reduce((acc, claim) => {
         if (claim.supplier_id) {
           acc[claim.supplier_id] = (acc[claim.supplier_id] || 0) + 1;
@@ -134,11 +167,11 @@ function analyzePatterns(
       }, {} as Record<string, number>);
 
       const topSupplier = Object.entries(supplierCounts)
-        .sort(([,a], [,b]) => Number(b) - Number(a))[0];
+        .sort(([,a], [,b]) => b - a)[0];
 
       if (topSupplier) {
         const supplierData = machineSpecificClaims.find(c => c.supplier_id === topSupplier[0]);
-        const supplierCount = Number(topSupplier[1]);
+        const supplierCount = topSupplier[1];
         const totalClaims = machineSpecificClaims.length;
         
         suggestions.supplier = {
@@ -151,22 +184,22 @@ function analyzePatterns(
     }
   }
 
-  // Cost estimation based on category and historical data
+  // Cost estimation with type-safe range mapping
   if (suggestions.category) {
     const categorySpecificClaims = historicalData.filter(claim => 
       claim.category === suggestions.category!.category
     );
 
     if (categorySpecificClaims.length > 0) {
-      // This would ideally calculate from cost_line data, but for now we use simple estimates
-      const costRanges = {
+      // Type-safe cost ranges
+      const costRanges: Record<string, CostRange> = {
         'Service': { min: 2000, max: 15000 },
         'Installasjon': { min: 5000, max: 25000 },
         'Produkt': { min: 1000, max: 50000 },
         'Del': { min: 500, max: 8000 }
       };
 
-      const range = costRanges[suggestions.category.category as keyof typeof costRanges];
+      const range = costRanges[suggestions.category.category];
       if (range) {
         suggestions.estimatedCost = {
           min: range.min,

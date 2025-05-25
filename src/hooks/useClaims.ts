@@ -47,7 +47,7 @@ export const useCreateClaim = () => {
 
       if (error) {
         console.error('Error creating claim:', error);
-        throw error;
+        throw new Error(`Failed to create claim: ${error.message}`);
       }
 
       return claim;
@@ -62,9 +62,13 @@ export const useCreateClaim = () => {
     },
     onError: (error) => {
       console.error('Error creating claim:', error);
+      const message = error.message?.includes('permission') 
+        ? 'Du har ikke tillatelse til å opprette reklamasjoner'
+        : 'Kunne ikke opprette reklamasjon. Prøv igjen.';
+      
       toast({
         title: 'Feil ved opprettelse',
-        description: 'Kunne ikke opprette reklamasjon. Prøv igjen.',
+        description: message,
         variant: 'destructive',
       });
     },
@@ -76,6 +80,10 @@ export const useUpdateClaimStatus = () => {
 
   return useMutation({
     mutationFn: async ({ claimId, status }: { claimId: string; status: string }) => {
+      if (!claimId) {
+        throw new Error('Claim ID er påkrevd');
+      }
+
       const updateData: any = { status };
       
       // Hvis status er lukket, sett closed_at
@@ -90,7 +98,11 @@ export const useUpdateClaimStatus = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating claim status:', error);
+        throw new Error(`Failed to update status: ${error.message}`);
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -102,9 +114,13 @@ export const useUpdateClaimStatus = () => {
     },
     onError: (error) => {
       console.error('Error updating claim status:', error);
+      const message = error.message?.includes('permission')
+        ? 'Du har ikke tillatelse til å oppdatere denne reklamasjonen'
+        : 'Kunne ikke oppdatere status.';
+      
       toast({
         title: 'Feil',
-        description: 'Kunne ikke oppdatere status.',
+        description: message,
         variant: 'destructive',
       });
     },

@@ -1,28 +1,13 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Plus, Eye, FileX } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useClaimsQuery } from '@/hooks/useClaimsQuery';
-
-const statusOptions = ['Alle', 'Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
-const categoryOptions = ['Alle', 'Service', 'Installasjon', 'Produkt', 'Del'];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Ny': return 'bg-orange-100 text-orange-800';
-    case 'Avventer': return 'bg-blue-100 text-blue-800';
-    case 'Godkjent': return 'bg-green-100 text-green-800';
-    case 'Avslått': return 'bg-red-100 text-red-800';
-    case 'Bokført': return 'bg-purple-100 text-purple-800';
-    case 'Lukket': return 'bg-gray-100 text-gray-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
+import { ClaimsListFilters } from '@/components/claims/ClaimsListFilters';
+import { ClaimsListTable } from '@/components/claims/ClaimsListTable';
 
 const ClaimsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,55 +47,17 @@ const ClaimsList = () => {
         </Link>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtre
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Søk kunde, ID, maskin eller adresse..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Input
-              placeholder="Søk på delenummer..."
-              value={partNumberFilter}
-              onChange={(e) => setPartNumberFilter(e.target.value)}
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map(status => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Kategori" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map(category => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <ClaimsListFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        partNumberFilter={partNumberFilter}
+        setPartNumberFilter={setPartNumberFilter}
+      />
 
-      {/* Claims Table */}
       <Card>
         <CardHeader>
           <CardTitle>Reklamasjoner ({filteredClaims.length})</CardTitle>
@@ -119,116 +66,12 @@ const ClaimsList = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse border rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-24"></div>
-                      <div className="h-3 bg-gray-200 rounded w-20"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-32"></div>
-                      <div className="h-3 bg-gray-200 rounded w-28"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-6 bg-gray-200 rounded w-16"></div>
-                      <div className="h-3 bg-gray-200 rounded w-20"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded w-16"></div>
-                      <div className="h-4 bg-gray-200 rounded w-24"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 rounded w-12"></div>
-                      <div className="h-4 bg-gray-200 rounded w-20"></div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded w-10"></div>
-                        <div className="h-4 bg-gray-200 rounded w-16"></div>
-                      </div>
-                      <div className="h-8 bg-gray-200 rounded w-16"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <FileX className="w-12 h-12 mx-auto mb-4 text-red-300" />
-              <p className="text-red-600">Feil ved lasting av reklamasjoner.</p>
-              <p className="text-sm text-gray-500 mt-2">Prøv å laste siden på nytt.</p>
-            </div>
-          ) : filteredClaims.length === 0 ? (
-            claims?.length === 0 ? (
-              <div className="text-center py-8">
-                <FileX className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500 mb-4">Ingen reklamasjoner er opprettet ennå.</p>
-                <Link to="/claim/new">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Opprett første reklamasjon
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500">Ingen reklamasjoner funnet med gjeldende filtre.</p>
-                <p className="text-sm text-gray-400 mt-2">Prøv å endre søkekriteriene.</p>
-              </div>
-            )
-          ) : (
-            <div className="overflow-x-auto">
-              <div className="space-y-3">
-                {filteredClaims.map((claim) => (
-                  <div key={claim.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                      <div>
-                        <p className="font-semibold text-myhrvold-primary">{claim.id}</p>
-                        <p className="text-sm text-gray-600">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">{claim.customer_name || 'Ukjent kunde'}</p>
-                        <p className="text-sm text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
-                        {claim.part_number && (
-                          <p className="text-xs text-blue-600 font-mono">Del: {claim.part_number}</p>
-                        )}
-                      </div>
-                      <div>
-                        <Badge className={getStatusColor(claim.status)}>
-                          {claim.status}
-                        </Badge>
-                        <p className="text-sm text-gray-600 mt-1">{claim.category || 'Ingen kategori'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Leverandør</p>
-                        <p className="font-medium">{claim.suppliers?.name || 'Ingen leverandør'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Tekniker</p>
-                        <p className="font-medium">{claim.technician?.name || 'Ingen tekniker'}</p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-gray-600">Opprettet</p>
-                          <p className="font-semibold">{claim.created_by || 'Ukjent'}</p>
-                        </div>
-                        <Link to={`/claim/${claim.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Se
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <ClaimsListTable
+            claims={filteredClaims}
+            isLoading={isLoading}
+            error={!!error}
+            hasAnyClaims={!!claims && claims.length > 0}
+          />
         </CardContent>
       </Card>
     </div>
