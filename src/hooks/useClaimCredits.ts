@@ -1,14 +1,14 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
+import { ErrorService } from '@/services/errorHandling/errorService';
 import { useToast } from '@/hooks/use-toast';
 
 export function useClaimCredits(claimIdOrNumber: string) {
   return useQuery({
     queryKey: ['credits', claimIdOrNumber],
     queryFn: async () => {
-      return withRetry(async () => {
+      return ErrorService.withRetry(async () => {
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
         
         let actualClaimId = claimIdOrNumber;
@@ -22,7 +22,7 @@ export function useClaimCredits(claimIdOrNumber: string) {
             .maybeSingle();
             
           if (claimError) {
-            handleSupabaseError(claimError, 'finne reklamasjon');
+            ErrorService.handleSupabaseError(claimError, 'finne reklamasjon');
             return [];
           }
           
@@ -41,7 +41,7 @@ export function useClaimCredits(claimIdOrNumber: string) {
           .order('created_at', { ascending: true });
         
         if (error) {
-          handleSupabaseError(error, 'laste kreditnotaer');
+          ErrorService.handleSupabaseError(error, 'laste kreditnotaer');
           throw error;
         }
         
@@ -65,7 +65,7 @@ export function useAddCreditNote() {
       konto_nr?: number;
       voucher_no?: string;
     }) => {
-      return withRetry(async () => {
+      return ErrorService.withRetry(async () => {
         const { data: result, error } = await supabase
           .from('credit_note')
           .insert({
@@ -79,7 +79,7 @@ export function useAddCreditNote() {
           .single();
         
         if (error) {
-          handleSupabaseError(error, 'legge til kreditnota');
+          ErrorService.handleSupabaseError(error, 'legge til kreditnota');
           throw error;
         }
         

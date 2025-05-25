@@ -14,7 +14,7 @@ import SupplierDistributionChart from '@/components/dashboard/SupplierDistributi
 import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
 import { InteractiveChartWrapper } from '@/components/dashboard/InteractiveChartWrapper';
 import { NotificationToasts } from '@/components/dashboard/NotificationToasts';
-import ErrorBoundary from '@/components/ui/error-boundary';
+import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardContent = () => {
@@ -41,65 +41,65 @@ const DashboardContent = () => {
       </div>
 
       {/* Quick Stats Cards */}
-      <ErrorBoundary title="Feil ved lasting av hurtigstatistikk">
+      <ImprovedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
         <QuickStatsCards />
-      </ErrorBoundary>
+      </ImprovedErrorBoundary>
 
       {/* Main KPI Cards */}
-      <ErrorBoundary title="Feil ved lasting av nøkkeltall">
+      <ImprovedErrorBoundary title="Feil ved lasting av nøkkeltall">
         <KpiCardsGrid />
-      </ErrorBoundary>
+      </ImprovedErrorBoundary>
 
       {/* Additional KPI Cards */}
-      <ErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
+      <ImprovedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
         <AdditionalKpiCards />
-      </ErrorBoundary>
+      </ImprovedErrorBoundary>
 
       {/* Mobile Optimized Filters */}
-      <ErrorBoundary title="Feil ved lasting av filtre">
+      <ImprovedErrorBoundary title="Feil ved lasting av filtre">
         <MobileOptimizedFilters />
-      </ErrorBoundary>
+      </ImprovedErrorBoundary>
 
       {/* Charts with Interactive Wrappers */}
       <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-        <ErrorBoundary title="Feil ved lasting av kostnadsdiagram">
+        <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
           <InteractiveChartWrapper 
             title="Kostnader per Konto"
             description="Månedlig oversikt over kostnader fordelt på kontoer"
           >
             <OptimizedStackedBarChart />
           </InteractiveChartWrapper>
-        </ErrorBoundary>
+        </ImprovedErrorBoundary>
         
-        <ErrorBoundary title="Feil ved lasting av leverandørfordeling">
+        <ImprovedErrorBoundary title="Feil ved lasting av leverandørfordeling">
           <InteractiveChartWrapper 
             title="Leverandørfordeling"
             description="Prosentvis fordeling av kostnader per leverandør"
           >
             <SupplierDistributionChart />
           </InteractiveChartWrapper>
-        </ErrorBoundary>
+        </ImprovedErrorBoundary>
       </div>
 
       {/* Root Cause Chart and Recent Claims */}
       <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-        <ErrorBoundary title="Feil ved lasting av årsaksanalyse">
+        <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
           <InteractiveChartWrapper 
             title="Årsaksanalyse"
             description="Fordeling av reklamasjoner etter rotårsak"
           >
             <OptimizedDonutChart />
           </InteractiveChartWrapper>
-        </ErrorBoundary>
+        </ImprovedErrorBoundary>
         
-        <ErrorBoundary title="Feil ved lasting av siste reklamasjoner">
+        <ImprovedErrorBoundary title="Feil ved lasting av siste reklamasjoner">
           <InteractiveChartWrapper 
             title="Siste Reklamasjoner"
             description="Oversikt over nyeste reklamasjoner"
           >
             <EnhancedRecentClaimsTable />
           </InteractiveChartWrapper>
-        </ErrorBoundary>
+        </ImprovedErrorBoundary>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Activity, Clock, Database, Users } from 'lucide-react';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
+import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
 
 export const PerformanceMonitor = () => {
   const { metrics, isLoading, error, refresh } = useSystemHealth();
@@ -20,17 +21,13 @@ export const PerformanceMonitor = () => {
 
   if (error) {
     return (
-      <Card className="border-red-200">
-        <CardHeader>
-          <CardTitle className="text-red-600">Performance Monitor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-600">Feil ved lasting av systemmetrikker: {error}</p>
-          <button onClick={refresh} className="mt-2 text-blue-600 hover:text-blue-800">
-            Prøv igjen
-          </button>
-        </CardContent>
-      </Card>
+      <ImprovedErrorBoundary
+        title="Performance Monitor"
+        description={`Feil ved lasting av systemmetrikker: ${error}`}
+        onReset={refresh}
+      >
+        <div>Error content is handled by the error boundary</div>
+      </ImprovedErrorBoundary>
     );
   }
 

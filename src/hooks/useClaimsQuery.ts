@@ -1,13 +1,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
+import { ErrorService } from '@/services/errorHandling/errorService';
 
 export const useClaimsQuery = () => {
   return useQuery({
     queryKey: ['claims'],
     queryFn: async () => {
-      return withRetry(async () => {
+      return ErrorService.withRetry(async () => {
         const { data, error } = await supabase
           .from('claims')
           .select(`
@@ -22,7 +22,7 @@ export const useClaimsQuery = () => {
           .limit(100);
 
         if (error) {
-          handleSupabaseError(error, 'laste reklamasjoner');
+          ErrorService.handleSupabaseError(error, 'laste reklamasjoner');
           throw error;
         }
 
@@ -30,13 +30,7 @@ export const useClaimsQuery = () => {
       });
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => {
-      // Don't retry on auth errors
-      if ('code' in error && error.code === '42501') {
-        return false;
-      }
-      return failureCount < 2;
-    }
+    retry: ErrorService.shouldRetryQuery
   });
 };
 
@@ -46,7 +40,7 @@ export const useClaimQuery = (claimId: string) => {
     queryFn: async () => {
       if (!claimId) return null;
       
-      return withRetry(async () => {
+      return ErrorService.withRetry(async () => {
         // Check if it's a UUID or claim number
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimId);
         
@@ -73,7 +67,7 @@ export const useClaimQuery = (claimId: string) => {
         const { data, error } = await query.maybeSingle();
 
         if (error) {
-          handleSupabaseError(error, 'laste reklamasjon');
+          ErrorService.handleSupabaseError(error, 'laste reklamasjon');
           throw error;
         }
 

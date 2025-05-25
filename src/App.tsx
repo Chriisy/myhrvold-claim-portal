@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DashboardFiltersProvider } from "@/contexts/DashboardFiltersContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ImprovedErrorBoundary } from "@/components/shared/ImprovedErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import ClaimsList from "./pages/ClaimsList";
 import ClaimDetail from "./pages/ClaimDetail";
@@ -19,49 +20,66 @@ import InvoiceImport from "./pages/InvoiceImport";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Don't retry on auth errors
+        if ('code' in error && error.code === '42501') {
+          return false;
+        }
+        return failureCount < 2;
+      }
+    }
+  }
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <DashboardFiltersProvider>
-                    <SidebarProvider>
-                      <div className="min-h-screen flex w-full">
-                        <AppSidebar />
-                        <main className="flex-1 p-6 bg-myhrvold-bg">
-                          <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/claims" element={<ClaimsList />} />
-                            <Route path="/claim/new" element={<ClaimWizard />} />
-                            <Route path="/claim/:id" element={<ClaimDetail />} />
-                            <Route path="/suppliers" element={<Suppliers />} />
-                            <Route path="/import" element={<InvoiceImport />} />
-                            <Route path="/reports" element={<Reports />} />
-                            <Route path="/404" element={<NotFound />} />
-                            <Route path="*" element={<Navigate to="/404" replace />} />
-                          </Routes>
-                        </main>
-                      </div>
-                    </SidebarProvider>
-                  </DashboardFiltersProvider>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ImprovedErrorBoundary
+    title="Applikasjonfeil"
+    description="Det oppstod en alvorlig feil i applikasjonen. Vennligst last siden på nytt."
+  >
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <DashboardFiltersProvider>
+                      <SidebarProvider>
+                        <div className="min-h-screen flex w-full">
+                          <AppSidebar />
+                          <main className="flex-1 p-6 bg-myhrvold-bg">
+                            <Routes>
+                              <Route path="/" element={<Dashboard />} />
+                              <Route path="/claims" element={<ClaimsList />} />
+                              <Route path="/claim/new" element={<ClaimWizard />} />
+                              <Route path="/claim/:id" element={<ClaimDetail />} />
+                              <Route path="/suppliers" element={<Suppliers />} />
+                              <Route path="/import" element={<InvoiceImport />} />
+                              <Route path="/reports" element={<Reports />} />
+                              <Route path="/404" element={<NotFound />} />
+                              <Route path="*" element={<Navigate to="/404" replace />} />
+                            </Routes>
+                          </main>
+                        </div>
+                      </SidebarProvider>
+                    </DashboardFiltersProvider>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ImprovedErrorBoundary>
 );
 
 export default App;
