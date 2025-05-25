@@ -7,6 +7,7 @@ import { useRecentClaims } from '@/hooks/api/dashboard/useRecentClaims';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { memo } from 'react';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -20,7 +21,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const RecentClaimsTable = () => {
+const RecentClaimsTable = memo(() => {
   const { filters } = useDashboardFilters();
   const { data: recentClaims, isLoading } = useRecentClaims(filters);
 
@@ -107,6 +108,8 @@ const RecentClaimsTable = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+RecentClaimsTable.displayName = 'RecentClaimsTable';
 
 export default RecentClaimsTable;

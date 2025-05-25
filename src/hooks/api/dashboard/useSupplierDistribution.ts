@@ -76,7 +76,7 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         }))
         .sort((a, b) => b.amount - a.amount);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 15 * 60 * 1000, // Increased to 15 minutes
+    gcTime: 30 * 60 * 1000, // Increased to 30 minutes
   });
 };

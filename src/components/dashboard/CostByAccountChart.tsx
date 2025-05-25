@@ -4,8 +4,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/api/dashboard/useCostByAccount';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { memo } from 'react';
 
-const CostByAccountChart = () => {
+const CostByAccountChart = memo(() => {
   const { filters } = useDashboardFilters();
   const { data: enrichedData, isLoading } = useCostByAccount(filters);
 
@@ -62,6 +63,8 @@ const CostByAccountChart = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+CostByAccountChart.displayName = 'CostByAccountChart';
 
 export default CostByAccountChart;

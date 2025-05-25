@@ -4,8 +4,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useSupplierDistribution } from '@/hooks/api/dashboard/useSupplierDistribution';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { memo } from 'react';
 
-const SupplierDistributionChart = () => {
+const SupplierDistributionChart = memo(() => {
   const { filters } = useDashboardFilters();
   const { data: supplierData, isLoading } = useSupplierDistribution(filters);
 
@@ -67,6 +68,8 @@ const SupplierDistributionChart = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+SupplierDistributionChart.displayName = 'SupplierDistributionChart';
 
 export default SupplierDistributionChart;
