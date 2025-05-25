@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ErrorService } from '@/services/errorHandling/errorService';
-import { ClaimCategory } from '@/types/claim';
+import { ClaimCategory, ClaimStatus } from '@/types/claim';
 
 interface ClaimWithRelations {
   id: string;
@@ -16,7 +16,7 @@ interface ClaimWithRelations {
   warranty?: boolean;
   quantity?: number;
   category?: ClaimCategory | null; // Use proper ClaimCategory type instead of string
-  status?: string;
+  status?: ClaimStatus; // Use proper ClaimStatus type instead of string
   created_at: string;
   created_by?: string;
   suppliers?: { name: string } | null;
