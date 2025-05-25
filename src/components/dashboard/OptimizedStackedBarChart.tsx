@@ -1,9 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useStackedBarData } from '@/hooks/dashboard';
+import { useStackedBarData } from '@/hooks/api/dashboard/useStackedBarData';
 import { useNavigate } from 'react-router-dom';
 import { memo } from 'react';
 

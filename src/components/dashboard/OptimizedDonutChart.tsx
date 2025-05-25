@@ -1,9 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { PieChart as PieChartIcon } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useRootCauseData } from '@/hooks/dashboard';
+import { useRootCauseData } from '@/hooks/api/dashboard/useRootCauseData';
 import { memo } from 'react';
 
 const OptimizedDonutChart = memo(() => {

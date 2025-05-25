@@ -7,6 +7,8 @@ export const queryKeys = {
     costByAccount: (filters: any) => ['dashboard', 'cost-by-account', filters] as const,
     supplierDistribution: (filters: any) => ['dashboard', 'supplier-distribution', filters] as const,
     recentClaims: (filters: any) => ['dashboard', 'recent-claims', filters] as const,
+    rootCause: (filters: any) => ['dashboard', 'root-cause', filters] as const,
+    stackedBar: (filters: any) => ['dashboard', 'stacked-bar', filters] as const,
   },
   
   // Account queries
