@@ -37,6 +37,14 @@ export function AccountCodeSelector({ selectedAccountCodeId, onAccountCodeChange
     return <div>Laster kontokoder...</div>;
   }
 
+  const handleSelectChange = (value: string) => {
+    if (value === 'none') {
+      onAccountCodeChange(undefined);
+    } else {
+      onAccountCodeChange(parseInt(value));
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -68,14 +76,14 @@ export function AccountCodeSelector({ selectedAccountCodeId, onAccountCodeChange
             <div>
               <Label htmlFor="account_code">Velg kontokode</Label>
               <Select 
-                value={selectedAccountCodeId ? selectedAccountCodeId.toString() : ''} 
-                onValueChange={(value) => onAccountCodeChange(value ? parseInt(value) : undefined)}
+                value={selectedAccountCodeId ? selectedAccountCodeId.toString() : 'none'} 
+                onValueChange={handleSelectChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Velg kontokode" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  <SelectItem value="">Ingen kontokode</SelectItem>
+                  <SelectItem value="none">Ingen kontokode</SelectItem>
                   {accountCodes.map((code) => (
                     <SelectItem key={code.konto_nr} value={code.konto_nr.toString()}>
                       <div className="flex items-center gap-2">
