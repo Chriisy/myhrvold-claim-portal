@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, subDays } from 'date-fns';
@@ -27,7 +26,8 @@ export const useDashboardKPIs = (filters: DashboardFilters) => {
         .from('claims')
         .select('id, status, due_date, closed_at, supplier_id, technician_id, machine_model')
         .gte('created_at', filters.date_range.start.toISOString())
-        .lte('created_at', filters.date_range.end.toISOString());
+        .lte('created_at', filters.date_range.end.toISOString())
+        .is('deleted_at', null);
 
       // Apply filters
       if (filters.supplier_id) {
@@ -87,7 +87,8 @@ export const useCostByAccount = (filters: DashboardFilters) => {
           )
         `)
         .gte('claims.created_at', filters.date_range.start.toISOString())
-        .lte('claims.created_at', filters.date_range.end.toISOString());
+        .lte('claims.created_at', filters.date_range.end.toISOString())
+        .is('claims.deleted_at', null);
 
       if (filters.supplier_id) {
         query = query.eq('claims.supplier_id', filters.supplier_id);
@@ -140,7 +141,8 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           )
         `)
         .gte('claims.created_at', filters.date_range.start.toISOString())
-        .lte('claims.created_at', filters.date_range.end.toISOString());
+        .lte('claims.created_at', filters.date_range.end.toISOString())
+        .is('claims.deleted_at', null);
 
       if (filters.supplier_id) {
         query = query.eq('claims.supplier_id', filters.supplier_id);
@@ -192,10 +194,11 @@ export const useRecentClaims = (filters: DashboardFilters) => {
           supplier_id,
           technician_id,
           suppliers(name),
-          users!claims_technician_id_fkey(name)
+          technician:users!claims_technician_id_fkey(name)
         `)
         .gte('created_at', filters.date_range.start.toISOString())
         .lte('created_at', filters.date_range.end.toISOString())
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(5);
 
