@@ -2,24 +2,25 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useStackedBarChartData } from '@/hooks/useOptimizedDashboardData';
-import { useCallback, memo } from 'react';
+import { useStackedBarData } from '@/hooks/dashboard';
+import { useNavigate } from 'react-router-dom';
+import { memo } from 'react';
 
 const OptimizedStackedBarChart = memo(() => {
   const { filters } = useDashboardFilters();
-  const { data, isLoading } = useStackedBarChartData(filters);
+  const { data, isLoading } = useStackedBarData(filters);
   const navigate = useNavigate();
 
-  const handleBarClick = useCallback((data: any, month: string) => {
-    if (!data?.accountKeys?.length) return;
+  const handleBarClick = (clickData: any, month: string) => {
+    if (!data?.accountKeys) return;
     
-    const maxAccount = data.accountKeys.reduce((max: string, key: string) => 
-      (data[key] || 0) > (data[max] || 0) ? key : max
+    // Find the highest value account for this month
+    const maxAccount = data.accountKeys.reduce((max, key) => 
+      (clickData[key] || 0) > (clickData[max] || 0) ? key : max
     );
     navigate(`/claims?konto=${maxAccount}&month=${month}`);
-  }, [navigate]);
+  };
 
   if (isLoading) {
     return (
@@ -72,7 +73,7 @@ const OptimizedStackedBarChart = memo(() => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart 
             data={data.data} 
-            onClick={(chartData) => chartData?.activeLabel && handleBarClick(chartData.activePayload?.[0]?.payload, chartData.activeLabel)}
+            onClick={(clickData) => clickData?.activeLabel && handleBarClick(clickData.activePayload?.[0]?.payload, clickData.activeLabel)}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
@@ -81,12 +82,12 @@ const OptimizedStackedBarChart = memo(() => {
               formatter={(value, name) => [`${Number(value).toLocaleString('nb-NO')} kr`, `Konto ${name}`]}
               labelFormatter={(month) => `Måned: ${month}`}
             />
-            {data.accountKeys?.map((key) => (
+            {data.accountKeys.map((key) => (
               <Bar 
                 key={key} 
                 dataKey={key} 
                 stackId="a" 
-                fill={data.accountColors?.[key]} 
+                fill={data.accountColors[key]} 
                 radius={[0, 0, 0, 0]}
                 style={{ cursor: 'pointer' }}
               />

@@ -16,11 +16,11 @@ const CostByAccountChart = () => {
     if (!accountData || !accounts) return [];
     
     return accountData.map(item => {
-      const account = accounts.find(acc => acc.konto_nr === parseInt(item.account));
+      const account = accounts.find(acc => acc.konto_nr === item.account);
       return {
         ...item,
         accountName: account?.type || `Konto ${item.account}`,
-        displayName: account ? `${item.account} - ${account.type}` : item.account
+        displayName: account ? `${item.account} - ${account.type}` : item.account.toString()
       };
     });
   }, [accountData, accounts]);

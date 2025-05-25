@@ -3,12 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { PieChart as PieChartIcon } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useRootCauseChartData } from '@/hooks/useOptimizedDashboardData';
+import { useRootCauseData } from '@/hooks/dashboard';
 import { memo } from 'react';
 
 const OptimizedDonutChart = memo(() => {
   const { filters } = useDashboardFilters();
-  const { data, isLoading } = useRootCauseChartData(filters);
+  const { data, isLoading } = useRootCauseData(filters);
 
   if (isLoading) {
     return (

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import OptimizedKPICards from '@/components/dashboard/OptimizedKPICards';
+import KpiCards from '@/components/dashboard/KpiCards';
 import EnhancedDashboardFilters from '@/components/dashboard/EnhancedDashboardFilters';
 import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
@@ -30,8 +30,8 @@ const DashboardContent = () => {
         </Link>
       </div>
 
-      {/* Optimized KPI Cards */}
-      <OptimizedKPICards />
+      {/* KPI Cards */}
+      <KpiCards />
 
       {/* Enhanced Filters */}
       <EnhancedDashboardFilters />
