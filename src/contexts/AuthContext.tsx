@@ -48,15 +48,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listeners');
     
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
-      // Update session state immediately
       setSession(session);
       
       if (session?.user) {
-        // Defer user profile loading to prevent deadlocks
         setTimeout(async () => {
           try {
             await loadUserProfile(session.user);
@@ -73,7 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
         console.error('Error getting session:', error);
@@ -111,43 +107,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Loading user profile for:', supabaseUser.email);
       
-      // Last brukerdata fra databasen med tillatelser
-      const { data: userData, error } = await supabase
+      // First get user data
+      const { data: userData, error: userError } = await supabase
         .from('users')
-        .select(`
-          *,
-          user_permissions(permission_name)
-        `)
+        .select('*')
         .eq('id', supabaseUser.id)
         .single();
 
-      if (error) {
-        console.error('Error loading user profile:', error);
-        throw error;
+      if (userError) {
+        console.error('Error loading user:', userError);
+        throw userError;
       }
 
-      if (userData) {
-        console.log('User profile loaded from database:', userData);
-        
-        // Map permissions to string array
-        const permissions = userData.user_permissions?.map(p => p.permission_name) || [];
-        
-        setUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          role: userData.role as User['role'],
-          user_role: userData.user_role as UserRole,
-          department: userData.department as Department,
-          seller_no: userData.seller_no,
-          permissions: permissions as PermissionType[],
-        });
-        
-        console.log('User set with role:', userData.user_role, 'permissions:', permissions);
-      } else {
+      if (!userData) {
         console.warn('User not found in database');
         setUser(null);
+        return;
       }
+
+      // Then get permissions separately
+      const { data: permissionsData, error: permError } = await supabase
+        .from('user_permissions')
+        .select('permission_name')
+        .eq('user_id', supabaseUser.id);
+
+      if (permError) {
+        console.error('Error loading permissions:', permError);
+        // Continue without permissions rather than failing completely
+      }
+
+      const permissions = permissionsData?.map(p => p.permission_name) || [];
+      
+      console.log('User profile loaded:', {
+        id: userData.id,
+        role: userData.user_role,
+        permissions: permissions
+      });
+      
+      setUser({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role as User['role'],
+        user_role: userData.user_role as UserRole,
+        department: userData.department as Department,
+        seller_no: userData.seller_no,
+        permissions: permissions as PermissionType[],
+      });
+      
+      console.log('User set successfully with role:', userData.user_role);
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
       setUser(null);
@@ -163,30 +171,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     console.log('Checking permission:', permission, 'for user role:', user.user_role);
     
-    // Admin har alle tillatelser
+    // Admin has all permissions
     if (user.user_role === 'admin') {
       console.log('User is admin, has permission:', permission);
       return true;
     }
     
-    // Sjekk spesifikke tillatelser
+    // Check specific permissions
     if (user.permissions && user.permissions.includes(permission as PermissionType)) {
       console.log('User has specific permission:', permission);
       return true;
     }
     
-    // Grunnleggende rollebaserte tillatelser
-    switch (user.user_role) {
-      case 'saksbehandler':
-        return ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'].includes(permission);
-      case 'avdelingsleder':
-        return ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'].includes(permission);
-      case 'tekniker':
-        return ['edit_own_claims', 'create_claims'].includes(permission);
-      default:
-        console.log('No permission for role:', user.user_role, 'permission:', permission);
-        return false;
-    }
+    // Role-based permissions
+    const rolePermissions = {
+      'saksbehandler': ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'],
+      'avdelingsleder': ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'],
+      'tekniker': ['edit_own_claims', 'create_claims'],
+      'admin': [] // Handled above
+    };
+    
+    const userRolePermissions = rolePermissions[user.user_role] || [];
+    const hasRolePermission = userRolePermissions.includes(permission);
+    
+    console.log('Role-based permission check:', permission, 'result:', hasRolePermission);
+    return hasRolePermission;
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -194,10 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // Clean up existing state first
       cleanupAuthState();
       
-      // Attempt global sign out to clear any existing sessions
       try {
         await supabase.auth.signOut({ scope: 'global' });
         console.log('Global sign out completed');
@@ -218,7 +225,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.user && data.session) {
         console.log('Login successful, user:', data.user.email);
-        // Don't manually load user profile here - let onAuthStateChange handle it
         return true;
       }
 
@@ -234,25 +240,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     console.log('Logout initiated');
     try {
-      // Clean up auth state first
       cleanupAuthState();
       
-      // Attempt global sign out
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         console.error('Sign out error (continuing anyway):', err);
       }
       
-      // Clear local state
       setUser(null);
       setSession(null);
       
-      // Force page reload for clean state
       window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
-      // Force reload even if logout fails
       window.location.href = '/login';
     }
   };

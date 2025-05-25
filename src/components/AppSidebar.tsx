@@ -58,22 +58,20 @@ export function AppSidebar() {
 
   console.log('AppSidebar - User role:', user?.user_role, 'isAdmin:', isAdmin(), 'canManageUsers:', canManageUsers());
 
-  // Admin-only menu items
-  const adminMenuItems = [];
+  // Check if user should see admin menu
+  const showAdminMenu = user?.user_role === 'admin' || canManageUsers();
   
-  // Sjekk om brukeren har admin-rettigheter eller kan administrere brukere
-  if (user?.user_role === 'admin' || isAdmin() || canManageUsers()) {
+  // Combine regular menu items with admin items
+  const allMenuItems = [...menuItems];
+  
+  if (showAdminMenu) {
     console.log('Adding admin menu items');
-    adminMenuItems.push({
+    allMenuItems.push({
       title: 'Brukere',
       url: '/admin/users',
       icon: Shield,
-      requiresAdmin: true,
     });
   }
-
-  // Combine regular menu items with admin items
-  const allMenuItems = [...menuItems, ...adminMenuItems];
 
   console.log('All menu items:', allMenuItems.map(item => item.title));
 
@@ -125,6 +123,7 @@ export function AppSidebar() {
                 <p>Role: {user?.user_role}</p>
                 <p>Is Admin: {isAdmin() ? 'Yes' : 'No'}</p>
                 <p>Can Manage Users: {canManageUsers() ? 'Yes' : 'No'}</p>
+                <p>Show Admin Menu: {showAdminMenu ? 'Yes' : 'No'}</p>
                 <p>Permissions: {user?.permissions?.join(', ') || 'None'}</p>
               </div>
             )}
