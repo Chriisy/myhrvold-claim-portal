@@ -1,30 +1,35 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { NewSupplierData } from '@/lib/validations/claim';
-import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 import { toast } from '@/hooks/use-toast';
+import { NewSupplierData } from '@/lib/validations/claim';
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contact_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  created_at?: string;
+}
 
 export const useSuppliers = () => {
   return useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {
-      return withRetry(async () => {
-        const { data, error } = await supabase
-          .from('suppliers')
-          .select('*')
-          .is('deleted_at', null)
-          .order('name');
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('*')
+        .is('deleted_at', null)
+        .order('name');
 
-        if (error) {
-          handleSupabaseError(error, 'laste leverandører');
-          throw error;
-        }
+      if (error) {
+        console.error('Error fetching suppliers:', error);
+        throw error;
+      }
 
-        return data || [];
-      });
+      return data as Supplier[];
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes - suppliers don't change often
   });
 };
 
@@ -32,44 +37,39 @@ export const useCreateSupplier = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (supplierData: NewSupplierData) => {
-      return withRetry(async () => {
-        // Verify authentication
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
-        if (authError || !user) {
-          throw new Error('Du må være innlogget for å opprette leverandører');
-        }
+    mutationFn: async (data: NewSupplierData) => {
+      const { data: supplier, error } = await supabase
+        .from('suppliers')
+        .insert({
+          name: data.name,
+          contact_name: data.contact_name || null,
+          contact_phone: data.contact_phone || null,
+          contact_email: data.contact_email || null,
+        })
+        .select()
+        .single();
 
-        const { data, error } = await supabase
-          .from('suppliers')
-          .insert({
-            name: supplierData.name,
-            contact_name: supplierData.contact_name || null,
-            contact_phone: supplierData.contact_phone || null,
-            contact_email: supplierData.contact_email || null,
-          })
-          .select()
-          .single();
+      if (error) {
+        console.error('Error creating supplier:', error);
+        throw error;
+      }
 
-        if (error) {
-          handleSupabaseError(error, 'opprette leverandør');
-          throw error;
-        }
-        
-        return data;
-      });
+      return supplier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toast({
         title: 'Leverandør opprettet',
-        description: 'Den nye leverandøren har blitt lagt til.',
+        description: 'Ny leverandør har blitt lagt til.',
       });
     },
-    onError: (error: any) => {
-      // Error already handled by handleSupabaseError, just log
+    onError: (error) => {
       console.error('Error creating supplier:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke opprette leverandør.',
+        variant: 'destructive',
+      });
     },
   });
 };
@@ -78,73 +78,73 @@ export const useUpdateSupplier = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: NewSupplierData }) => {
-      return withRetry(async () => {
-        const { data: supplier, error } = await supabase
-          .from('suppliers')
-          .update({
-            name: data.name,
-            contact_name: data.contact_name || null,
-            contact_phone: data.contact_phone || null,
-            contact_email: data.contact_email || null,
-          })
-          .eq('id', id)
-          .is('deleted_at', null)
-          .select()
-          .single();
+    mutationFn: async ({ id, data }: { id: string; data: Partial<NewSupplierData> }) => {
+      const { data: supplier, error } = await supabase
+        .from('suppliers')
+        .update({
+          name: data.name,
+          contact_name: data.contact_name || null,
+          contact_phone: data.contact_phone || null,
+          contact_email: data.contact_email || null,
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-        if (error) {
-          handleSupabaseError(error, 'oppdatere leverandør');
-          throw error;
-        }
+      if (error) {
+        console.error('Error updating supplier:', error);
+        throw error;
+      }
 
-        return supplier;
-      });
+      return supplier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toast({
         title: 'Leverandør oppdatert',
-        description: 'Leverandørinformasjonen har blitt oppdatert.',
+        description: 'Leverandørinformasjon har blitt oppdatert.',
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.error('Error updating supplier:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke oppdatere leverandør.',
+        variant: 'destructive',
+      });
     },
   });
 };
 
-export const useArchiveSupplier = () => {
+export const useDeleteSupplier = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      return withRetry(async () => {
-        const { data, error } = await supabase
-          .from('suppliers')
-          .update({ deleted_at: new Date().toISOString() })
-          .eq('id', id)
-          .is('deleted_at', null)
-          .select()
-          .single();
+      const { error } = await supabase
+        .from('suppliers')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
 
-        if (error) {
-          handleSupabaseError(error, 'arkivere leverandør');
-          throw error;
-        }
-
-        return data;
-      });
+      if (error) {
+        console.error('Error deleting supplier:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toast({
-        title: 'Leverandør arkivert',
-        description: 'Leverandøren har blitt arkivert.',
+        title: 'Leverandør slettet',
+        description: 'Leverandøren har blitt fjernet.',
       });
     },
-    onError: (error: any) => {
-      console.error('Error archiving supplier:', error);
+    onError: (error) => {
+      console.error('Error deleting supplier:', error);
+      toast({
+        title: 'Feil',
+        description: 'Kunne ikke slette leverandør.',
+        variant: 'destructive',
+      });
     },
   });
 };

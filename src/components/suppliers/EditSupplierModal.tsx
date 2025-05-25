@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,20 +19,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { newSupplierSchema, type NewSupplierData } from '@/lib/validations/claim';
-import { useCreateSupplier } from '@/hooks/useSuppliers';
+import { useUpdateSupplier, type Supplier } from '@/hooks/useSuppliers';
 
-interface NewSupplierModalProps {
+interface EditSupplierModalProps {
+  supplier: Supplier | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSupplierCreated: (supplierId: string) => void;
 }
 
-export function NewSupplierModal({
+export function EditSupplierModal({
+  supplier,
   open,
   onOpenChange,
-  onSupplierCreated,
-}: NewSupplierModalProps) {
-  const createSupplier = useCreateSupplier();
+}: EditSupplierModalProps) {
+  const updateSupplier = useUpdateSupplier();
 
   const form = useForm<NewSupplierData>({
     resolver: zodResolver(newSupplierSchema),
@@ -44,12 +44,23 @@ export function NewSupplierModal({
     },
   });
 
+  useEffect(() => {
+    if (supplier) {
+      form.reset({
+        name: supplier.name,
+        contact_name: supplier.contact_name || '',
+        contact_phone: supplier.contact_phone || '',
+        contact_email: supplier.contact_email || '',
+      });
+    }
+  }, [supplier, form]);
+
   const handleSubmit = async (data: NewSupplierData) => {
+    if (!supplier) return;
+
     try {
-      const supplier = await createSupplier.mutateAsync(data);
-      onSupplierCreated(supplier.id);
+      await updateSupplier.mutateAsync({ id: supplier.id, data });
       onOpenChange(false);
-      form.reset();
     } catch (error) {
       // Error is handled in the mutation
     }
@@ -59,7 +70,7 @@ export function NewSupplierModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Ny leverandør</DialogTitle>
+          <DialogTitle>Rediger leverandør</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -134,10 +145,10 @@ export function NewSupplierModal({
               </Button>
               <Button
                 type="submit"
-                disabled={createSupplier.isPending}
+                disabled={updateSupplier.isPending}
                 className="bg-myhrvold-primary hover:bg-myhrvold-primary/90"
               >
-                {createSupplier.isPending ? 'Oppretter...' : 'Opprett leverandør'}
+                {updateSupplier.isPending ? 'Oppdaterer...' : 'Oppdater leverandør'}
               </Button>
             </div>
           </form>
