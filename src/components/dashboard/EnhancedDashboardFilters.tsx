@@ -3,11 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useAccountCodes } from '@/hooks/useAccountCodes';
+import { useTechnicians } from '@/hooks/useTechnicians';
+import { FilterDropdown } from './FilterDropdown';
 import { format } from 'date-fns';
 import { useState } from 'react';
 
@@ -15,6 +17,7 @@ export const EnhancedDashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
   const { data: accountCodes } = useAccountCodes();
+  const { data: technicians } = useTechnicians();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
@@ -27,6 +30,30 @@ export const EnhancedDashboardFilters = () => {
     }
   };
 
+  const supplierOptions = [
+    { value: '', label: 'Alle leverandører' },
+    ...(suppliers?.map(supplier => ({
+      value: supplier.id,
+      label: supplier.name
+    })) || [])
+  ];
+
+  const accountOptions = [
+    { value: '', label: 'Alle kontoer' },
+    ...(accountCodes?.map(account => ({
+      value: account.konto_nr.toString(),
+      label: `${account.konto_nr} - ${account.type}`
+    })) || [])
+  ];
+
+  const technicianOptions = [
+    { value: '', label: 'Alle teknikere' },
+    ...(technicians?.map(tech => ({
+      value: tech.id,
+      label: tech.name
+    })) || [])
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -37,10 +64,10 @@ export const EnhancedDashboardFilters = () => {
         <CardDescription>Filtrer data for bedre innsikt i reklamasjoner</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Date Range Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Tidsperiode</label>
+            <label className="text-sm font-medium text-gray-700">Tidsperiode</label>
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -70,55 +97,57 @@ export const EnhancedDashboardFilters = () => {
                   }}
                   onSelect={handleDateRangeChange}
                   numberOfMonths={2}
+                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
           </div>
 
           {/* Supplier Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Leverandør</label>
-            <Select value={filters.supplier_id || 'all'} onValueChange={(value) => updateFilter('supplier_id', value === 'all' ? undefined : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Alle leverandører" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle leverandører</SelectItem>
-                {suppliers?.map(supplier => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FilterDropdown
+            label="Leverandør"
+            value={filters.supplier_id || ''}
+            options={supplierOptions}
+            onSelect={(value) => updateFilter('supplier_id', value || undefined)}
+            placeholder="Alle leverandører"
+          />
 
           {/* Account Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Konto</label>
-            <Select value={filters.konto_nr?.toString() || 'all'} onValueChange={(value) => updateFilter('konto_nr', value === 'all' ? undefined : parseInt(value))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Alle kontoer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle kontoer</SelectItem>
-                {accountCodes?.map(account => (
-                  <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
-                    {account.konto_nr} - {account.type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FilterDropdown
+            label="Konto"
+            value={filters.konto_nr?.toString() || ''}
+            options={accountOptions}
+            onSelect={(value) => updateFilter('konto_nr', value ? parseInt(value) : undefined)}
+            placeholder="Alle kontoer"
+          />
 
-          {/* Reset Button */}
+          {/* Technician Filter */}
+          <FilterDropdown
+            label="Tekniker"
+            value={filters.technician_id || ''}
+            options={technicianOptions}
+            onSelect={(value) => updateFilter('technician_id', value || undefined)}
+            placeholder="Alle teknikere"
+          />
+
+          {/* Machine Model Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium invisible">Reset</label>
-            <Button variant="outline" onClick={resetFilters} className="w-full">
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Tilbakestill
-            </Button>
+            <label className="text-sm font-medium text-gray-700">Maskinmodell</label>
+            <Input
+              placeholder="Søk maskinmodell..."
+              value={filters.machine_model || ""}
+              onChange={(e) => updateFilter('machine_model', e.target.value || undefined)}
+              className="w-full"
+            />
           </div>
+        </div>
+
+        {/* Reset Button */}
+        <div className="mt-4 flex justify-end">
+          <Button variant="outline" onClick={resetFilters} className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" />
+            Tilbakestill alle filtre
+          </Button>
         </div>
       </CardContent>
     </Card>
