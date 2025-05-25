@@ -386,30 +386,71 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          created_at: string | null
+          department_scope: Database["public"]["Enums"]["department"] | null
+          id: string
+          permission_name: Database["public"]["Enums"]["permission_type"]
+          resource: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          department_scope?: Database["public"]["Enums"]["department"] | null
+          id?: string
+          permission_name: Database["public"]["Enums"]["permission_type"]
+          resource?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          department_scope?: Database["public"]["Enums"]["department"] | null
+          id?: string
+          permission_name?: Database["public"]["Enums"]["permission_type"]
+          resource?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string | null
+          department: Database["public"]["Enums"]["department"] | null
           email: string
           id: string
           name: string
           role: string
           seller_no: number | null
+          user_role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           created_at?: string | null
+          department?: Database["public"]["Enums"]["department"] | null
           email: string
           id?: string
           name: string
           role: string
           seller_no?: number | null
+          user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           created_at?: string | null
+          department?: Database["public"]["Enums"]["department"] | null
           email?: string
           id?: string
           name?: string
           role?: string
           seller_no?: number | null
+          user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: []
       }
@@ -421,6 +462,15 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      has_permission: {
+        Args: {
+          _user_id: string
+          _permission: Database["public"]["Enums"]["permission_type"]
+          _resource?: string
+          _department?: Database["public"]["Enums"]["department"]
+        }
+        Returns: boolean
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -436,12 +486,30 @@ export type Database = {
         | "Avslått"
         | "Bokført"
         | "Lukket"
+      department:
+        | "oslo"
+        | "bergen"
+        | "trondheim"
+        | "kristiansand"
+        | "sornorge"
+        | "nord"
       import_status: "new" | "validating" | "ready" | "error"
       improvement_action:
         | "Ingen"
         | "ForbedreProsess"
         | "ErstatteKomponent"
         | "StopSale"
+      permission_type:
+        | "view_all_claims"
+        | "edit_all_claims"
+        | "delete_claims"
+        | "manage_users"
+        | "view_reports"
+        | "approve_claims"
+        | "view_department_claims"
+        | "edit_own_claims"
+        | "create_claims"
+      user_role: "admin" | "saksbehandler" | "tekniker" | "avdelingsleder"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -566,6 +634,14 @@ export const Constants = {
         "Bokført",
         "Lukket",
       ],
+      department: [
+        "oslo",
+        "bergen",
+        "trondheim",
+        "kristiansand",
+        "sornorge",
+        "nord",
+      ],
       import_status: ["new", "validating", "ready", "error"],
       improvement_action: [
         "Ingen",
@@ -573,6 +649,18 @@ export const Constants = {
         "ErstatteKomponent",
         "StopSale",
       ],
+      permission_type: [
+        "view_all_claims",
+        "edit_all_claims",
+        "delete_claims",
+        "manage_users",
+        "view_reports",
+        "approve_claims",
+        "view_department_claims",
+        "edit_own_claims",
+        "create_claims",
+      ],
+      user_role: ["admin", "saksbehandler", "tekniker", "avdelingsleder"],
     },
   },
 } as const

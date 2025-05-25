@@ -1,14 +1,19 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
+import { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['user_role'];
+type Department = Database['public']['Enums']['department'];
 
 export interface User {
   id: string;
   name: string;
   email: string;
   role: 'technician' | 'sales' | 'manager' | 'finance' | 'admin';
+  user_role: UserRole;
+  department: Department;
   seller_no?: number;
 }
 
@@ -18,6 +23,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,7 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: session.user.id,
               name: session.user.email?.split('@')[0] || 'User',
               email: session.user.email || '',
-              role: 'admin'
+              role: 'admin',
+              user_role: 'admin',
+              department: 'oslo'
             };
             setUser(fallbackUser);
           }
@@ -95,7 +103,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: session.user.id,
               name: session.user.email?.split('@')[0] || 'User',
               email: session.user.email || '',
-              role: 'admin'
+              role: 'admin',
+              user_role: 'admin',
+              department: 'oslo'
             };
             setUser(fallbackUser);
           }
@@ -140,6 +150,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: userData.name,
           email: userData.email,
           role: userData.role as User['role'],
+          user_role: userData.user_role as UserRole,
+          department: userData.department as Department,
           seller_no: userData.seller_no,
         });
       } else {
@@ -151,7 +163,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: supabaseUser.id,
           name: supabaseUser.email?.split('@')[0] || 'User',
           email: supabaseUser.email || '',
-          role: 'admin'
+          role: 'admin',
+          user_role: 'admin',
+          department: 'oslo'
         };
         setUser(mockUser);
       }
@@ -162,9 +176,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: supabaseUser.id,
         name: supabaseUser.email?.split('@')[0] || 'User',
         email: supabaseUser.email || '',
-        role: 'admin'
+        role: 'admin',
+        user_role: 'admin',
+        department: 'oslo'
       };
       setUser(fallbackUser);
+    }
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    
+    // Admin has all permissions
+    if (user.user_role === 'admin') return true;
+    
+    // Basic role-based permissions
+    switch (user.user_role) {
+      case 'saksbehandler':
+        return ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'].includes(permission);
+      case 'avdelingsleder':
+        return ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'].includes(permission);
+      case 'tekniker':
+        return ['edit_own_claims', 'create_claims'].includes(permission);
+      default:
+        return false;
     }
   };
 
@@ -247,7 +282,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, session, login, logout, isLoading, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

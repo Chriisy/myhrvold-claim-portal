@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CookiePolicy from "./pages/CookiePolicy";
 import TermsOfService from "./pages/TermsOfService";
 import UserProfile from "./pages/UserProfile";
+import UserManagement from "./pages/UserManagement";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +75,7 @@ const App = () => (
                                 <Route path="/import" element={<InvoiceImport />} />
                                 <Route path="/reports" element={<Reports />} />
                                 <Route path="/profile" element={<UserProfile />} />
+                                <Route path="/admin/users" element={<UserManagement />} />
                                 <Route path="/404" element={<NotFound />} />
                                 <Route path="*" element={<Navigate to="/404" replace />} />
                               </Routes>
