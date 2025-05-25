@@ -18,8 +18,11 @@ export const EnhancedDashboardFilters = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
-    updateFilter('dateRange', range);
     if (range?.from && range?.to) {
+      updateFilter('date_range', {
+        start: range.from,
+        end: range.to
+      });
       setIsDatePickerOpen(false);
     }
   };
@@ -42,14 +45,14 @@ export const EnhancedDashboardFilters = () => {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.dateRange?.from ? (
-                    filters.dateRange.to ? (
+                  {filters.date_range?.start ? (
+                    filters.date_range.end ? (
                       <>
-                        {format(filters.dateRange.from, "dd.MM.yy")} -{" "}
-                        {format(filters.dateRange.to, "dd.MM.yy")}
+                        {format(filters.date_range.start, "dd.MM.yy")} -{" "}
+                        {format(filters.date_range.end, "dd.MM.yy")}
                       </>
                     ) : (
-                      format(filters.dateRange.from, "dd.MM.yy")
+                      format(filters.date_range.start, "dd.MM.yy")
                     )
                   ) : (
                     <span>Velg periode</span>
@@ -60,8 +63,11 @@ export const EnhancedDashboardFilters = () => {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={filters.dateRange?.from}
-                  selected={filters.dateRange}
+                  defaultMonth={filters.date_range?.start}
+                  selected={{
+                    from: filters.date_range?.start,
+                    to: filters.date_range?.end
+                  }}
                   onSelect={handleDateRangeChange}
                   numberOfMonths={2}
                 />
@@ -72,7 +78,7 @@ export const EnhancedDashboardFilters = () => {
           {/* Supplier Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Leverandør</label>
-            <Select value={filters.supplierId || 'all'} onValueChange={(value) => updateFilter('supplierId', value === 'all' ? null : value)}>
+            <Select value={filters.supplier_id || 'all'} onValueChange={(value) => updateFilter('supplier_id', value === 'all' ? undefined : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Alle leverandører" />
               </SelectTrigger>
@@ -90,7 +96,7 @@ export const EnhancedDashboardFilters = () => {
           {/* Account Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Konto</label>
-            <Select value={filters.accountId || 'all'} onValueChange={(value) => updateFilter('accountId', value === 'all' ? null : value)}>
+            <Select value={filters.konto_nr?.toString() || 'all'} onValueChange={(value) => updateFilter('konto_nr', value === 'all' ? undefined : parseInt(value))}>
               <SelectTrigger>
                 <SelectValue placeholder="Alle kontoer" />
               </SelectTrigger>
