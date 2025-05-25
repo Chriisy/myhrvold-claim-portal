@@ -134,15 +134,18 @@ function analyzePatterns(
       }, {} as Record<string, number>);
 
       const topSupplier = Object.entries(supplierCounts)
-        .sort(([,a], [,b]) => b - a)[0];
+        .sort(([,a], [,b]) => Number(b) - Number(a))[0];
 
       if (topSupplier) {
         const supplierData = machineSpecificClaims.find(c => c.supplier_id === topSupplier[0]);
+        const supplierCount = Number(topSupplier[1]);
+        const totalClaims = machineSpecificClaims.length;
+        
         suggestions.supplier = {
           supplier_id: topSupplier[0],
           supplier_name: supplierData?.suppliers?.name || 'Ukjent',
-          confidence: Math.min(80, (topSupplier[1] / machineSpecificClaims.length) * 100),
-          reason: `Vanligste leverandør for ${machineModel} (${topSupplier[1]} av ${machineSpecificClaims.length} tilfeller)`
+          confidence: Math.min(80, (supplierCount / totalClaims) * 100),
+          reason: `Vanligste leverandør for ${machineModel} (${supplierCount} av ${totalClaims} tilfeller)`
         };
       }
     }
