@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -31,15 +31,22 @@ export function BulkUserActions({
   const selectedCount = selectedUsers.length;
   const isAllSelected = selectedCount === totalUsers && totalUsers > 0;
   const isSomeSelected = selectedCount > 0 && selectedCount < totalUsers;
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+
+  // Use useEffect to set indeterminate state after render
+  useEffect(() => {
+    if (checkboxRef.current) {
+      // Cast to any to access the indeterminate property
+      (checkboxRef.current as any).indeterminate = isSomeSelected;
+    }
+  }, [isSomeSelected]);
 
   return (
     <div className="flex items-center gap-4 p-4 bg-gray-50 border rounded-lg">
       <div className="flex items-center gap-2">
         <Checkbox
+          ref={checkboxRef}
           checked={isAllSelected}
-          ref={(el) => {
-            if (el) el.indeterminate = isSomeSelected;
-          }}
           onCheckedChange={(checked) => onSelectAll(checked as boolean)}
         />
         <span className="text-sm font-medium">
