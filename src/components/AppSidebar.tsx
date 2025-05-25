@@ -51,26 +51,31 @@ const menuItems = [
   },
 ];
 
-// Admin-only menu items
-const adminMenuItems = [
-  {
-    title: 'Brukere',
-    url: '/admin/users',
-    icon: Shield,
-    requiresAdmin: true,
-  },
-];
-
 export function AppSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { isAdmin, canManageUsers } = usePermissions();
 
-  // Combine regular menu items with admin items based on permissions
-  const allMenuItems = [
-    ...menuItems,
-    ...(isAdmin() || canManageUsers() ? adminMenuItems : [])
-  ];
+  console.log('AppSidebar - User role:', user?.user_role, 'isAdmin:', isAdmin(), 'canManageUsers:', canManageUsers());
+
+  // Admin-only menu items
+  const adminMenuItems = [];
+  
+  // Sjekk om brukeren har admin-rettigheter eller kan administrere brukere
+  if (user?.user_role === 'admin' || isAdmin() || canManageUsers()) {
+    console.log('Adding admin menu items');
+    adminMenuItems.push({
+      title: 'Brukere',
+      url: '/admin/users',
+      icon: Shield,
+      requiresAdmin: true,
+    });
+  }
+
+  // Combine regular menu items with admin items
+  const allMenuItems = [...menuItems, ...adminMenuItems];
+
+  console.log('All menu items:', allMenuItems.map(item => item.title));
 
   return (
     <Sidebar className="border-r border-myhrvold-border">
@@ -111,7 +116,18 @@ export function AppSidebar() {
           <div className="text-sm">
             <p className="font-medium text-myhrvold-primary">{user?.name}</p>
             <p className="text-gray-600">{user?.email}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.user_role} {user?.user_role === 'admin' && '(Administrator)'}
+            </p>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
+                <p>Debug info:</p>
+                <p>Role: {user?.user_role}</p>
+                <p>Is Admin: {isAdmin() ? 'Yes' : 'No'}</p>
+                <p>Can Manage Users: {canManageUsers() ? 'Yes' : 'No'}</p>
+                <p>Permissions: {user?.permissions?.join(', ') || 'None'}</p>
+              </div>
+            )}
           </div>
           <Button 
             variant="outline" 

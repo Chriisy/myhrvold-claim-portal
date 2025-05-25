@@ -8,6 +8,7 @@ import { handleSupabaseError } from '@/utils/supabaseErrorHandler';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
+type PermissionType = Database['public']['Enums']['permission_type'];
 
 export interface User {
   id: string;
@@ -17,6 +18,7 @@ export interface User {
   user_role: UserRole;
   department: Department;
   seller_no?: number;
+  permissions?: PermissionType[];
 }
 
 interface AuthContextType {
@@ -43,29 +45,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fallback user creation for dev environments
-  const createFallbackUser = (supabaseUser: SupabaseUser): User => {
-    console.warn('Using fallback user profile - DB user not found');
-    return {
-      id: supabaseUser.id,
-      name: supabaseUser.email?.split('@')[0] || 'Unnamed User',
-      email: supabaseUser.email || '',
-      role: 'technician',
-      user_role: 'tekniker',
-      department: 'oslo',
-    };
-  };
-
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('AuthProvider: Setting up auth state listeners');
-    }
+    console.log('AuthProvider: Setting up auth state listeners');
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Auth state change:', event, session?.user?.email);
-      }
+      console.log('Auth state change:', event, session?.user?.email);
       
       // Update session state immediately
       setSession(session);
@@ -77,12 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile:', error);
-            // Use fallback user for development environments
-            if (process.env.NODE_ENV === 'development') {
-              setUser(createFallbackUser(session.user));
-            } else {
-              setUser(null);
-            }
+            setUser(null);
           } finally {
             setIsLoading(false);
           }
@@ -102,9 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Initial session check:', session?.user?.email);
-      }
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       
       if (session?.user) {
@@ -113,12 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile on init:', error);
-            // Use fallback user for development environments
-            if (process.env.NODE_ENV === 'development') {
-              setUser(createFallbackUser(session.user));
-            } else {
-              setUser(null);
-            }
+            setUser(null);
           } finally {
             setIsLoading(false);
           }
@@ -129,50 +102,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('AuthProvider: Cleaning up auth subscription');
-      }
+      console.log('AuthProvider: Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
 
   const loadUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Loading user profile for:', supabaseUser.email);
-      }
+      console.log('Loading user profile for:', supabaseUser.email);
       
-      // Prøv først direkte forespørsel
+      // Last brukerdata fra databasen med tillatelser
       const { data: userData, error } = await supabase
         .from('users')
-        .select('*')
+        .select(`
+          *,
+          user_permissions(permission_name)
+        `)
         .eq('id', supabaseUser.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
-        // Hvis vi får RLS infinite recursion, prøv en alternativ tilnærming
-        if (error.code === '42P17') {
-          console.warn('RLS recursion detected, using auth user data only');
-          setUser({
-            id: supabaseUser.id,
-            email: supabaseUser.email || '',
-            name: supabaseUser.user_metadata.name || supabaseUser.email?.split('@')[0] || 'User',
-            role: 'technician',
-            user_role: 'tekniker',
-            department: 'oslo',
-          });
-          return;
-        }
-        
         console.error('Error loading user profile:', error);
         throw error;
       }
 
-      // If user exists in users table, use that data
       if (userData) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('User profile loaded from database:', userData);
-        }
+        console.log('User profile loaded from database:', userData);
+        
+        // Map permissions to string array
+        const permissions = userData.user_permissions?.map(p => p.permission_name) || [];
+        
         setUser({
           id: userData.id,
           name: userData.name,
@@ -181,31 +140,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user_role: userData.user_role as UserRole,
           department: userData.department as Department,
           seller_no: userData.seller_no,
+          permissions: permissions as PermissionType[],
         });
+        
+        console.log('User set with role:', userData.user_role, 'permissions:', permissions);
       } else {
-        // User not found - normal during dev or first login
-        console.warn('User not found in database - using fallback');
-        setUser(createFallbackUser(supabaseUser));
+        console.warn('User not found in database');
+        setUser(null);
       }
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
-      // Development fallback
-      if (process.env.NODE_ENV === 'development') {
-        setUser(createFallbackUser(supabaseUser));
-      } else {
-        setUser(null);
-      }
+      setUser(null);
       throw error;
     }
   };
 
   const hasPermission = (permission: string): boolean => {
-    if (!user) return false;
+    if (!user) {
+      console.log('hasPermission: No user');
+      return false;
+    }
     
-    // Admin has all permissions
-    if (user.user_role === 'admin') return true;
+    console.log('Checking permission:', permission, 'for user role:', user.user_role);
     
-    // Basic role-based permissions
+    // Admin har alle tillatelser
+    if (user.user_role === 'admin') {
+      console.log('User is admin, has permission:', permission);
+      return true;
+    }
+    
+    // Sjekk spesifikke tillatelser
+    if (user.permissions && user.permissions.includes(permission as PermissionType)) {
+      console.log('User has specific permission:', permission);
+      return true;
+    }
+    
+    // Grunnleggende rollebaserte tillatelser
     switch (user.user_role) {
       case 'saksbehandler':
         return ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'].includes(permission);
@@ -214,14 +184,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       case 'tekniker':
         return ['edit_own_claims', 'create_claims'].includes(permission);
       default:
+        console.log('No permission for role:', user.user_role, 'permission:', permission);
         return false;
     }
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Login attempt for:', email);
-    }
+    console.log('Login attempt for:', email);
     setIsLoading(true);
     
     try {
@@ -231,13 +200,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Attempt global sign out to clear any existing sessions
       try {
         await supabase.auth.signOut({ scope: 'global' });
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Global sign out completed');
-        }
+        console.log('Global sign out completed');
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Global sign out failed (continuing anyway):', err);
-        }
+        console.log('Global sign out failed (continuing anyway):', err);
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -252,9 +217,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user && data.session) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Login successful, user:', data.user.email);
-        }
+        console.log('Login successful, user:', data.user.email);
         // Don't manually load user profile here - let onAuthStateChange handle it
         return true;
       }
@@ -269,9 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Logout initiated');
-    }
+    console.log('Logout initiated');
     try {
       // Clean up auth state first
       cleanupAuthState();
