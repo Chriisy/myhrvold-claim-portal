@@ -6,60 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Plus, Eye } from 'lucide-react';
+import { Search, Filter, Plus, Eye, FileX } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Mock claims data
-const mockClaims = [
-  {
-    id: 'RK-2024-001',
-    customer: 'TM Service Oslo',
-    status: 'Ny',
-    category: 'ServiceJobb',
-    supplier: 'Comenda',
-    machine: 'Comenda FC45',
-    technician: 'Erik Moe',
-    salesperson: 'Mylnvold AS',
-    created: '2024-12-18',
-    amount: 12500
-  },
-  {
-    id: 'RK-2024-002',
-    customer: 'Myhrvold AS',
-    status: 'Avventer',
-    category: 'Produkt',
-    supplier: 'Westfold Telemark',
-    machine: 'PF45 Circle K',
-    technician: 'Thor Hammerfest',
-    salesperson: 'Mylnvold AS',
-    created: '2024-12-17',
-    amount: 8900
-  },
-  {
-    id: 'RK-2024-003',
-    customer: 'Comenda Norge AS',
-    status: 'Godkjent',
-    category: 'Del',
-    supplier: 'Comenda',
-    machine: 'FC45 Thon Hammerfest',
-    technician: 'Trond Erik Moe',
-    salesperson: 'Mylnvold AS',
-    created: '2024-12-16',
-    amount: 15600
-  },
-  {
-    id: 'RK-2024-004',
-    customer: 'TechAS',
-    status: 'Avslått',
-    category: 'Installasjon',
-    supplier: 'Pemal Miljøteknikk AS',
-    machine: 'PF45 Circle K Haukids',
-    technician: 'Bamesen Cooltech AS',
-    salesperson: 'Mylnvold AS',
-    created: '2024-12-15',
-    amount: 22100
-  }
-];
+import { useClaimsQuery } from '@/hooks/useClaimsQuery';
 
 const statusOptions = ['Alle', 'Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
 const categoryOptions = ['Alle', 'ServiceJobb', 'Installasjon', 'Montasje', 'Produkt', 'Del'];
@@ -80,16 +29,18 @@ const ClaimsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Alle');
   const [categoryFilter, setCategoryFilter] = useState('Alle');
+  
+  const { data: claims, isLoading, error } = useClaimsQuery();
 
-  const filteredClaims = mockClaims.filter(claim => {
-    const matchesSearch = claim.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredClaims = claims?.filter(claim => {
+    const matchesSearch = claim.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          claim.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         claim.machine.toLowerCase().includes(searchTerm.toLowerCase());
+                         claim.machine_model?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'Alle' || claim.status === statusFilter;
     const matchesCategory = categoryFilter === 'Alle' || claim.category === categoryFilter;
     
     return matchesSearch && matchesStatus && matchesCategory;
-  });
+  }) || [];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -156,57 +107,116 @@ const ClaimsList = () => {
       <Card>
         <CardHeader>
           <CardTitle>Reklamasjoner ({filteredClaims.length})</CardTitle>
-          <CardDescription>Klikk på en reklamasjon for å se detaljer</CardDescription>
+          <CardDescription>
+            {isLoading ? 'Laster reklamasjoner...' : 'Klikk på en reklamasjon for å se detaljer'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <div className="space-y-3">
-              {filteredClaims.map((claim) => (
-                <div key={claim.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                    <div>
-                      <p className="font-semibold text-myhrvold-primary">{claim.id}</p>
-                      <p className="text-sm text-gray-600">{claim.created}</p>
+          {isLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse border rounded-lg p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
                     </div>
-                    <div>
-                      <p className="font-medium">{claim.customer}</p>
-                      <p className="text-sm text-gray-600">{claim.machine}</p>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      <div className="h-3 bg-gray-200 rounded w-28"></div>
                     </div>
-                    <div>
-                      <Badge className={getStatusColor(claim.status)}>
-                        {claim.status}
-                      </Badge>
-                      <p className="text-sm text-gray-600 mt-1">{claim.category}</p>
+                    <div className="space-y-2">
+                      <div className="h-6 bg-gray-200 rounded w-16"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Leverandør</p>
-                      <p className="font-medium">{claim.supplier}</p>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-16"></div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Tekniker</p>
-                      <p className="font-medium">{claim.technician}</p>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-12"></div>
+                      <div className="h-4 bg-gray-200 rounded w-20"></div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-gray-600">Beløp</p>
-                        <p className="font-semibold">{claim.amount.toLocaleString('nb-NO')} kr</p>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-gray-200 rounded w-10"></div>
+                        <div className="h-4 bg-gray-200 rounded w-16"></div>
                       </div>
-                      <Link to={`/claim/${claim.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-2" />
-                          Se
-                        </Button>
-                      </Link>
+                      <div className="h-8 bg-gray-200 rounded w-16"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-          
-          {filteredClaims.length === 0 && (
+          ) : error ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">Ingen reklamasjoner funnet med gjeldende filtre.</p>
+              <FileX className="w-12 h-12 mx-auto mb-4 text-red-300" />
+              <p className="text-red-600">Feil ved lasting av reklamasjoner.</p>
+              <p className="text-sm text-gray-500 mt-2">Prøv å laste siden på nytt.</p>
+            </div>
+          ) : filteredClaims.length === 0 ? (
+            claims?.length === 0 ? (
+              <div className="text-center py-8">
+                <FileX className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-gray-500 mb-4">Ingen reklamasjoner er opprettet ennå.</p>
+                <Link to="/claim/new">
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Opprett første reklamasjon
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-gray-500">Ingen reklamasjoner funnet med gjeldende filtre.</p>
+                <p className="text-sm text-gray-400 mt-2">Prøv å endre søkekriteriene.</p>
+              </div>
+            )
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="space-y-3">
+                {filteredClaims.map((claim) => (
+                  <div key={claim.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
+                      <div>
+                        <p className="font-semibold text-myhrvold-primary">{claim.id}</p>
+                        <p className="text-sm text-gray-600">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">{claim.customer_name || 'Ukjent kunde'}</p>
+                        <p className="text-sm text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
+                      </div>
+                      <div>
+                        <Badge className={getStatusColor(claim.status)}>
+                          {claim.status}
+                        </Badge>
+                        <p className="text-sm text-gray-600 mt-1">{claim.category || 'Ingen kategori'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Leverandør</p>
+                        <p className="font-medium">{claim.suppliers?.name || 'Ingen leverandør'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Tekniker</p>
+                        <p className="font-medium">{claim.technician?.name || 'Ingen tekniker'}</p>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-600">Opprettet</p>
+                          <p className="font-semibold">{claim.created_by || 'Ukjent'}</p>
+                        </div>
+                        <Link to={`/claim/${claim.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Se
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

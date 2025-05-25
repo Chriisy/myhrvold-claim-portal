@@ -9,7 +9,31 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      accounts: {
+      account_codes: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          konto_nr: number
+          seller_flag: boolean | null
+          type: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          konto_nr: number
+          seller_flag?: boolean | null
+          type: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          konto_nr?: number
+          seller_flag?: boolean | null
+          type?: string
+        }
+        Relationships: []
+      }
+      accounts_deprecated: {
         Row: {
           comment: string | null
           created_at: string | null

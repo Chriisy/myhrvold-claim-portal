@@ -8,12 +8,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 
 export const EnhancedDashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
+  const { data: accountCodes } = useAccountCodes();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   // Load filters from localStorage on mount
@@ -90,6 +92,24 @@ export const EnhancedDashboardFilters = () => {
               {suppliers?.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Account Code Filter */}
+          <Select 
+            value={filters.konto_nr?.toString() || "all"} 
+            onValueChange={(value) => updateFilter('konto_nr', value === "all" ? undefined : parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Konto" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle kontoer</SelectItem>
+              {accountCodes?.map(account => (
+                <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
+                  {account.konto_nr} - {account.type}
                 </SelectItem>
               ))}
             </SelectContent>
