@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          konto_nr: number
+          seller_flag: boolean | null
+          type: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          konto_nr: number
+          seller_flag?: boolean | null
+          type: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          konto_nr?: number
+          seller_flag?: boolean | null
+          type?: string
+        }
+        Relationships: []
+      }
       claims: {
         Row: {
           category: Database["public"]["Enums"]["claim_category"] | null

@@ -8,12 +8,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useAccounts } from '@/hooks/useAccounts';
 import { format } from 'date-fns';
 import { useState } from 'react';
 
 export const DashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
+  const { data: accounts } = useAccounts();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
@@ -35,7 +37,7 @@ export const DashboardFilters = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Supplier Filter */}
           <Select 
             value={filters.supplier_id || "all"} 
@@ -49,6 +51,24 @@ export const DashboardFilters = () => {
               {suppliers?.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Account Filter */}
+          <Select 
+            value={filters.account_nr || "all"} 
+            onValueChange={(value) => updateFilter('account_nr', value === "all" ? undefined : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Konto" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle kontoer</SelectItem>
+              {accounts?.map(account => (
+                <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
+                  {account.konto_nr} - {account.type}
                 </SelectItem>
               ))}
             </SelectContent>

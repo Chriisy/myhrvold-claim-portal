@@ -3,13 +3,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/useDashboardData';
+import { useAccounts } from '@/hooks/useAccounts';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
+import { useMemo } from 'react';
 
 const CostByAccountChart = () => {
   const { filters } = useDashboardFilters();
-  const { data: accountData, isLoading } = useCostByAccount(filters);
+  const { data: accountData, isLoading: costLoading } = useCostByAccount(filters);
+  const { data: accounts, isLoading: accountsLoading } = useAccounts();
 
-  if (isLoading) {
+  const enrichedData = useMemo(() => {
+    if (!accountData || !accounts) return [];
+    
+    return accountData.map(item => {
+      const account = accounts.find(acc => acc.konto_nr === parseInt(item.account));
+      return {
+        ...item,
+        accountName: account?.type || `Konto ${item.account}`,
+        displayName: account ? `${item.account} - ${account.type}` : item.account
+      };
+    });
+  }, [accountData, accounts]);
+
+  if (costLoading || accountsLoading) {
     return (
       <Card className="card-hover">
         <CardHeader>
@@ -39,13 +55,22 @@ const CostByAccountChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={accountData}>
+          <BarChart data={enrichedData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="account" />
+            <XAxis 
+              dataKey="account"
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
             <YAxis />
             <Tooltip 
               formatter={(value) => [`${Number(value).toLocaleString('nb-NO')} kr`, 'Beløp']}
-              labelFormatter={(account) => `Konto ${account}`}
+              labelFormatter={(account) => {
+                const item = enrichedData.find(d => d.account === account);
+                return item?.displayName || `Konto ${account}`;
+              }}
             />
             <Bar dataKey="amount" fill="#223368" radius={[4, 4, 0, 0]} />
           </BarChart>

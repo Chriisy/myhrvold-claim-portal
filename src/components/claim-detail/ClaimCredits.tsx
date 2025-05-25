@@ -1,11 +1,13 @@
 
 import { useState } from 'react';
 import { useClaimCredits, useAddCreditNote } from '@/hooks/useClaimCredits';
+import { useAccounts } from '@/hooks/useAccounts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +20,7 @@ interface ClaimCreditsProps {
 
 export function ClaimCredits({ claimId }: ClaimCreditsProps) {
   const { data: credits, isLoading, error } = useClaimCredits(claimId);
+  const { data: accounts } = useAccounts();
   const addCredit = useAddCreditNote();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -74,6 +77,12 @@ export function ClaimCredits({ claimId }: ClaimCreditsProps) {
     }).format(amount);
   };
 
+  const getAccountDisplay = (kontoNr: number | null) => {
+    if (!kontoNr || !accounts) return '-';
+    const account = accounts.find(acc => acc.konto_nr === kontoNr);
+    return account ? `${kontoNr} - ${account.type}` : kontoNr.toString();
+  };
+
   if (isLoading) return <div>Laster kreditnotaer...</div>;
   if (error) return <div>Kunne ikke hente kreditnotaer</div>;
 
@@ -114,20 +123,26 @@ export function ClaimCredits({ claimId }: ClaimCreditsProps) {
                 />
               </div>
               <div>
+                <Label htmlFor="konto_nr">Konto</Label>
+                <Select onValueChange={(value) => setFormData({ ...formData, konto_nr: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg konto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts?.map((account) => (
+                      <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
+                        {account.konto_nr} - {account.type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label htmlFor="voucher_no">Bilagsnummer</Label>
                 <Input
                   id="voucher_no"
                   value={formData.voucher_no}
                   onChange={(e) => setFormData({ ...formData, voucher_no: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="konto_nr">Kontonummer</Label>
-                <Input
-                  id="konto_nr"
-                  type="number"
-                  value={formData.konto_nr}
-                  onChange={(e) => setFormData({ ...formData, konto_nr: e.target.value })}
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -152,8 +167,8 @@ export function ClaimCredits({ claimId }: ClaimCreditsProps) {
               <TableHead>Dato</TableHead>
               <TableHead>Beskrivelse</TableHead>
               <TableHead>Beløp</TableHead>
-              <TableHead>Bilagsnr</TableHead>
               <TableHead>Konto</TableHead>
+              <TableHead>Bilagsnr</TableHead>
               <TableHead>Handlinger</TableHead>
             </TableRow>
           </TableHeader>
@@ -163,8 +178,8 @@ export function ClaimCredits({ claimId }: ClaimCreditsProps) {
                 <TableCell>{new Date(credit.date).toLocaleDateString('nb-NO')}</TableCell>
                 <TableCell>{credit.description}</TableCell>
                 <TableCell>{formatCurrency(credit.amount)}</TableCell>
+                <TableCell>{getAccountDisplay(credit.konto_nr)}</TableCell>
                 <TableCell>{credit.voucher_no || '-'}</TableCell>
-                <TableCell>{credit.konto_nr || '-'}</TableCell>
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

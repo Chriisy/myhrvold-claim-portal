@@ -1,11 +1,13 @@
 
 import { useState } from 'react';
 import { useClaimCosts, useAddCostLine } from '@/hooks/useClaimCosts';
+import { useAccounts } from '@/hooks/useAccounts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +20,7 @@ interface ClaimCostsProps {
 
 export function ClaimCosts({ claimId }: ClaimCostsProps) {
   const { data: costs, isLoading, error } = useClaimCosts(claimId);
+  const { data: accounts } = useAccounts();
   const addCost = useAddCostLine();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -72,6 +75,12 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
     }).format(amount);
   };
 
+  const getAccountDisplay = (kontoNr: number | null) => {
+    if (!kontoNr || !accounts) return '-';
+    const account = accounts.find(acc => acc.konto_nr === kontoNr);
+    return account ? `${kontoNr} - ${account.type}` : kontoNr.toString();
+  };
+
   if (isLoading) return <div>Laster kostnader...</div>;
   if (error) return <div>Kunne ikke hente kostnader</div>;
 
@@ -112,13 +121,19 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="konto_nr">Kontonummer</Label>
-                <Input
-                  id="konto_nr"
-                  type="number"
-                  value={formData.konto_nr}
-                  onChange={(e) => setFormData({ ...formData, konto_nr: e.target.value })}
-                />
+                <Label htmlFor="konto_nr">Konto</Label>
+                <Select onValueChange={(value) => setFormData({ ...formData, konto_nr: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg konto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts?.map((account) => (
+                      <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
+                        {account.konto_nr} - {account.type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -152,7 +167,7 @@ export function ClaimCosts({ claimId }: ClaimCostsProps) {
                 <TableCell>{new Date(cost.date).toLocaleDateString('nb-NO')}</TableCell>
                 <TableCell>{cost.description}</TableCell>
                 <TableCell>{formatCurrency(cost.amount)}</TableCell>
-                <TableCell>{cost.konto_nr || '-'}</TableCell>
+                <TableCell>{getAccountDisplay(cost.konto_nr)}</TableCell>
                 <TableCell>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
