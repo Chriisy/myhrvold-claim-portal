@@ -67,7 +67,7 @@ Systemet viser forbedringspotensial innen...`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ai-generert-rapport.txt';
+    a.download = 'myhrvold-mentor-rapport.txt';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -77,7 +77,7 @@ Systemet viser forbedringspotensial innen...`;
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-myhrvold-primary" />
-          AI Rapport Generator
+          Myhrvold Mentor Rapport Generator
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -20,7 +20,7 @@ export function useAIAssistant() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hei! Jeg er din AI-assistent for Myhrvold reklamasjonssystem. Hvordan kan jeg hjelpe deg i dag?',
+      content: 'Hei! Jeg er Myhrvold Mentor, din intelligente assistent for reklamasjonssystemet. Hvordan kan jeg hjelpe deg i dag?',
       timestamp: new Date()
     }
   ]);
@@ -60,10 +60,10 @@ export function useAIAssistant() {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('AI Assistant error:', error);
+      console.error('Myhrvold Mentor error:', error);
       toast({
-        title: "AI-Assistent Feil",
-        description: "Kunne ikke få svar fra AI-assistenten. Prøv igjen.",
+        title: "Myhrvold Mentor Feil",
+        description: "Kunne ikke få svar fra Myhrvold Mentor. Prøv igjen.",
         variant: "destructive",
       });
     } finally {
@@ -74,7 +74,7 @@ export function useAIAssistant() {
   const clearMessages = () => {
     setMessages([{
       role: 'assistant',
-      content: 'Hei! Jeg er din AI-assistent for Myhrvold reklamasjonssystem. Hvordan kan jeg hjelpe deg i dag?',
+      content: 'Hei! Jeg er Myhrvold Mentor, din intelligente assistent for reklamasjonssystemet. Hvordan kan jeg hjelpe deg i dag?',
       timestamp: new Date()
     }]);
   };

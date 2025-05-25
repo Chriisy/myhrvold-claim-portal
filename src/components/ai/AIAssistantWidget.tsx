@@ -60,7 +60,7 @@ export const AIAssistantWidget = ({ context }: AIAssistantWidgetProps) => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
-                AI-Assistent
+                Myhrvold Mentor
               </CardTitle>
               <div className="flex gap-1">
                 <Button

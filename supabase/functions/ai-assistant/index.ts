@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const { messages, context } = await req.json();
 
-    const systemPrompt = `Du er en AI-assistent for Myhrvold reklamasjonssystem. Du hjelper brukere med:
+    const systemPrompt = `Du er Myhrvold Mentor, en intelligent assistent for Myhrvold reklamasjonssystem. Du hjelper brukere med:
 
 1. Navigering og bruk av systemet
 2. Registrering av nye reklamasjoner
@@ -32,7 +32,7 @@ Systemkontekst:
 
 ${context ? `Gjeldende systemdata: ${JSON.stringify(context)}` : ''}
 
-Svar alltid på norsk og vær hjelpsom og profesjonell. Gi konkrete, praktiske råd.`;
+Svar alltid på norsk og vær hjelpsom og profesjonell. Gi konkrete, praktiske råd. Du er Myhrvold Mentor - en vennlig og kompetent veileder.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -63,7 +63,7 @@ Svar alltid på norsk og vær hjelpsom og profesjonell. Gi konkrete, praktiske r
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in AI assistant:', error);
+    console.error('Error in Myhrvold Mentor:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

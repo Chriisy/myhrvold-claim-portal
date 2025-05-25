@@ -61,7 +61,7 @@ Svar kun med JSON format:
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="w-4 h-4 text-blue-600" />
-            <h3 className="font-medium text-blue-900">AI Forslag</h3>
+            <h3 className="font-medium text-blue-900">Myhrvold Mentor Forslag</h3>
           </div>
           <Button
             variant="ghost"
