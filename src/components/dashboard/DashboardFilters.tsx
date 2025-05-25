@@ -8,14 +8,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useSuppliers } from '@/hooks/useSuppliers';
-import { useAccounts } from '@/hooks/useAccounts';
+import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { format } from 'date-fns';
 import { useState } from 'react';
 
 export const DashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
-  const { data: accounts } = useAccounts();
+  const { data: accountCodes } = useAccountCodes();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
@@ -66,7 +66,7 @@ export const DashboardFilters = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle kontoer</SelectItem>
-              {accounts?.map(account => (
+              {accountCodes?.map(account => (
                 <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
                   {account.konto_nr} - {account.type}
                 </SelectItem>

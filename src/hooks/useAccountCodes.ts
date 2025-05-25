@@ -34,3 +34,5 @@ export const useAccountCodes = () => {
     refetchOnWindowFocus: false,
   });
 };
+
+export default useAccountCodes;

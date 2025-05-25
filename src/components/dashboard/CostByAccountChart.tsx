@@ -3,27 +3,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/useDashboardData';
-import { useAccounts } from '@/hooks/useAccounts';
+import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useMemo } from 'react';
 
 const CostByAccountChart = () => {
   const { filters } = useDashboardFilters();
   const { data: accountData, isLoading: costLoading } = useCostByAccount(filters);
-  const { data: accounts, isLoading: accountsLoading } = useAccounts();
+  const { data: accountCodes, isLoading: accountsLoading } = useAccountCodes();
 
   const enrichedData = useMemo(() => {
-    if (!accountData || !accounts) return [];
+    if (!accountData || !accountCodes) return [];
     
     return accountData.map(item => {
-      const account = accounts.find(acc => acc.konto_nr === item.account);
+      const account = accountCodes.find(acc => acc.konto_nr === item.account);
       return {
         ...item,
         accountName: account?.type || `Konto ${item.account}`,
         displayName: account ? `${item.account} - ${account.type}` : item.account.toString()
       };
     });
-  }, [accountData, accounts]);
+  }, [accountData, accountCodes]);
 
   if (costLoading || accountsLoading) {
     return (

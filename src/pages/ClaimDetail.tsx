@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -6,8 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ClaimTimeline } from '@/components/claim-detail/ClaimTimeline';
-import { ClaimCosts } from '@/components/claim-detail/ClaimCosts';
-import { ClaimCredits } from '@/components/claim-detail/ClaimCredits';
+import ClaimCosts from '@/components/claim-detail/ClaimCosts';
+import ClaimCredits from '@/components/claim-detail/ClaimCredits';
 import { EditableClaimOverview } from '@/components/claim-detail/EditableClaimOverview';
 import { useClaimQuery } from '@/hooks/useClaimsQuery';
 
