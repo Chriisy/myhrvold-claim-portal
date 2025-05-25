@@ -14,6 +14,7 @@ import { Database } from '@/integrations/supabase/types';
 
 type ClaimCategory = Database['public']['Enums']['claim_category'];
 type ClaimStatus = Database['public']['Enums']['claim_status'];
+type Department = Database['public']['Enums']['department'];
 
 interface ClaimData {
   id: string;
@@ -76,7 +77,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setIsEditing(false);
   };
 
-  // Oppdaterte kategoriopsjoner med de nye norske verdiene
+  // Kategoriopsjoner
   const categoryOptions = [
     { value: 'Service', label: 'Service' },
     { value: 'Installasjon', label: 'Installasjon' },
@@ -91,6 +92,16 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     { value: 'Avslått', label: 'Avslått' },
     { value: 'Bokført', label: 'Bokført' },
     { value: 'Lukket', label: 'Lukket' },
+  ];
+
+  // Avdelingsopsjoner
+  const departmentOptions = [
+    { value: 'oslo', label: 'Oslo' },
+    { value: 'bergen', label: 'Bergen' },
+    { value: 'trondheim', label: 'Trondheim' },
+    { value: 'kristiansand', label: 'Kristiansand' },
+    { value: 'sornorge', label: 'Sør-Norge' },
+    { value: 'nord', label: 'Nord' },
   ];
 
   return (
@@ -128,7 +139,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 </div>
                 <div><span className="font-medium">Kunde:</span> {claim.customer_name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kundenummer:</span> {claim.customer_no || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Avdeling:</span> {claim.department || 'Ikke angitt'}</div>
+                <div><span className="font-medium">Avdeling:</span> {
+                  departmentOptions.find(dept => dept.value === claim.department)?.label || claim.department || 'Ikke angitt'
+                }</div>
                 <div><span className="font-medium">Maskin:</span> {claim.machine_model || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Serienummer:</span> {claim.machine_serial || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Leverandør:</span> {claim.suppliers?.name || 'Ikke angitt'}</div>
@@ -186,11 +199,21 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               </div>
               <div>
                 <Label htmlFor="department">Avdeling</Label>
-                <Input
-                  id="department"
-                  value={formData.department || ''}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                />
+                <Select 
+                  value={formData.department || ''} 
+                  onValueChange={(value) => setFormData({ ...formData, department: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg avdeling" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departmentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="machine_model">Maskin</Label>
