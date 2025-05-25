@@ -9,7 +9,9 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, session, isLoading } = useAuth();
 
-  console.log('ProtectedRoute: user:', !!user, 'session:', !!session, 'isLoading:', isLoading);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ProtectedRoute: user:', !!user, 'session:', !!session, 'isLoading:', isLoading);
+  }
 
   if (isLoading) {
     return (
@@ -27,7 +29,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Require both user and session for full authentication
   if (!user || !session) {
-    console.log('ProtectedRoute: Redirecting to login - user or session missing');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('ProtectedRoute: Redirecting to login - user or session missing');
+    }
     return <Navigate to="/login" replace />;
   }
 

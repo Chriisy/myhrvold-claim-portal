@@ -62,10 +62,10 @@ export const useClaimQuery = (claimId: string) => {
         if (isUUID) {
           query = query.eq('id', claimId);
         } else {
-          // For non-UUID identifiers, we'll need to add a claim_number field
-          // For now, fallback to the existing UUID
-          const fallbackId = 'a1468dd3-f579-4bdc-9fd4-4e1119c8d840';
-          query = query.eq('id', fallbackId);
+          // For non-UUID identifiers, we need a proper lookup mechanism
+          // This should be enhanced when claim_number field is added
+          console.warn('Non-UUID claim identifier provided:', claimId);
+          return null;
         }
 
         const { data, error } = await query.maybeSingle();

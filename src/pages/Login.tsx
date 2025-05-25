@@ -20,7 +20,9 @@ const Login = () => {
 
   // If user is authenticated and has a valid session, redirect
   if (user && session) {
-    console.log('User authenticated, redirecting to dashboard');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('User authenticated, redirecting to dashboard');
+    }
     return <Navigate to="/" replace />;
   }
 
@@ -53,7 +55,9 @@ const Login = () => {
           });
         }
       } else {
-        console.log('Attempting login...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Attempting login...');
+        }
         const success = await login(email, password);
         
         if (!success) {
@@ -64,7 +68,9 @@ const Login = () => {
             variant: 'destructive',
           });
         } else {
-          console.log('Login successful, user should be redirected');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Login successful, user should be redirected');
+          }
           // Force page reload to ensure clean state
           setTimeout(() => {
             window.location.href = '/';

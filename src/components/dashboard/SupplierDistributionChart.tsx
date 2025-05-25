@@ -5,11 +5,20 @@ import { TrendingUp } from 'lucide-react';
 import { useSupplierDistribution } from '@/hooks/api/dashboard/useSupplierDistribution';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { memo } from 'react';
 
 const SupplierDistributionChart = memo(() => {
   const { filters } = useDashboardFilters();
-  const { data: supplierData, isLoading } = useSupplierDistribution(filters);
+  const { data: supplierData, isLoading, isError, error } = useSupplierDistribution(filters);
+
+  if (isError) {
+    return (
+      <ErrorBoundary title="Feil ved lasting av leverandørfordeling">
+        <div>En feil oppstod ved lasting av data</div>
+      </ErrorBoundary>
+    );
+  }
 
   if (isLoading) {
     return (

@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
@@ -40,28 +41,30 @@ export const useRecentClaims = (filters: DashboardFilters) => {
 
       if (error) throw error;
 
-      // Get cost totals for each claim
+      // Get cost totals for each claim in batches to optimize queries
       const claimIds = claims?.map(claim => claim.id) || [];
       
       if (claimIds.length === 0) return [];
 
-      const { data: costLines } = await supabase
-        .from('cost_line')
-        .select('claim_id, amount')
-        .in('claim_id', claimIds);
+      // Batch query for all cost lines and credit notes
+      const [costResult, creditResult] = await Promise.all([
+        supabase
+          .from('cost_line')
+          .select('claim_id, amount')
+          .in('claim_id', claimIds),
+        supabase
+          .from('credit_note')
+          .select('claim_id, amount')
+          .in('claim_id', claimIds)
+      ]);
 
-      const { data: creditNotes } = await supabase
-        .from('credit_note')
-        .select('claim_id, amount')
-        .in('claim_id', claimIds);
-
-      // Calculate totals
-      const costTotals = costLines?.reduce((acc, line) => {
+      // Calculate totals efficiently
+      const costTotals = costResult.data?.reduce((acc, line) => {
         acc[line.claim_id] = (acc[line.claim_id] || 0) + Number(line.amount);
         return acc;
       }, {} as Record<string, number>) || {};
 
-      const creditTotals = creditNotes?.reduce((acc, note) => {
+      const creditTotals = creditResult.data?.reduce((acc, note) => {
         acc[note.claim_id] = (acc[note.claim_id] || 0) + Number(note.amount);
         return acc;
       }, {} as Record<string, number>) || {};

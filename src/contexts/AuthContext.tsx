@@ -36,11 +36,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listeners');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('AuthProvider: Setting up auth state listeners');
+    }
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Auth state change:', event, session?.user?.email);
+      }
       
       // Update session state immediately
       setSession(session);
@@ -76,7 +80,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cleanupAuthState();
       }
       
-      console.log('Initial session check:', session?.user?.email);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Initial session check:', session?.user?.email);
+      }
       setSession(session);
       
       if (session?.user) {
@@ -100,29 +106,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
-      console.log('AuthProvider: Cleaning up auth subscription');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('AuthProvider: Cleaning up auth subscription');
+      }
       subscription.unsubscribe();
     };
   }, []);
 
   const loadUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      console.log('Loading user profile for:', supabaseUser.email);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Loading user profile for:', supabaseUser.email);
+      }
       
-      // Try to get user from the users table
+      // Use .maybeSingle() instead of .single() to prevent errors when no user found
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', supabaseUser.email)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading user profile:', error);
       }
 
       // If user exists in users table, use that data
       if (userData) {
-        console.log('User profile loaded from database:', userData);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User profile loaded from database:', userData);
+        }
         setUser({
           id: userData.id,
           name: userData.name,
@@ -131,7 +143,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           seller_no: userData.seller_no,
         });
       } else {
-        console.log('User not found in database, creating fallback user');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User not found in database, creating fallback user');
+        }
         // Create a default user profile if not found
         const mockUser: User = {
           id: supabaseUser.id,
@@ -155,7 +169,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    console.log('Login attempt for:', email);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login attempt for:', email);
+    }
     setIsLoading(true);
     
     try {
@@ -165,9 +181,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Attempt global sign out to clear any existing sessions
       try {
         await supabase.auth.signOut({ scope: 'global' });
-        console.log('Global sign out completed');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Global sign out completed');
+        }
       } catch (err) {
-        console.log('Global sign out failed (continuing anyway):', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Global sign out failed (continuing anyway):', err);
+        }
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -182,7 +202,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user && data.session) {
-        console.log('Login successful, user:', data.user.email);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Login successful, user:', data.user.email);
+        }
         // Don't manually load user profile here - let onAuthStateChange handle it
         return true;
       }
@@ -197,7 +219,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    console.log('Logout initiated');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Logout initiated');
+    }
     try {
       // Clean up auth state first
       cleanupAuthState();
