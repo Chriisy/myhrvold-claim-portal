@@ -13,7 +13,7 @@ export interface AccountCode {
 
 export const useAccountCodes = () => {
   return useQuery({
-    queryKey: ['account_codes'],
+    queryKey: ['accounts.codes'],
     queryFn: async (): Promise<AccountCode[]> => {
       return withRetry(async () => {
         const { data, error } = await supabase
@@ -29,10 +29,11 @@ export const useAccountCodes = () => {
         return data || [];
       });
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes - account codes rarely change
+    staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false,
   });
 };
 
+// Default export for consistency
 export default useAccountCodes;
