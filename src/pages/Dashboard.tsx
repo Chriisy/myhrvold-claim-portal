@@ -5,18 +5,26 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
 import KpiCardsGrid from '@/components/dashboard/KpiCardsGrid';
+import AdditionalKpiCards from '@/components/dashboard/AdditionalKpiCards';
 import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards';
-import EnhancedDashboardFilters from '@/components/dashboard/EnhancedDashboardFilters';
+import { MobileOptimizedFilters } from '@/components/dashboard/MobileOptimizedFilters';
 import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
 import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
+import { InteractiveChartWrapper } from '@/components/dashboard/InteractiveChartWrapper';
+import { NotificationToasts } from '@/components/dashboard/NotificationToasts';
 import ErrorBoundary from '@/components/ui/error-boundary';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardContent = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <NotificationToasts />
+      
+      <div className={`flex items-center justify-between ${isMobile ? 'flex-col gap-4' : ''}`}>
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div>
@@ -37,33 +45,60 @@ const DashboardContent = () => {
         <QuickStatsCards />
       </ErrorBoundary>
 
-      {/* KPI Cards with Error Boundary */}
+      {/* Main KPI Cards */}
       <ErrorBoundary title="Feil ved lasting av nøkkeltall">
         <KpiCardsGrid />
       </ErrorBoundary>
 
-      {/* Enhanced Filters */}
-      <ErrorBoundary title="Feil ved lasting av filtre">
-        <EnhancedDashboardFilters />
+      {/* Additional KPI Cards */}
+      <ErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
+        <AdditionalKpiCards />
       </ErrorBoundary>
 
-      {/* Charts with Error Boundaries */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Mobile Optimized Filters */}
+      <ErrorBoundary title="Feil ved lasting av filtre">
+        <MobileOptimizedFilters />
+      </ErrorBoundary>
+
+      {/* Charts with Interactive Wrappers */}
+      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <ErrorBoundary title="Feil ved lasting av kostnadsdiagram">
-          <OptimizedStackedBarChart />
+          <InteractiveChartWrapper 
+            title="Kostnader per Konto"
+            description="Månedlig oversikt over kostnader fordelt på kontoer"
+          >
+            <OptimizedStackedBarChart />
+          </InteractiveChartWrapper>
         </ErrorBoundary>
+        
         <ErrorBoundary title="Feil ved lasting av leverandørfordeling">
-          <SupplierDistributionChart />
+          <InteractiveChartWrapper 
+            title="Leverandørfordeling"
+            description="Prosentvis fordeling av kostnader per leverandør"
+          >
+            <SupplierDistributionChart />
+          </InteractiveChartWrapper>
         </ErrorBoundary>
       </div>
 
-      {/* Root Cause Chart and Recent Claims with Error Boundaries */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Root Cause Chart and Recent Claims */}
+      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <ErrorBoundary title="Feil ved lasting av årsaksanalyse">
-          <OptimizedDonutChart />
+          <InteractiveChartWrapper 
+            title="Årsaksanalyse"
+            description="Fordeling av reklamasjoner etter rotårsak"
+          >
+            <OptimizedDonutChart />
+          </InteractiveChartWrapper>
         </ErrorBoundary>
+        
         <ErrorBoundary title="Feil ved lasting av siste reklamasjoner">
-          <EnhancedRecentClaimsTable />
+          <InteractiveChartWrapper 
+            title="Siste Reklamasjoner"
+            description="Oversikt over nyeste reklamasjoner"
+          >
+            <EnhancedRecentClaimsTable />
+          </InteractiveChartWrapper>
         </ErrorBoundary>
       </div>
     </div>
