@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,10 +72,13 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setIsEditing(false);
   };
 
+  // Fixed: Use actual database enum values, not Norwegian translations
   const statusOptions = [
     { value: 'Ny', label: 'Ny' },
-    { value: 'Under behandling', label: 'Under behandling' },
-    { value: 'Venter på deler', label: 'Venter på deler' },
+    { value: 'Avventer', label: 'Avventer' },
+    { value: 'Godkjent', label: 'Godkjent' },
+    { value: 'Avslått', label: 'Avslått' },
+    { value: 'Bokført', label: 'Bokført' },
     { value: 'Lukket', label: 'Lukket' },
   ];
 
