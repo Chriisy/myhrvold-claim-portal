@@ -4,20 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import EnhancedKPICards from '@/components/dashboard/EnhancedKPICards';
+import OptimizedKPICards from '@/components/dashboard/OptimizedKPICards';
 import EnhancedDashboardFilters from '@/components/dashboard/EnhancedDashboardFilters';
-import StackedBarChart from '@/components/dashboard/StackedBarChart';
-import DonutChart from '@/components/dashboard/DonutChart';
+import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
+import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
 import EnhancedRecentClaimsTable from '@/components/dashboard/EnhancedRecentClaimsTable';
-import { useStackedBarData, useRootCauseDistribution } from '@/hooks/useEnhancedDashboardData';
-import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 
 const DashboardContent = () => {
-  const { filters } = useDashboardFilters();
-  const { data: stackedBarData, isLoading: stackedBarLoading } = useStackedBarData(filters);
-  const { data: rootCauseData, isLoading: rootCauseLoading } = useRootCauseDistribution(filters);
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -36,31 +30,21 @@ const DashboardContent = () => {
         </Link>
       </div>
 
-      {/* Enhanced KPI Cards */}
-      <EnhancedKPICards />
+      {/* Optimized KPI Cards */}
+      <OptimizedKPICards />
 
       {/* Enhanced Filters */}
       <EnhancedDashboardFilters />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <StackedBarChart 
-          data={stackedBarData?.data || []}
-          isLoading={stackedBarLoading}
-          accountKeys={stackedBarData?.accountKeys || []}
-          accountColors={stackedBarData?.accountColors || {}}
-        />
+        <OptimizedStackedBarChart />
         <SupplierDistributionChart />
       </div>
 
       {/* Root Cause Chart and Recent Claims */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DonutChart
-          data={rootCauseData || []}
-          isLoading={rootCauseLoading}
-          title="Rotårsak Fordeling (Siste 6 måneder)"
-          description="Fordeling av rotårsaker for reklamasjoner"
-        />
+        <OptimizedDonutChart />
         <EnhancedRecentClaimsTable />
       </div>
     </div>
