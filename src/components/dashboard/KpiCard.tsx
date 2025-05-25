@@ -3,6 +3,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { memo } from 'react';
+import { TrendIndicator } from './TrendIndicator';
+
+interface TrendData {
+  percentage: number;
+  direction: 'up' | 'down' | 'stable';
+}
 
 interface KpiCardProps {
   title: string;
@@ -12,9 +18,21 @@ interface KpiCardProps {
   bgColor: string;
   link?: string;
   loading?: boolean;
+  trend?: TrendData;
+  isGoodTrend?: boolean;
 }
 
-const KpiCard = memo(({ title, value, icon: Icon, color, bgColor, link, loading }: KpiCardProps) => {
+const KpiCard = memo(({ 
+  title, 
+  value, 
+  icon: Icon, 
+  color, 
+  bgColor, 
+  link, 
+  loading, 
+  trend,
+  isGoodTrend = true
+}: KpiCardProps) => {
   if (loading) {
     return (
       <Card className="animate-pulse">
@@ -38,9 +56,18 @@ const KpiCard = memo(({ title, value, icon: Icon, color, bgColor, link, loading 
           <div className={`p-3 rounded-lg ${bgColor}`}>
             <Icon className={`w-6 h-6 ${color}`} />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-myhrvold-primary">{value}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-bold text-myhrvold-primary">{value}</p>
+              {trend && (
+                <TrendIndicator 
+                  percentage={trend.percentage} 
+                  direction={trend.direction}
+                  isGoodTrend={isGoodTrend}
+                />
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

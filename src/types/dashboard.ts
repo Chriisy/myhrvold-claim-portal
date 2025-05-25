@@ -1,4 +1,3 @@
-
 export interface DashboardFilters {
   supplier_id?: string;
   machine_model?: string;
@@ -10,6 +9,11 @@ export interface DashboardFilters {
   };
 }
 
+export interface TrendData {
+  percentage: number;
+  direction: 'up' | 'down' | 'stable';
+}
+
 export interface KpiData {
   newClaims: number;
   openClaims: number;
@@ -17,6 +21,14 @@ export interface KpiData {
   closedThisMonth: number;
   totalWarrantyCost: number;
   avgLeadTime: number;
+  trends: {
+    newClaims: TrendData;
+    openClaims: TrendData;
+    overdueClaims: TrendData;
+    closedThisMonth: TrendData;
+    totalWarrantyCost: TrendData;
+    avgLeadTime: TrendData;
+  };
 }
 
 export interface DonutChartData {

@@ -19,6 +19,8 @@ const KpiCardsGrid = memo(() => {
         bgColor="bg-yellow-100"
         link="/claims?status=Ny"
         loading={isLoading}
+        trend={kpiData?.trends?.newClaims}
+        isGoodTrend={false} // Lower is better for new claims
       />
       
       <KpiCard
@@ -29,6 +31,8 @@ const KpiCardsGrid = memo(() => {
         bgColor="bg-blue-100"
         link="/claims?status=Avventer,Godkjent"
         loading={isLoading}
+        trend={kpiData?.trends?.openClaims}
+        isGoodTrend={false} // Lower is better for open claims
       />
       
       <KpiCard
@@ -39,6 +43,8 @@ const KpiCardsGrid = memo(() => {
         bgColor="bg-red-100"
         link="/claims?overdue=true"
         loading={isLoading}
+        trend={kpiData?.trends?.overdueClaims}
+        isGoodTrend={false} // Lower is better for overdue claims
       />
       
       <KpiCard
@@ -48,6 +54,8 @@ const KpiCardsGrid = memo(() => {
         color="text-green-600"
         bgColor="bg-green-100"
         loading={isLoading}
+        trend={kpiData?.trends?.closedThisMonth}
+        isGoodTrend={true} // Higher is better for closed claims
       />
       
       <KpiCard
@@ -57,6 +65,8 @@ const KpiCardsGrid = memo(() => {
         color="text-purple-600"
         bgColor="bg-purple-100"
         loading={isLoading}
+        trend={kpiData?.trends?.totalWarrantyCost}
+        isGoodTrend={false} // Lower is better for warranty costs
       />
       
       <KpiCard
@@ -66,6 +76,8 @@ const KpiCardsGrid = memo(() => {
         color="text-indigo-600"
         bgColor="bg-indigo-100"
         loading={isLoading}
+        trend={kpiData?.trends?.avgLeadTime}
+        isGoodTrend={false} // Lower is better for lead time
       />
     </div>
   );
