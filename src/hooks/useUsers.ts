@@ -46,14 +46,20 @@ export const useUpdateUserRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, role, department }: { 
+    mutationFn: async ({ userId, role, department, sellerNo }: { 
       userId: string; 
       role: UserRole; 
       department: Department;
+      sellerNo?: number;
     }) => {
+      const updateData: any = { user_role: role, department };
+      if (sellerNo !== undefined) {
+        updateData.seller_no = sellerNo;
+      }
+
       const { data, error } = await supabase
         .from('users')
-        .update({ user_role: role, department })
+        .update(updateData)
         .eq('id', userId)
         .select()
         .single();
