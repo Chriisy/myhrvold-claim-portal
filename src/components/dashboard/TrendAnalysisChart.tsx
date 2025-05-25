@@ -22,7 +22,7 @@ interface ClaimData {
 
 interface CostData {
   date: string;
-  amount: string;
+  amount: number; // Changed from string to number to match actual data
   claims: {
     warranty: boolean;
   };
@@ -36,7 +36,6 @@ export const TrendAnalysisChart = () => {
       const startDate = subDays(endDate, 30);
 
       try {
-        // Fetch both data sets concurrently with proper error handling
         const [claimsResult, costsResult] = await Promise.all([
           supabase
             .from('claims')
@@ -52,7 +51,6 @@ export const TrendAnalysisChart = () => {
             .lte('date', format(endDate, 'yyyy-MM-dd'))
         ]);
 
-        // Handle potential errors
         if (claimsResult.error) {
           console.error('Error fetching claims for trend analysis:', claimsResult.error);
           throw new Error(`Claims fetch failed: ${claimsResult.error.message}`);
@@ -60,22 +58,18 @@ export const TrendAnalysisChart = () => {
 
         if (costsResult.error) {
           console.error('Error fetching costs for trend analysis:', costsResult.error);
-          // Don't throw for costs as it's less critical - just log and continue
         }
 
         const claims = claimsResult.data as ClaimData[] || [];
         const costs = costsResult.data as CostData[] || [];
 
-        // Initialize date groups with type safety
         const dateGroups: Record<string, { claims: number; costs: number; warranty: number }> = {};
 
-        // Pre-populate all dates to ensure consistency
         for (let i = 0; i <= 30; i++) {
           const date = format(subDays(endDate, i), 'yyyy-MM-dd');
           dateGroups[date] = { claims: 0, costs: 0, warranty: 0 };
         }
 
-        // Process claims data with null safety
         claims.forEach(claim => {
           if (!claim.created_at) return;
           
@@ -92,20 +86,18 @@ export const TrendAnalysisChart = () => {
           }
         });
 
-        // Process cost data with null safety and validation
         costs.forEach(cost => {
           if (!cost.date || !cost.amount) return;
           
           const date = cost.date;
           if (dateGroups[date]) {
-            const amount = parseFloat(cost.amount);
+            const amount = typeof cost.amount === 'number' ? cost.amount : parseFloat(String(cost.amount));
             if (!isNaN(amount)) {
               dateGroups[date].costs += amount;
             }
           }
         });
 
-        // Convert to sorted array with proper formatting
         return Object.entries(dateGroups)
           .map(([date, data]) => {
             try {
@@ -118,7 +110,7 @@ export const TrendAnalysisChart = () => {
             } catch (dateError) {
               console.warn('Error formatting date:', date);
               return {
-                date: date.slice(-5), // fallback to last 5 chars
+                date: date.slice(-5),
                 claims: data.claims,
                 costs: Math.round(data.costs),
                 warranty: data.warranty
@@ -126,28 +118,26 @@ export const TrendAnalysisChart = () => {
             }
           })
           .sort((a, b) => {
-            // Sort by date safely
             try {
               const dateA = new Date(a.date.split('/').reverse().join('-'));
               const dateB = new Date(b.date.split('/').reverse().join('-'));
               return dateA.getTime() - dateB.getTime();
             } catch {
-              return 0; // fallback if date parsing fails
+              return 0;
             }
           })
-          .slice(-14); // Show last 14 days
+          .slice(-14);
       } catch (error) {
         console.error('Error in trend analysis query:', error);
         throw error;
       }
     },
-    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
-    staleTime: 2 * 60 * 1000, // Consider stale after 2 minutes
+    refetchInterval: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 
-  // Memoize calculations to prevent unnecessary re-renders
   const summary = useMemo(() => {
     if (!trendData || trendData.length === 0) {
       return {

@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, FileX, Search, Plus } from 'lucide-react';
@@ -10,7 +9,7 @@ interface ClaimData {
   machine_model?: string;
   part_number?: string;
   status?: string;
-  category?: string;
+  category?: string | null; // Allow null to match ClaimWithRelations
   created_at: string;
   created_by?: string;
   suppliers?: { name: string } | null;
