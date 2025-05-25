@@ -58,8 +58,8 @@ export const DashboardFilters = () => {
 
           {/* Account Filter */}
           <Select 
-            value={filters.account_nr || "all"} 
-            onValueChange={(value) => updateFilter('account_nr', value === "all" ? undefined : value)}
+            value={filters.konto_nr?.toString() || "all"} 
+            onValueChange={(value) => updateFilter('konto_nr', value === "all" ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Konto" />
