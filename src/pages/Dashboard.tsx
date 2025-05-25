@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import KpiCards from '@/components/dashboard/KpiCards';
+import KpiCardsGrid from '@/components/dashboard/KpiCardsGrid';
 import EnhancedDashboardFilters from '@/components/dashboard/EnhancedDashboardFilters';
 import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
@@ -33,7 +33,7 @@ const DashboardContent = () => {
 
       {/* KPI Cards with Error Boundary */}
       <ErrorBoundary title="Feil ved lasting av nøkkeltall">
-        <KpiCards />
+        <KpiCardsGrid />
       </ErrorBoundary>
 
       {/* Enhanced Filters */}

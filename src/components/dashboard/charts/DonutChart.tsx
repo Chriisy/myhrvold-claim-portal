@@ -2,22 +2,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { PieChart as PieChartIcon } from 'lucide-react';
-
-interface DonutData {
-  name: string;
-  value: number;
-  color: string;
-}
+import { DonutChartData } from '@/types/dashboard';
+import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
+import { memo } from 'react';
 
 interface DonutChartProps {
-  data: DonutData[];
-  isLoading: boolean;
+  data: DonutChartData[];
   title: string;
   description: string;
 }
 
-const DonutChart = ({ data, isLoading, title, description }: DonutChartProps) => {
-  if (isLoading) {
+const DonutChart = memo(({ data, title, description }: DonutChartProps) => {
+  if (!data?.length) {
     return (
       <Card className="card-hover">
         <CardHeader>
@@ -29,7 +25,7 @@ const DonutChart = ({ data, isLoading, title, description }: DonutChartProps) =>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-pulse text-gray-400">Laster data...</div>
+            <div className="text-gray-400">Ingen data tilgjengelig</div>
           </div>
         </CardContent>
       </Card>
@@ -46,15 +42,18 @@ const DonutChart = ({ data, isLoading, title, description }: DonutChartProps) =>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer 
+          width={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.WIDTH} 
+          height={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.HEIGHT}
+        >
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={100}
-              paddingAngle={5}
+              innerRadius={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.DONUT_INNER_RADIUS}
+              outerRadius={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.DONUT_OUTER_RADIUS}
+              paddingAngle={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.PADDING_ANGLE}
               dataKey="value"
               aria-label={title}
             >
@@ -69,6 +68,8 @@ const DonutChart = ({ data, isLoading, title, description }: DonutChartProps) =>
       </CardContent>
     </Card>
   );
-};
+});
+
+DonutChart.displayName = 'DonutChart';
 
 export default DonutChart;

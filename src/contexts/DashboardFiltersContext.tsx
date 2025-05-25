@@ -1,17 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { subDays } from 'date-fns';
-
-interface DashboardFilters {
-  supplier_id?: string;
-  machine_model?: string;
-  konto_nr?: number;
-  technician_id?: string;
-  date_range: {
-    start: Date;
-    end: Date;
-  };
-}
+import { DashboardFilters } from '@/types/dashboard';
 
 interface DashboardFiltersContextType {
   filters: DashboardFilters;

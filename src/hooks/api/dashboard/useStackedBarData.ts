@@ -2,19 +2,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
-import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
-import { format, subMonths } from 'date-fns';
-
-interface DashboardFilters {
-  supplier_id?: string;
-  machine_model?: string;
-  konto_nr?: number;
-  technician_id?: string;
-  date_range: {
-    start: Date;
-    end: Date;
-  };
-}
+import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
+import { DashboardFilters } from '@/types/dashboard';
+import { format } from 'date-fns';
 
 export const useStackedBarData = (filters: DashboardFilters) => {
   return useQuery({

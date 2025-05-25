@@ -1,33 +1,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-
-interface StackedBarData {
-  month: string;
-  [key: string]: string | number;
-}
+import { StackedBarData } from '@/types/dashboard';
+import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
+import { memo } from 'react';
 
 interface StackedBarChartProps {
   data: StackedBarData[];
-  isLoading: boolean;
   accountKeys: string[];
   accountColors: Record<string, string>;
+  onBarClick?: (data: any, month: string) => void;
 }
 
-const StackedBarChart = ({ data, isLoading, accountKeys, accountColors }: StackedBarChartProps) => {
-  const navigate = useNavigate();
-
-  const handleBarClick = (data: any, month: string) => {
-    // Find the highest value account for this month
-    const maxAccount = accountKeys.reduce((max, key) => 
-      (data[key] || 0) > (data[max] || 0) ? key : max
-    );
-    navigate(`/claims?konto=${maxAccount}&month=${month}`);
-  };
-
-  if (isLoading) {
+const StackedBarChart = memo(({ data, accountKeys, accountColors, onBarClick }: StackedBarChartProps) => {
+  if (!data?.length) {
     return (
       <Card className="card-hover">
         <CardHeader>
@@ -39,7 +26,7 @@ const StackedBarChart = ({ data, isLoading, accountKeys, accountColors }: Stacke
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-pulse text-gray-400">Laster data...</div>
+            <div className="text-gray-400">Ingen data tilgjengelig</div>
           </div>
         </CardContent>
       </Card>
@@ -56,8 +43,16 @@ const StackedBarChart = ({ data, isLoading, accountKeys, accountColors }: Stacke
         <CardDescription>Månedlige kostnader fordelt på kontoer - klikk for å filtrere</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} onClick={(data) => data?.activeLabel && handleBarClick(data.activePayload?.[0]?.payload, data.activeLabel)}>
+        <ResponsiveContainer 
+          width={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.WIDTH} 
+          height={DASHBOARD_CONSTANTS.CHART_DIMENSIONS.HEIGHT}
+        >
+          <BarChart 
+            data={data} 
+            onClick={onBarClick ? (clickData) => 
+              clickData?.activeLabel && onBarClick(clickData.activePayload?.[0]?.payload, clickData.activeLabel)
+            : undefined}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
@@ -72,7 +67,7 @@ const StackedBarChart = ({ data, isLoading, accountKeys, accountColors }: Stacke
                 stackId="a" 
                 fill={accountColors[key]} 
                 radius={[0, 0, 0, 0]}
-                style={{ cursor: 'pointer' }}
+                style={onBarClick ? { cursor: 'pointer' } : undefined}
               />
             ))}
           </BarChart>
@@ -80,6 +75,8 @@ const StackedBarChart = ({ data, isLoading, accountKeys, accountColors }: Stacke
       </CardContent>
     </Card>
   );
-};
+});
+
+StackedBarChart.displayName = 'StackedBarChart';
 
 export default StackedBarChart;

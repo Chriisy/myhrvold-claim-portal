@@ -1,18 +1,7 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
-
-interface DashboardFilters {
-  supplier_id?: string;
-  machine_model?: string;
-  konto_nr?: number;
-  technician_id?: string;
-  date_range: {
-    start: Date;
-    end: Date;
-  };
-}
+import { DashboardFilters } from '@/types/dashboard';
 
 export const useRecentClaims = (filters: DashboardFilters) => {
   return useQuery({

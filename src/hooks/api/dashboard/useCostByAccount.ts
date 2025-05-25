@@ -1,21 +1,10 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { queryKeys } from '@/lib/queryKeys';
-import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
+import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
+import { DashboardFilters } from '@/types/dashboard';
 import { useMemo } from 'react';
-
-interface DashboardFilters {
-  supplier_id?: string;
-  machine_model?: string;
-  konto_nr?: number;
-  technician_id?: string;
-  date_range: {
-    start: Date;
-    end: Date;
-  };
-}
 
 export const useCostByAccount = (filters: DashboardFilters) => {
   const { data: accountCodes, isLoading: accountsLoading } = useAccountCodes();
