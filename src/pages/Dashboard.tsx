@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
 import KpiCardsGrid from '@/components/dashboard/KpiCardsGrid';
+import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards';
 import EnhancedDashboardFilters from '@/components/dashboard/EnhancedDashboardFilters';
 import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBarChart';
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
@@ -30,6 +31,11 @@ const DashboardContent = () => {
           </Button>
         </Link>
       </div>
+
+      {/* Quick Stats Cards */}
+      <ErrorBoundary title="Feil ved lasting av hurtigstatistikk">
+        <QuickStatsCards />
+      </ErrorBoundary>
 
       {/* KPI Cards with Error Boundary */}
       <ErrorBoundary title="Feil ved lasting av nøkkeltall">
