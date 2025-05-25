@@ -1,14 +1,14 @@
 
 import { TrendingUp, AlertTriangle, CheckCircle, Clock, DollarSign, Timer } from 'lucide-react';
-import { useDashboardKPIs, useEnhancedDashboardKPIs } from '@/hooks/useDashboardData';
-import { useEnhancedDashboardKPIs as useNewKPIs } from '@/hooks/useEnhancedDashboardData';
+import { useDashboardKPIs } from '@/hooks/useDashboardData';
+import { useEnhancedDashboardKPIs } from '@/hooks/useEnhancedDashboardData';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import KpiCard from './KpiCard';
 
 const EnhancedKPICards = () => {
   const { filters } = useDashboardFilters();
   const { data: kpis, isLoading: kpisLoading } = useDashboardKPIs(filters);
-  const { data: enhancedKpis, isLoading: enhancedLoading } = useNewKPIs(filters);
+  const { data: enhancedKpis, isLoading: enhancedLoading } = useEnhancedDashboardKPIs(filters);
 
   const isLoading = kpisLoading || enhancedLoading;
 

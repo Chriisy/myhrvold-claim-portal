@@ -30,7 +30,7 @@ const KpiCard = ({ title, value, icon: Icon, color, bgColor, link, loading }: Kp
     );
   }
 
-  const CardComponent = ({ children }: { children: React.ReactNode }) => (
+  const CardComponent = () => (
     <Card className={`card-hover ${link ? 'cursor-pointer' : ''}`}>
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
@@ -49,17 +49,7 @@ const KpiCard = ({ title, value, icon: Icon, color, bgColor, link, loading }: Kp
   if (link) {
     return (
       <Link to={link}>
-        <CardComponent>
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg ${bgColor}`}>
-              <Icon className={`w-6 h-6 ${color}`} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">{title}</p>
-              <p className="text-2xl font-bold text-myhrvold-primary">{value}</p>
-            </div>
-          </div>
-        </CardComponent>
+        <CardComponent />
       </Link>
     );
   }
