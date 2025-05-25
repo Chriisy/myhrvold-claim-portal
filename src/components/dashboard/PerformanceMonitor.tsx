@@ -7,7 +7,7 @@ import { useSystemHealth } from '@/hooks/useSystemHealth';
 import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
 
 export const PerformanceMonitor = () => {
-  const { metrics, isLoading, error, refresh } = useSystemHealth();
+  const { data: metrics, isLoading, error, refetch } = useSystemHealth();
   const [renderTime, setRenderTime] = useState(0);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export const PerformanceMonitor = () => {
       <ImprovedErrorBoundary
         title="Performance Monitor"
         description={`Feil ved lasting av systemmetrikker: ${error}`}
-        onReset={refresh}
+        onReset={() => refetch()}
       >
         <div>Error content is handled by the error boundary</div>
       </ImprovedErrorBoundary>
