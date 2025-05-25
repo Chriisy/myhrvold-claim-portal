@@ -22,9 +22,8 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { NewSupplierModal } from './NewSupplierModal';
 
 const categoryOptions = [
-  { value: 'ServiceJobb', label: 'Servicejobb' },
+  { value: 'Service', label: 'Service' },
   { value: 'Installasjon', label: 'Installasjon' },
-  { value: 'Montasje', label: 'Montasje' },
   { value: 'Produkt', label: 'Produkt' },
   { value: 'Del', label: 'Del' },
 ] as const;

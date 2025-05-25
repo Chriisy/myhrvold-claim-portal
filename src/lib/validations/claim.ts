@@ -12,7 +12,7 @@ export const claimFormSchema = z.object({
   quantity: z.number().positive().optional(),
   
   // Step 2: Category & Supplier
-  category: z.enum(['ServiceJobb', 'Installasjon', 'Montasje', 'Produkt', 'Del']).optional(),
+  category: z.enum(['Service', 'Installasjon', 'Produkt', 'Del']).optional(),
   supplier_id: z.string().uuid().optional(),
   
   // Step 3: Description & References

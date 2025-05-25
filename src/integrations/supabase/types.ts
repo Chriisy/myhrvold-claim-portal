@@ -428,12 +428,7 @@ export type Database = {
       }
     }
     Enums: {
-      claim_category:
-        | "ServiceJobb"
-        | "Installasjon"
-        | "Montasje"
-        | "Produkt"
-        | "Del"
+      claim_category: "Service" | "Installasjon" | "Produkt" | "Del"
       claim_status:
         | "Ny"
         | "Avventer"
@@ -562,13 +557,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      claim_category: [
-        "ServiceJobb",
-        "Installasjon",
-        "Montasje",
-        "Produkt",
-        "Del",
-      ],
+      claim_category: ["Service", "Installasjon", "Produkt", "Del"],
       claim_status: [
         "Ny",
         "Avventer",

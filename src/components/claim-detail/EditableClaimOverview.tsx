@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +76,14 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setIsEditing(false);
   };
 
-  // Fixed: Use actual database enum values, not Norwegian translations
+  // Oppdaterte kategoriopsjoner med de nye norske verdiene
+  const categoryOptions = [
+    { value: 'Service', label: 'Service' },
+    { value: 'Installasjon', label: 'Installasjon' },
+    { value: 'Produkt', label: 'Produkt' },
+    { value: 'Del', label: 'Del' },
+  ];
+
   const statusOptions = [
     { value: 'Ny', label: 'Ny' },
     { value: 'Avventer', label: 'Avventer' },
@@ -83,14 +91,6 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     { value: 'Avslått', label: 'Avslått' },
     { value: 'Bokført', label: 'Bokført' },
     { value: 'Lukket', label: 'Lukket' },
-  ];
-
-  const categoryOptions = [
-    { value: 'ServiceJobb', label: 'ServiceJobb' },
-    { value: 'Installasjon', label: 'Installasjon' },
-    { value: 'Montasje', label: 'Montasje' },
-    { value: 'Produkt', label: 'Produkt' },
-    { value: 'Del', label: 'Del' },
   ];
 
   return (

@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { useClaimsQuery } from '@/hooks/useClaimsQuery';
 
 const statusOptions = ['Alle', 'Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
-const categoryOptions = ['Alle', 'ServiceJobb', 'Installasjon', 'Montasje', 'Produkt', 'Del'];
+const categoryOptions = ['Alle', 'Service', 'Installasjon', 'Produkt', 'Del'];
 
 const getStatusColor = (status: string) => {
   switch (status) {

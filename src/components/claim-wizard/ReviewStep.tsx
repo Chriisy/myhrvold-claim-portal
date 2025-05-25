@@ -5,9 +5,8 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { Badge } from '@/components/ui/badge';
 
 const categoryLabels = {
-  'ServiceJobb': 'Servicejobb',
+  'Service': 'Service',
   'Installasjon': 'Installasjon',
-  'Montasje': 'Montasje',
   'Produkt': 'Produkt',
   'Del': 'Del',
 };
