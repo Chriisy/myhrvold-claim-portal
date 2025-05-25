@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, CheckCircle, Clock, TrendingUp, Wrench, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useKPIData } from '@/hooks/dashboard';
+import { useDashboardKPIs } from '@/hooks/api/dashboard/useDashboardKPIs';
 import { memo } from 'react';
 
 interface KpiCardProps {
@@ -64,7 +64,7 @@ KpiCard.displayName = 'KpiCard';
 
 const KpiCards = memo(() => {
   const { filters } = useDashboardFilters();
-  const { data: kpiData, isLoading } = useKPIData(filters);
+  const { data: kpiData, isLoading } = useDashboardKPIs(filters);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">

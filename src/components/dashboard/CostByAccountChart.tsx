@@ -2,30 +2,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart as BarChartIcon } from 'lucide-react';
-import { useCostByAccount } from '@/hooks/useDashboardData';
-import { useAccountCodes } from '@/hooks/useAccountCodes';
+import { useCostByAccount } from '@/hooks/api/dashboard/useCostByAccount';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { useMemo } from 'react';
 
 const CostByAccountChart = () => {
   const { filters } = useDashboardFilters();
-  const { data: accountData, isLoading: costLoading } = useCostByAccount(filters);
-  const { data: accountCodes, isLoading: accountsLoading } = useAccountCodes();
+  const { data: enrichedData, isLoading } = useCostByAccount(filters);
 
-  const enrichedData = useMemo(() => {
-    if (!accountData || !accountCodes) return [];
-    
-    return accountData.map(item => {
-      const account = accountCodes.find(acc => acc.konto_nr === item.account);
-      return {
-        ...item,
-        accountName: account?.type || `Konto ${item.account}`,
-        displayName: account ? `${item.account} - ${account.type}` : item.account.toString()
-      };
-    });
-  }, [accountData, accountCodes]);
-
-  if (costLoading || accountsLoading) {
+  if (isLoading) {
     return (
       <Card className="card-hover">
         <CardHeader>

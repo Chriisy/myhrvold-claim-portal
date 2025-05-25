@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { useSupplierDistribution } from '@/hooks/useDashboardData';
+import { useSupplierDistribution } from '@/hooks/api/dashboard/useSupplierDistribution';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 
 const SupplierDistributionChart = () => {

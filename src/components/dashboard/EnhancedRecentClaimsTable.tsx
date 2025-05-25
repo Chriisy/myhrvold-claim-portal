@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Eye, Download } from 'lucide-react';
-import { useRecentClaims } from '@/hooks/useDashboardData';
+import { useRecentClaims } from '@/hooks/api/dashboard/useRecentClaims';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { Link } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
