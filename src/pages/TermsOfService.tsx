@@ -191,7 +191,7 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-myhrvold-primary mb-4">11. Gjeldende lov og verneting</h2>
             <p className="text-gray-700 leading-relaxed">
               Disse vilkårene er underlagt norsk lov. Eventuelle tvister skal løses av norske domstoler, 
-              med [SETT INN VERNETING] som verneting.
+              med Oslo tingrett som verneting.
             </p>
           </section>
 
@@ -199,9 +199,10 @@ const TermsOfService = () => {
             <h2 className="text-xl font-semibold text-myhrvold-primary mb-4">12. Kontaktinformasjon</h2>
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="font-medium mb-2">Myhrvold AS</p>
+              <p>Organisasjonsnummer: 914 451 892</p>
               <p>E-post: support@myhrvold.no</p>
-              <p>Telefon: [SETT INN TELEFONNUMMER]</p>
-              <p>Adresse: [SETT INN ADRESSE]</p>
+              <p>Telefon: 22 70 10 00</p>
+              <p>Adresse: Frysjavegen 33, 0884 Oslo</p>
             </div>
           </section>
         </Card>

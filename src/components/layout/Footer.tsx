@@ -12,7 +12,7 @@ export const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <p className="text-sm text-gray-600">
-                © {new Date().getFullYear()} Myhrvold AS. Alle rettigheter reservert.
+                © {new Date().getFullYear()} Myhrvold AS (Org.nr. 914 451 892). Alle rettigheter reservert.
               </p>
             </div>
             

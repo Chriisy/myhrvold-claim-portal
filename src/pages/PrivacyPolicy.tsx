@@ -35,15 +35,15 @@ const PrivacyPolicy = () => {
             <h2 className="text-xl font-semibold text-myhrvold-primary mb-4">2. Databehandlingsansvarlig</h2>
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="font-medium">Myhrvold AS</p>
-              <p>Organisasjonsnummer: [SETT INN ORG.NR]</p>
-              <p>Adresse: [SETT INN ADRESSE]</p>
+              <p>Organisasjonsnummer: 914 451 892</p>
+              <p>Adresse: Frysjavegen 33, 0884 Oslo</p>
               <div className="flex items-center gap-2 mt-2">
                 <Mail className="h-4 w-4" />
                 <p>E-post: personvern@myhrvold.no</p>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <Phone className="h-4 w-4" />
-                <p>Telefon: [SETT INN TELEFONNUMMER]</p>
+                <p>Telefon: 22 70 10 00</p>
               </div>
             </div>
           </section>
@@ -214,8 +214,8 @@ const PrivacyPolicy = () => {
             </p>
             <div className="bg-gray-50 p-4 rounded-lg">
               <p><strong>E-post:</strong> personvern@myhrvold.no</p>
-              <p><strong>Telefon:</strong> [SETT INN TELEFONNUMMER]</p>
-              <p><strong>Post:</strong> Myhrvold AS, [ADRESSE]</p>
+              <p><strong>Telefon:</strong> 22 70 10 00</p>
+              <p><strong>Post:</strong> Myhrvold AS, Frysjavegen 33, 0884 Oslo</p>
             </div>
             <p className="text-gray-700 leading-relaxed mt-4">
               Du har også rett til å klage til Datatilsynet hvis du mener vi ikke overholder personvernregelverket.
