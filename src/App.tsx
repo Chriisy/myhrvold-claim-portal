@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ImprovedErrorBoundary } from "@/components/shared/ImprovedErrorBoundary";
 import { CookieBanner } from "@/components/privacy/CookieBanner";
+import { AIAssistantWidget } from "@/components/ai/AIAssistantWidget";
 import Dashboard from "./pages/Dashboard";
 import ClaimsList from "./pages/ClaimsList";
 import ClaimDetail from "./pages/ClaimDetail";
@@ -79,6 +81,13 @@ const App = () => (
                                 <Route path="/404" element={<NotFound />} />
                                 <Route path="*" element={<Navigate to="/404" replace />} />
                               </Routes>
+                              {/* AI Assistant Widget - visible on all authenticated pages */}
+                              <AIAssistantWidget 
+                                context={{
+                                  currentPage: window.location.pathname,
+                                  userRole: 'user'
+                                }}
+                              />
                             </main>
                           </div>
                         </SidebarProvider>
