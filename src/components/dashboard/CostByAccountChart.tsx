@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/api/dashboard/useCostByAccount';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
-import { DASHBOARD_CONSTANTS } from '@/constants/dashboard';
+import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
 import { memo } from 'react';
 
 const CostByAccountChart = memo(() => {
