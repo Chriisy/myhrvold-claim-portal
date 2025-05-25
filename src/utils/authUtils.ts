@@ -19,3 +19,8 @@ export const cleanupAuthState = () => {
     });
   }
 };
+
+export const dummyLogin = async () => {
+  // Dette er bare en hjelpefunksjon for testing
+  console.log('Dummy login funksjon');
+};

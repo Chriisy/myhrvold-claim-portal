@@ -11,6 +11,7 @@ export interface Supplier {
   contact_phone?: string;
   contact_email?: string;
   created_at?: string;
+  deleted_at?: string;
 }
 
 export const useSuppliers = () => {
@@ -116,7 +117,7 @@ export const useUpdateSupplier = () => {
   });
 };
 
-export const useDeleteSupplier = () => {
+export const useArchiveSupplier = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -127,24 +128,27 @@ export const useDeleteSupplier = () => {
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting supplier:', error);
+        console.error('Error archiving supplier:', error);
         throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toast({
-        title: 'Leverandør slettet',
-        description: 'Leverandøren har blitt fjernet.',
+        title: 'Leverandør arkivert',
+        description: 'Leverandøren har blitt arkivert.',
       });
     },
     onError: (error) => {
-      console.error('Error deleting supplier:', error);
+      console.error('Error archiving supplier:', error);
       toast({
         title: 'Feil',
-        description: 'Kunne ikke slette leverandør.',
+        description: 'Kunne ikke arkivere leverandør.',
         variant: 'destructive',
       });
     },
   });
 };
+
+// Alias for backward compatibility
+export const useDeleteSupplier = useArchiveSupplier;

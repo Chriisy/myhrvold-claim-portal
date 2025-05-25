@@ -11,12 +11,38 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pencil, Archive, Phone, Mail, User } from 'lucide-react';
-import { useSuppliers, useArchiveSupplier } from '@/hooks/useSuppliers';
-import { NewSupplierModal } from '@/components/claim-wizard/NewSupplierModal';
-import { ConfirmArchiveDialog } from '@/components/ConfirmArchiveDialog';
-import { Database } from '@/integrations/supabase/types';
+import { useSuppliers, useArchiveSupplier, type Supplier } from '@/hooks/useSuppliers';
+import { EditSupplierModal } from '@/components/suppliers/EditSupplierModal';
 
-type Supplier = Database['public']['Tables']['suppliers']['Row'];
+interface ConfirmArchiveDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  supplierName: string;
+}
+
+const ConfirmArchiveDialog = ({ open, onOpenChange, onConfirm, supplierName }: ConfirmArchiveDialogProps) => {
+  if (!open) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 className="text-lg font-semibold mb-4">Arkiver leverandør</h3>
+        <p className="text-gray-600 mb-6">
+          Er du sikker på at du vil arkivere leverandøren "{supplierName}"?
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Avbryt
+          </Button>
+          <Button variant="destructive" onClick={onConfirm}>
+            Arkiver
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const SuppliersTable = () => {
   const { data: suppliers, isLoading, error } = useSuppliers();
@@ -147,7 +173,7 @@ export const SuppliersTable = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {new Date(supplier.created_at).toLocaleDateString('nb-NO')}
+                    {supplier.created_at ? new Date(supplier.created_at).toLocaleDateString('nb-NO') : '-'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -177,11 +203,10 @@ export const SuppliersTable = () => {
         </CardContent>
       </Card>
 
-      <NewSupplierModal
+      <EditSupplierModal
+        supplier={selectedSupplier}
         open={editModalOpen}
         onOpenChange={handleEditModalClose}
-        supplier={selectedSupplier}
-        mode="edit"
       />
 
       <ConfirmArchiveDialog

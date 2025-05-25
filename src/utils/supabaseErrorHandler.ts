@@ -33,6 +33,9 @@ export function handleSupabaseError(error: PostgrestError | Error, operation: st
       case 'PGRST301':
         userMessage = 'Database forbindelse feilet';
         break;
+      case '42P17':
+        userMessage = 'Database konfigurasjonsfeil - kontakt administrator';
+        break;
       default:
         userMessage = error.message || userMessage;
     }

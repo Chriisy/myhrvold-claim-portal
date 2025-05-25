@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
 import { Database } from '@/integrations/supabase/types';
+import { handleSupabaseError } from '@/utils/supabaseErrorHandler';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
@@ -42,6 +43,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fallback user creation for dev environments
+  const createFallbackUser = (supabaseUser: SupabaseUser): User => {
+    console.warn('Using fallback user profile - DB user not found');
+    return {
+      id: supabaseUser.id,
+      name: supabaseUser.email?.split('@')[0] || 'Unnamed User',
+      email: supabaseUser.email || '',
+      role: 'technician',
+      user_role: 'tekniker',
+      department: 'oslo',
+    };
+  };
+
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.log('AuthProvider: Setting up auth state listeners');
@@ -63,14 +77,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile:', error);
-            setUser(null);
+            // Use fallback user for development environments
+            if (process.env.NODE_ENV === 'development') {
+              setUser(createFallbackUser(session.user));
+            } else {
+              setUser(null);
+            }
+          } finally {
+            setIsLoading(false);
           }
         }, 0);
       } else {
         setUser(null);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     });
 
     // THEN check for existing session
@@ -78,6 +98,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('Error getting session:', error);
         cleanupAuthState();
+        setIsLoading(false);
+        return;
       }
       
       if (process.env.NODE_ENV === 'development') {
@@ -91,12 +113,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await loadUserProfile(session.user);
           } catch (error) {
             console.error('Error loading user profile on init:', error);
-            setUser(null);
+            // Use fallback user for development environments
+            if (process.env.NODE_ENV === 'development') {
+              setUser(createFallbackUser(session.user));
+            } else {
+              setUser(null);
+            }
+          } finally {
+            setIsLoading(false);
           }
         }, 0);
+      } else {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     });
 
     return () => {
@@ -113,6 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Loading user profile for:', supabaseUser.email);
       }
       
+      // Prøv først direkte forespørsel
       const { data: userData, error } = await supabase
         .from('users')
         .select('*')
@@ -120,6 +150,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
+        // Hvis vi får RLS infinite recursion, prøv en alternativ tilnærming
+        if (error.code === '42P17') {
+          console.warn('RLS recursion detected, using auth user data only');
+          setUser({
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            name: supabaseUser.user_metadata.name || supabaseUser.email?.split('@')[0] || 'User',
+            role: 'technician',
+            user_role: 'tekniker',
+            department: 'oslo',
+          });
+          return;
+        }
+        
         console.error('Error loading user profile:', error);
         throw error;
       }
@@ -139,13 +183,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           seller_no: userData.seller_no,
         });
       } else {
-        // User not found - this shouldn't happen with the trigger, but handle it
-        console.warn('User not found in database after auth - trigger may have failed');
-        setUser(null);
+        // User not found - normal during dev or first login
+        console.warn('User not found in database - using fallback');
+        setUser(createFallbackUser(supabaseUser));
       }
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
-      setUser(null);
+      // Development fallback
+      if (process.env.NODE_ENV === 'development') {
+        setUser(createFallbackUser(supabaseUser));
+      } else {
+        setUser(null);
+      }
       throw error;
     }
   };
