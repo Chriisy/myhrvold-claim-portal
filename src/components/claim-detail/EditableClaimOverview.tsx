@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,13 +61,28 @@ const statusOptions = [
   { value: 'Lukket', label: 'Lukket' },
 ];
 
+// Helper function to validate and normalize status
+const getValidStatus = (status?: ClaimStatus | string): ClaimStatus => {
+  const validStatuses: ClaimStatus[] = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
+  
+  if (status && validStatuses.includes(status as ClaimStatus)) {
+    return status as ClaimStatus;
+  }
+  
+  console.log('Invalid status detected, defaulting to "Ny":', status);
+  return 'Ny';
+};
+
 export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  
+  // Normalize the status before setting it in state
+  const normalizedClaim = {
     ...claim,
-    // Ensure status has a valid default value
-    status: claim.status || 'Ny' as ClaimStatus
-  });
+    status: getValidStatus(claim.status)
+  };
+  
+  const [formData, setFormData] = useState(normalizedClaim);
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
 
@@ -93,7 +107,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       customer_po: formData.customer_po,
       reported_by: formData.reported_by,
       internal_note: formData.internal_note,
-      status: formData.status || 'Ny' as ClaimStatus, // Ensure we always have a valid status
+      status: getValidStatus(formData.status), // Always ensure valid status
       account_code_id: formData.account_code_id,
     };
     
@@ -103,12 +117,11 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   };
 
   const handleCancel = () => {
-    setFormData({
-      ...claim,
-      status: claim.status || 'Ny' as ClaimStatus
-    });
+    setFormData(normalizedClaim);
     setIsEditing(false);
   };
+
+  const displayStatus = getValidStatus(claim.status);
 
   return (
     <Card>
@@ -141,7 +154,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Status:</span> 
-                  <Badge className="bg-orange-100 text-orange-800">{claim.status || 'Ny'}</Badge>
+                  <Badge className="bg-orange-100 text-orange-800">{displayStatus}</Badge>
                 </div>
                 <div><span className="font-medium">Kunde:</span> {claim.customer_name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kundenummer:</span> {claim.customer_no || 'Ikke angitt'}</div>
@@ -253,7 +266,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select 
-                  value={formData.status || 'Ny'} 
+                  value={getValidStatus(formData.status)} 
                   onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
                 >
                   <SelectTrigger>
