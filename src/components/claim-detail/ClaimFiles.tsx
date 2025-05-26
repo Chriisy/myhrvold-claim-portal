@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useClaimFiles, useDeleteClaimFile, useUploadClaimFiles } from '@/hooks/useClaimFiles';
 import { useDropzone } from 'react-dropzone';
+import { ImageGallery } from './ImageGallery';
 import { 
   FileText, 
   Image, 
@@ -79,6 +80,10 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
     setSelectedImage(fileUrl);
   };
 
+  // Separate files into images and documents
+  const imageFiles = files?.filter(file => file.file_type.startsWith('image/')) || [];
+  const documentFiles = files?.filter(file => !file.file_type.startsWith('image/')) || [];
+
   if (isLoading) {
     return (
       <Card>
@@ -103,7 +108,7 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
             Vedlegg ({files?.length || 0})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           {/* Upload area */}
           <div
             {...getRootProps()}
@@ -136,10 +141,16 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
             </div>
           )}
 
-          {/* Files list */}
-          {files && files.length > 0 ? (
+          {/* Image Gallery */}
+          {imageFiles.length > 0 && (
+            <ImageGallery files={imageFiles} onDownload={handleDownload} />
+          )}
+
+          {/* Document files list */}
+          {documentFiles.length > 0 && (
             <div className="space-y-3">
-              {files.map((file) => (
+              <h3 className="text-lg font-semibold">Dokumenter ({documentFiles.length})</h3>
+              {documentFiles.map((file) => (
                 <div
                   key={file.id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -158,15 +169,6 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    {file.file_type.startsWith('image/') && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleImageView(file.file_url)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
                     <Button
                       variant="outline"
                       size="sm"
@@ -186,7 +188,53 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
                 </div>
               ))}
             </div>
-          ) : (
+          )}
+
+          {/* All image files list for reference */}
+          {imageFiles.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Bildefiler ({imageFiles.length})</h3>
+              {imageFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {getFileIcon(file.file_type)}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{file.file_name}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>{getFileSize(file.file_size)}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {file.file_type.split('/')[1]?.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(file)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(file.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(!files || files.length === 0) && (
             <div className="text-center p-8 text-gray-500">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>Ingen vedlegg lastet opp ennå</p>
@@ -196,7 +244,7 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
         </CardContent>
       </Card>
 
-      {/* Image preview dialog */}
+      {/* Legacy single image preview dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
