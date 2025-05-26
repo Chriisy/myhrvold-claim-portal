@@ -12,7 +12,7 @@ export const useCreateClaim = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: ClaimFormData) => {
+    mutationFn: async (data: ClaimFormData & { source?: string }) => {
       if (!user) {
         throw new Error('Du må være logget inn for å opprette reklamasjoner');
       }
@@ -36,7 +36,7 @@ export const useCreateClaim = () => {
         internal_note: data.internal_note || null,
         created_by: user.id,
         status: 'Ny' as const,
-        source: 'wizard'
+        source: data.source || 'wizard'
       };
 
       const { data: claim, error } = await supabase
@@ -52,13 +52,22 @@ export const useCreateClaim = () => {
 
       return claim;
     },
-    onSuccess: (claim) => {
+    onSuccess: (claim, variables) => {
+      const source = variables.source || 'wizard';
+      const title = source === 'ai_import' 
+        ? 'Reklamasjon opprettet fra AI-analyse'
+        : 'Reklamasjon opprettet';
+      
       toast({
-        title: 'Reklamasjon opprettet',
+        title,
         description: 'Reklamasjonen har blitt opprettet og kan nå behandles.',
       });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
-      navigate(`/claim/${claim.id}`);
+      
+      // Only navigate for manual wizard creation
+      if (source === 'wizard') {
+        navigate(`/claim/${claim.id}`);
+      }
     },
     onError: (error) => {
       console.error('Error creating claim:', error);

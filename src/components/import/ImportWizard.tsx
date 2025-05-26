@@ -1,14 +1,15 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Plus } from 'lucide-react';
 import { FileUploadStep } from './FileUploadStep';
 import { LineMappingStep } from './LineMappingStep';
 import { ConfirmImportStep } from './ConfirmImportStep';
 import { useUploadFile, useCreateInvoiceImport, useProcessImport } from '@/hooks/useInvoiceImport';
+import { useCreateClaim } from '@/hooks/useClaims';
 import { parseCSVFile } from '@/utils/csvParser';
+import { parseImageInvoice } from '@/utils/imageInvoiceParser';
 import { ParsedInvoiceLine, MappedInvoiceLine } from '@/types/invoice';
 import { toast } from '@/hooks/use-toast';
 
@@ -24,28 +25,40 @@ export const ImportWizard: React.FC = () => {
   const [mappedLines, setMappedLines] = useState<MappedInvoiceLine[]>([]);
   const [importId, setImportId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [detectedClaimData, setDetectedClaimData] = useState<any>(null);
 
   const uploadFile = useUploadFile();
   const createImport = useCreateInvoiceImport();
   const processImport = useProcessImport();
+  const createClaim = useCreateClaim();
 
   const handleFileSelect = async (file: File) => {
     setError(null);
     
     try {
-      // Parse the file
       let lines: ParsedInvoiceLine[];
+      let claimData: any = null;
       
-      if (file.name.endsWith('.csv')) {
+      if (file.name.toLowerCase().endsWith('.csv')) {
         lines = await parseCSVFile(file);
       } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        // For now, just show error for Excel files
         throw new Error('Excel-filer støttes ikke ennå. Bruk CSV-format.');
       } else if (file.name.endsWith('.pdf')) {
-        // For now, just show error for PDF files
         throw new Error('PDF-filer støttes ikke ennå. Bruk CSV-format.');
+      } else if (file.type.startsWith('image/')) {
+        const result = await parseImageInvoice(file);
+        lines = result.lines;
+        claimData = result.claimData;
+        
+        if (claimData) {
+          setDetectedClaimData(claimData);
+          toast({
+            title: 'AI-analyse fullført',
+            description: 'Fakturaen ble analysert og reklamasjonsdata ble funnet. Du kan nå opprette en ny reklamasjon automatisk.',
+          });
+        }
       } else {
-        throw new Error('Ukjent filformat. Støttede formater: CSV');
+        throw new Error('Ukjent filformat. Støttede formater: CSV, JPG, PNG');
       }
 
       if (lines.length === 0) {
@@ -75,6 +88,35 @@ export const ImportWizard: React.FC = () => {
     }
   };
 
+  const handleCreateNewClaim = async () => {
+    if (!detectedClaimData) return;
+    
+    try {
+      await createClaim.mutateAsync({
+        customer_name: detectedClaimData.customer_name,
+        description: detectedClaimData.description,
+        machine_model: detectedClaimData.machine_model,
+        part_number: detectedClaimData.part_number,
+        warranty: false,
+        category: 'Produkt',
+        source: 'ai_import'
+      });
+      
+      toast({
+        title: 'Reklamasjon opprettet',
+        description: 'En ny reklamasjon ble opprettet basert på fakturaanalysen.',
+      });
+      
+      setDetectedClaimData(null);
+    } catch (error: any) {
+      toast({
+        title: 'Feil',
+        description: `Kunne ikke opprette reklamasjon: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleMappingComplete = (mapped: MappedInvoiceLine[]) => {
     setMappedLines(mapped);
   };
@@ -94,6 +136,7 @@ export const ImportWizard: React.FC = () => {
       setMappedLines([]);
       setImportId(null);
       setError(null);
+      setDetectedClaimData(null);
       
     } catch (error: any) {
       setError(error.message);
@@ -142,6 +185,26 @@ export const ImportWizard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* AI-detected claim data notification */}
+      {detectedClaimData && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-blue-900">🤖 AI fant reklamasjonsdata</h4>
+                <p className="text-sm text-blue-700 mt-1">
+                  Kunde: {detectedClaimData.customer_name} | Beskrivelse: {detectedClaimData.description}
+                </p>
+              </div>
+              <Button onClick={handleCreateNewClaim} disabled={createClaim.isPending}>
+                <Plus className="w-4 h-4 mr-2" />
+                {createClaim.isPending ? 'Oppretter...' : 'Opprett reklamasjon'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Step content */}
       <Card>

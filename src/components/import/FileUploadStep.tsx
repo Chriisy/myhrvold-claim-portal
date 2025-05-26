@@ -30,6 +30,8 @@ export const FileUploadStep: React.FC<FileUploadStepProps> = ({
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/pdf': ['.pdf'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
     },
     multiple: false,
     disabled: isUploading,
@@ -40,7 +42,8 @@ export const FileUploadStep: React.FC<FileUploadStepProps> = ({
       <div>
         <h2 className="text-xl font-semibold mb-2">Last opp faktura</h2>
         <p className="text-gray-600">
-          Velg en CSV, Excel eller PDF-fil med fakturalinjer som skal importeres.
+          Velg en CSV, Excel, PDF eller bildefil (JPG/PNG) med fakturalinjer som skal importeres.
+          Bilder vil bli analysert automatisk for å trekke ut fakturainformasjon.
         </p>
       </div>
 
@@ -71,13 +74,16 @@ export const FileUploadStep: React.FC<FileUploadStepProps> = ({
               <div>
                 <p className="text-lg font-medium">
                   {isUploading
-                    ? 'Laster opp...'
+                    ? 'Analyserer fil...'
                     : isDragActive
                     ? 'Slipp filen her'
                     : 'Dra og slipp fil hit, eller klikk for å velge'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Støttede formater: CSV, XLS, XLSX, PDF
+                  Støttede formater: CSV, XLS, XLSX, PDF, JPG, PNG
+                </p>
+                <p className="text-xs text-blue-600 mt-2">
+                  💡 Bilder analyseres automatisk med AI for å trekke ut fakturadata
                 </p>
               </div>
 
