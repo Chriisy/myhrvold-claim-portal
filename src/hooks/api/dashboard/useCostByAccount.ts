@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAccountCodes } from '@/hooks/useAccountCodes';
@@ -12,6 +13,8 @@ export const useCostByAccount = (filters: DashboardFilters) => {
   const costQuery = useQuery({
     queryKey: queryKeys.dashboard.costByAccount(filters),
     queryFn: async () => {
+      console.log('useCostByAccount - Starting query with filters:', filters);
+      
       let query = supabase
         .from('cost_line')
         .select(`
@@ -39,9 +42,16 @@ export const useCostByAccount = (filters: DashboardFilters) => {
         query = query.ilike('claims.machine_model', `%${filters.machine_model}%`);
       }
 
+      console.log('useCostByAccount - Executing query...');
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('useCostByAccount - Query error:', error);
+        throw error;
+      }
+
+      console.log('useCostByAccount - Raw data from query:', data);
+      console.log('useCostByAccount - Number of cost lines:', data?.length);
 
       // Group by account number
       const accountTotals = data?.reduce((acc, line) => {
@@ -50,14 +60,19 @@ export const useCostByAccount = (filters: DashboardFilters) => {
         return acc;
       }, {} as Record<number, number>) || {};
 
+      console.log('useCostByAccount - Account totals:', accountTotals);
+
       // Convert to array and sort by amount (top accounts)
-      return Object.entries(accountTotals)
+      const result = Object.entries(accountTotals)
         .map(([account, amount]) => ({
           account: Number(account),
           amount
         }))
         .sort((a, b) => b.amount - a.amount)
         .slice(0, DASHBOARD_CONSTANTS.QUERY_LIMITS.TOP_ACCOUNTS);
+
+      console.log('useCostByAccount - Final result:', result);
+      return result;
     },
     staleTime: DASHBOARD_CONSTANTS.CACHE_TIMES.STALE_TIME,
     gcTime: DASHBOARD_CONSTANTS.CACHE_TIMES.GC_TIME,
@@ -65,9 +80,12 @@ export const useCostByAccount = (filters: DashboardFilters) => {
 
   // Enrich data with account information - memoized for performance
   const enrichedData = useMemo(() => {
-    if (!costQuery.data || !accountCodes) return [];
+    if (!costQuery.data || !accountCodes) {
+      console.log('useCostByAccount - No data or account codes available for enrichment');
+      return [];
+    }
     
-    return costQuery.data.map(item => {
+    const enriched = costQuery.data.map(item => {
       const account = accountCodes.find(acc => acc.konto_nr === item.account);
       return {
         ...item,
@@ -75,6 +93,9 @@ export const useCostByAccount = (filters: DashboardFilters) => {
         displayName: account ? `${item.account} - ${account.type}` : item.account.toString()
       };
     });
+    
+    console.log('useCostByAccount - Enriched data:', enriched);
+    return enriched;
   }, [costQuery.data, accountCodes]);
 
   return {

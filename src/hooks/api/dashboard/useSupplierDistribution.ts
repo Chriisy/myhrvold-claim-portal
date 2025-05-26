@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
@@ -18,6 +19,8 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
   return useQuery({
     queryKey: queryKeys.dashboard.supplierDistribution(filters),
     queryFn: async () => {
+      console.log('useSupplierDistribution - Starting query with filters:', filters);
+      
       let query = supabase
         .from('cost_line')
         .select(`
@@ -44,9 +47,16 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         query = query.ilike('claims.machine_model', `%${filters.machine_model}%`);
       }
 
+      console.log('useSupplierDistribution - Executing query...');
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('useSupplierDistribution - Query error:', error);
+        throw error;
+      }
+
+      console.log('useSupplierDistribution - Raw data from query:', data);
+      console.log('useSupplierDistribution - Number of cost lines:', data?.length);
 
       // Group by supplier
       const supplierTotals = data?.reduce((acc, line) => {
@@ -55,9 +65,17 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         return acc;
       }, {} as Record<string, number>) || {};
 
-      const total = Object.values(supplierTotals).reduce((sum, amount) => sum + amount, 0);
+      console.log('useSupplierDistribution - Supplier totals:', supplierTotals);
 
-      return Object.entries(supplierTotals)
+      const total = Object.values(supplierTotals).reduce((sum, amount) => sum + amount, 0);
+      console.log('useSupplierDistribution - Total amount:', total);
+
+      if (total === 0) {
+        console.log('useSupplierDistribution - No data found, returning empty array');
+        return [];
+      }
+
+      const result = Object.entries(supplierTotals)
         .map(([name, amount]) => ({
           name,
           value: Math.round((amount / total) * 100),
@@ -65,6 +83,9 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           color: getSupplierColor(name)
         }))
         .sort((a, b) => b.amount - a.amount);
+
+      console.log('useSupplierDistribution - Final result:', result);
+      return result;
     },
     staleTime: DASHBOARD_CONSTANTS.CACHE_TIMES.STALE_TIME,
     gcTime: DASHBOARD_CONSTANTS.CACHE_TIMES.GC_TIME,

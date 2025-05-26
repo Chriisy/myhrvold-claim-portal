@@ -12,10 +12,18 @@ const SupplierDistributionChart = memo(() => {
   const { filters } = useDashboardFilters();
   const { data: supplierData, isLoading, isError, error } = useSupplierDistribution(filters);
 
+  // Debug logging
+  console.log('SupplierDistribution - filters:', filters);
+  console.log('SupplierDistribution - data:', supplierData);
+  console.log('SupplierDistribution - isLoading:', isLoading);
+  console.log('SupplierDistribution - isError:', isError);
+  console.log('SupplierDistribution - error:', error);
+
   if (isError) {
+    console.error('SupplierDistribution error:', error);
     return (
       <ErrorBoundary title="Feil ved lasting av leverandørfordeling">
-        <div>En feil oppstod ved lasting av data</div>
+        <div>En feil oppstod ved lasting av data: {error?.message}</div>
       </ErrorBoundary>
     );
   }
@@ -33,6 +41,26 @@ const SupplierDistributionChart = memo(() => {
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
             <div className="animate-pulse text-gray-400">Laster data...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Check if we have data
+  if (!supplierData || supplierData.length === 0) {
+    return (
+      <Card className="card-hover">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-myhrvold-primary" />
+            Leverandørfordeling
+          </CardTitle>
+          <CardDescription>Andel reklamasjonskostnader per leverandør</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="text-gray-500">Ingen data tilgjengelig for valgt periode</div>
           </div>
         </CardContent>
       </Card>

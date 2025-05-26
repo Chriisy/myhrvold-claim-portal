@@ -12,10 +12,18 @@ const CostByAccountChart = memo(() => {
   const { filters } = useDashboardFilters();
   const { data: enrichedData, isLoading, isError, error } = useCostByAccount(filters);
 
+  // Debug logging
+  console.log('CostByAccount - filters:', filters);
+  console.log('CostByAccount - data:', enrichedData);
+  console.log('CostByAccount - isLoading:', isLoading);
+  console.log('CostByAccount - isError:', isError);
+  console.log('CostByAccount - error:', error);
+
   if (isError) {
+    console.error('CostByAccount error:', error);
     return (
       <ErrorBoundary title="Feil ved lasting av kostnader per konto">
-        <div>En feil oppstod ved lasting av data</div>
+        <div>En feil oppstod ved lasting av data: {error?.message}</div>
       </ErrorBoundary>
     );
   }
@@ -33,6 +41,26 @@ const CostByAccountChart = memo(() => {
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
             <div className="animate-pulse text-gray-400">Laster data...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Check if we have data
+  if (!enrichedData || enrichedData.length === 0) {
+    return (
+      <Card className="card-hover">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChartIcon className="w-5 h-5 text-myhrvold-primary" />
+            Kostnader per Konto
+          </CardTitle>
+          <CardDescription>Reklamasjonskostnader fordelt på kontoer</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="text-gray-500">Ingen data tilgjengelig for valgt periode</div>
           </div>
         </CardContent>
       </Card>
