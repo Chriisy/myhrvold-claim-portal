@@ -5,14 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ClaimFormData } from '@/lib/validations/claim';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUploadClaimFiles } from './useClaimFiles';
 
 export const useCreateClaim = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const uploadFiles = useUploadClaimFiles();
 
   return useMutation({
-    mutationFn: async (data: ClaimFormData & { source?: string }) => {
+    mutationFn: async (data: ClaimFormData & { source?: string; files?: File[] }) => {
       if (!user) {
         throw new Error('Du må være logget inn for å opprette reklamasjoner');
       }
@@ -48,6 +50,24 @@ export const useCreateClaim = () => {
       if (error) {
         console.error('Error creating claim:', error);
         throw new Error(`Failed to create claim: ${error.message}`);
+      }
+
+      // Upload files if any
+      if (data.files && data.files.length > 0) {
+        try {
+          await uploadFiles.mutateAsync({ 
+            claimId: claim.id, 
+            files: data.files 
+          });
+        } catch (fileError) {
+          console.error('Error uploading files:', fileError);
+          // Don't fail the entire operation if file upload fails
+          toast({
+            title: 'Reklamasjon opprettet',
+            description: 'Reklamasjon ble opprettet, men noen filer kunne ikke lastes opp. Du kan laste dem opp senere.',
+            variant: 'default',
+          });
+        }
       }
 
       return claim;

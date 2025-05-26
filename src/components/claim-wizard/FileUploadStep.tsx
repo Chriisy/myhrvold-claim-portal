@@ -1,5 +1,5 @@
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -100,33 +100,36 @@ export function FileUploadStep({ files, onFilesChange }: FileUploadStepProps) {
         <Card>
           <CardContent className="p-6">
             <h4 className="font-semibold mb-4">Valgte filer ({files.length})</h4>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {files.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
+                <div key={index} className="relative group">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     {getFileIcon(file)}
-                    <div>
-                      <p className="font-medium text-sm">{file.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{file.name}</p>
                       <p className="text-xs text-gray-500">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
-                    {file.preview && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {file.preview && (
+                    <div className="mt-2">
                       <img
                         src={file.preview}
                         alt={file.name}
-                        className="h-10 w-10 object-cover rounded"
+                        className="w-full h-32 object-cover rounded-lg"
                       />
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeFile(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

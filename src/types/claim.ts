@@ -26,6 +26,9 @@ export interface ClaimFormData {
   customer_po?: string;
   reported_by?: string;
   internal_note?: string;
+  
+  // Step 4: Files (optional)
+  files?: File[];
 }
 
 export interface Supplier {
@@ -41,4 +44,15 @@ export interface NewSupplierData {
   contact_name?: string;
   contact_phone?: string;
   contact_email?: string;
+}
+
+export interface ClaimFile {
+  id: string;
+  claim_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: string;
+  file_url: string;
+  created_at: string;
 }

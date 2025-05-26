@@ -14,17 +14,24 @@ import { useCreateClaim } from '@/hooks/useClaims';
 import { CustomerEquipmentStep } from '@/components/claim-wizard/CustomerEquipmentStep';
 import { CategorySupplierStep } from '@/components/claim-wizard/CategorySupplierStep';
 import { DescriptionStep } from '@/components/claim-wizard/DescriptionStep';
+import { FileUploadStep } from '@/components/claim-wizard/FileUploadStep';
 import { ReviewStep } from '@/components/claim-wizard/ReviewStep';
+
+interface FileWithPreview extends File {
+  preview?: string;
+}
 
 const steps = [
   { id: 1, title: 'Kunde og utstyr', component: CustomerEquipmentStep },
   { id: 2, title: 'Kategori og leverandør', component: CategorySupplierStep },
   { id: 3, title: 'Beskrivelse', component: DescriptionStep },
-  { id: 4, title: 'Oppsummering', component: ReviewStep },
+  { id: 4, title: 'Vedlegg', component: FileUploadStep },
+  { id: 5, title: 'Oppsummering', component: ReviewStep },
 ];
 
 const ClaimWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
   const createClaim = useCreateClaim();
 
   const form = useForm<ClaimFormData>({
@@ -66,6 +73,8 @@ const ClaimWizard = () => {
         return ['description'];
       case 4:
         return [];
+      case 5:
+        return [];
       default:
         return [];
     }
@@ -86,7 +95,10 @@ const ClaimWizard = () => {
 
   const handleSubmit = async (data: ClaimFormData) => {
     try {
-      await createClaim.mutateAsync(data);
+      await createClaim.mutateAsync({
+        ...data,
+        files: files // Include files in the submission
+      });
     } catch (error) {
       // Error is handled in the mutation
     }
@@ -126,7 +138,11 @@ const ClaimWizard = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              {CurrentStepComponent && <CurrentStepComponent />}
+              {currentStep === 4 ? (
+                <FileUploadStep files={files} onFilesChange={setFiles} />
+              ) : (
+                CurrentStepComponent && <CurrentStepComponent />
+              )}
 
               <div className="flex justify-between pt-6 border-t">
                 <Button
