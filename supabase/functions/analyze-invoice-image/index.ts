@@ -15,11 +15,21 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting invoice analysis...');
+    console.log('OpenAI API Key available:', !!openAIApiKey);
+    
     const { image, filename } = await req.json();
 
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key ikke konfigurert');
+      console.error('OpenAI API key not found in environment');
+      throw new Error('OpenAI API-nøkkel er ikke konfigurert. Vennligst legg til OPENAI_API_KEY i Supabase secrets.');
     }
+
+    if (!image) {
+      throw new Error('Ingen bilde data mottatt');
+    }
+
+    console.log('Making request to OpenAI API...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -96,23 +106,30 @@ serve(async (req) => {
       }),
     });
 
+    console.log('OpenAI response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API feil (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI response received successfully');
+    
     const content = data.choices[0].message.content;
 
     try {
       const parsedResult = JSON.parse(content);
-      console.log('Parsed T.Myhrvold invoice data:', parsedResult);
+      console.log('Successfully parsed T.Myhrvold invoice data');
       
       return new Response(JSON.stringify(parsedResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
-      throw new Error('AI kunne ikke analysere T.Myhrvold fakturaen som forventet');
+      console.error('Failed to parse AI response as JSON:', content);
+      console.error('Parse error:', parseError);
+      throw new Error('AI kunne ikke analysere T.Myhrvold fakturaen som forventet. Prøv med et klarere bilde.');
     }
 
   } catch (error) {
