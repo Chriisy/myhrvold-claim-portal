@@ -1,7 +1,7 @@
 
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Camera, Brain } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -40,10 +40,10 @@ export const FileUploadStep: React.FC<FileUploadStepProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-2">Last opp faktura</h2>
+        <h2 className="text-xl font-semibold mb-2">Last opp T.Myhrvold faktura</h2>
         <p className="text-gray-600">
-          Velg en CSV, Excel, PDF eller bildefil (JPG/PNG) med fakturalinjer som skal importeres.
-          Bilder vil bli analysert automatisk for å trekke ut fakturainformasjon.
+          Velg en CSV, Excel, PDF eller bildefil (JPG/PNG) med T.Myhrvold fakturalinjer. 
+          AI vil automatisk tolke bildefakturaer og trekke ut kunde-, prosjekt- og teknisk informasjon.
         </p>
       </div>
 
@@ -74,24 +74,45 @@ export const FileUploadStep: React.FC<FileUploadStepProps> = ({
               <div>
                 <p className="text-lg font-medium">
                   {isUploading
-                    ? 'Analyserer fil...'
+                    ? 'Analyserer T.Myhrvold faktura...'
                     : isDragActive
                     ? 'Slipp filen her'
-                    : 'Dra og slipp fil hit, eller klikk for å velge'}
+                    : 'Dra og slipp faktura hit, eller klikk for å velge'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   Støttede formater: CSV, XLS, XLSX, PDF, JPG, PNG
                 </p>
-                <p className="text-xs text-blue-600 mt-2">
-                  💡 Bilder analyseres automatisk med AI for å trekke ut fakturadata
-                </p>
               </div>
 
               {!isUploading && (
-                <Button variant="outline" type="button">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Bla gjennom filer
-                </Button>
+                <>
+                  <Button variant="outline" type="button">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Bla gjennom filer
+                  </Button>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex gap-2">
+                        <Camera className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <Brain className="h-5 w-5 text-blue-600 mt-0.5" />
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-semibold text-blue-900 mb-2">Smart T.Myhrvold fakturaanalyse</p>
+                        <p className="text-blue-700 mb-2">AI tolker automatisk:</p>
+                        <ul className="text-blue-600 space-y-1 text-xs">
+                          <li>• <strong>Faktisk kunde</strong> (ikke bare T.Myhrvold AS)</li>
+                          <li>• <strong>Prosjektnummer</strong> og jobbeskrivelse</li>
+                          <li>• <strong>Tekniske detaljer</strong> (maskin, serienr, deler)</li>
+                          <li>• <strong>Leverandørinformasjon</strong></li>
+                        </ul>
+                        <p className="text-blue-700 mt-2 text-xs">
+                          <strong>Du setter selv:</strong> Kontokode og garantistatus
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>

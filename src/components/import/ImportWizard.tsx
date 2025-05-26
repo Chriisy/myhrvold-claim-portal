@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, Plus } from 'lucide-react';
+import { ArrowLeft, Check, Plus, Building, MapPin, Wrench } from 'lucide-react';
 import { FileUploadStep } from './FileUploadStep';
 import { LineMappingStep } from './LineMappingStep';
 import { ConfirmImportStep } from './ConfirmImportStep';
@@ -53,8 +53,8 @@ export const ImportWizard: React.FC = () => {
         if (claimData) {
           setDetectedClaimData(claimData);
           toast({
-            title: 'AI-analyse fullført',
-            description: 'Fakturaen ble analysert og reklamasjonsdata ble funnet. Du kan nå opprette en ny reklamasjon automatisk.',
+            title: '🤖 T.Myhrvold faktura analysert',
+            description: `Kunde: ${claimData.customer_name} | Jobb: ${claimData.work_description || claimData.description}`,
           });
         }
       } else {
@@ -94,17 +94,21 @@ export const ImportWizard: React.FC = () => {
     try {
       await createClaim.mutateAsync({
         customer_name: detectedClaimData.customer_name,
-        description: detectedClaimData.description,
+        customer_address: detectedClaimData.customer_address,
+        description: detectedClaimData.work_description || detectedClaimData.description,
         machine_model: detectedClaimData.machine_model,
+        machine_serial: detectedClaimData.machine_serial,
         part_number: detectedClaimData.part_number,
+        visma_order_no: detectedClaimData.project_number,
+        internal_note: `Automatisk opprettet fra T.Myhrvold faktura. Leverandør: ${detectedClaimData.supplier_info || 'Ikke oppgitt'}`,
         warranty: false,
-        category: 'Produkt',
+        category: 'Service',
         source: 'ai_import'
       });
       
       toast({
-        title: 'Reklamasjon opprettet',
-        description: 'En ny reklamasjon ble opprettet basert på fakturaanalysen.',
+        title: '✅ Reklamasjon opprettet fra T.Myhrvold faktura',
+        description: 'Reklamasjon opprettet basert på fakturaanalysen. Husk å sette kontokode og garantistatus manuelt.',
       });
       
       setDetectedClaimData(null);
@@ -150,7 +154,7 @@ export const ImportWizard: React.FC = () => {
       {/* Progress indicator */}
       <Card>
         <CardHeader>
-          <CardTitle>Import av faktura</CardTitle>
+          <CardTitle>Import av T.Myhrvold faktura</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
@@ -186,21 +190,74 @@ export const ImportWizard: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* AI-detected claim data notification */}
+      {/* Enhanced AI-detected claim data notification for T.Myhrvold */}
       {detectedClaimData && (
         <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-semibold text-blue-900">🤖 AI fant reklamasjonsdata</h4>
-                <p className="text-sm text-blue-700 mt-1">
-                  Kunde: {detectedClaimData.customer_name} | Beskrivelse: {detectedClaimData.description}
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-900 flex items-center gap-2">
+                    🤖 T.Myhrvold faktura analysert
+                  </h4>
+                  <p className="text-sm text-blue-700 mt-2">
+                    AI har tolket fakturaen og funnet relevant informasjon for reklamasjonssystem
+                  </p>
+                </div>
+                <Button onClick={handleCreateNewClaim} disabled={createClaim.isPending}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {createClaim.isPending ? 'Oppretter...' : 'Opprett reklamasjon'}
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-3 rounded-lg border">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Building className="w-4 h-4" />
+                    Kunde
+                  </div>
+                  <p className="text-sm">{detectedClaimData.customer_name}</p>
+                  {detectedClaimData.customer_address && (
+                    <p className="text-xs text-gray-600 mt-1">{detectedClaimData.customer_address}</p>
+                  )}
+                </div>
+                
+                <div className="bg-white p-3 rounded-lg border">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <Wrench className="w-4 h-4" />
+                    Jobb
+                  </div>
+                  <p className="text-sm">{detectedClaimData.work_description || detectedClaimData.description}</p>
+                  {detectedClaimData.project_number && (
+                    <p className="text-xs text-gray-600 mt-1">Prosjekt: {detectedClaimData.project_number}</p>
+                  )}
+                </div>
+                
+                <div className="bg-white p-3 rounded-lg border">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                    <MapPin className="w-4 h-4" />
+                    Teknisk info
+                  </div>
+                  {detectedClaimData.machine_model && (
+                    <p className="text-xs">Modell: {detectedClaimData.machine_model}</p>
+                  )}
+                  {detectedClaimData.machine_serial && (
+                    <p className="text-xs">Serie: {detectedClaimData.machine_serial}</p>
+                  )}
+                  {detectedClaimData.part_number && (
+                    <p className="text-xs">Del: {detectedClaimData.part_number}</p>
+                  )}
+                  {detectedClaimData.supplier_info && (
+                    <p className="text-xs">Leverandør: {detectedClaimData.supplier_info}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  💡 <strong>Husk:</strong> Du må sette kontokode og garantistatus manuelt etter at reklamasjonen er opprettet.
                 </p>
               </div>
-              <Button onClick={handleCreateNewClaim} disabled={createClaim.isPending}>
-                <Plus className="w-4 h-4 mr-2" />
-                {createClaim.isPending ? 'Oppretter...' : 'Opprett reklamasjon'}
-              </Button>
             </div>
           </CardContent>
         </Card>

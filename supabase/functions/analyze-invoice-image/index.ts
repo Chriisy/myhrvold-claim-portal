@@ -32,32 +32,55 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Du er en ekspert på å analysere fakturaer og trekke ut informasjon for reklamasjonssystemer. 
-            Analyser bildet og trekk ut følgende informasjon:
-            1. Fakturalinjер med beskrivelse, beløp, og eventuelle kontokoder
-            2. Kundeinformasjon (navn, adresse)
-            3. Produktinformasjon (modell, serienummer, delnummer)
-            4. Feilbeskrivelse eller årsak til reklamasjon
+            content: `Du er ekspert på å analysere T.Myhrvold fakturaer for reklamasjonssystemer. 
+            
+            Analyser bildet nøye og trekk ut følgende informasjon:
+            
+            FAKTISKE KUNDE (svært viktig):
+            - Finn den faktiske kunden jobben er gjort hos (ikke bare "T. Myhrvold AS")
+            - Se etter leveringsadresse, prosjektadresse, eller annen kunde-referanse
+            - Selv om fakturaen er intern til T.Myhrvold, finn hvem sluttbrukeren/kunden er
+            
+            TEKNISK INFORMASJON:
+            - Prosjektnummer (hvis oppgitt)
+            - Detaljert jobbeskrivelse (hva som faktisk ble gjort)
+            - Konkrete deler/produkter som ble brukt (ikke bare koder som T1, S1)
+            - Serienummer på utstyr/maskin
+            - Produkt-/modellnavn
+            - Leverandør av delene
+            - Maskinmodell og serienummer hvis oppgitt
+            
+            FAKTURALINJER:
+            - Beskrivelse av hver linje
+            - Beløp
+            - Bilagsnummer/voucher
+            
+            OBS: Ikke prøv å gjette kontokoder eller garantistatus - det setter brukeren selv.
             
             Returner resultatet som JSON med denne strukturen:
             {
-              "lines": [{"description": "...", "amount": 123.45, "konto": 1234, "voucher": "..."}],
+              "lines": [{"description": "...", "amount": 123.45, "voucher": "..."}],
               "claimData": {
-                "customer_name": "...",
-                "description": "...",
-                "machine_model": "...",
-                "part_number": "..."
+                "customer_name": "faktisk kunde (ikke T.Myhrvold)",
+                "customer_address": "kundens adresse",
+                "description": "detaljert jobbeskrivelse",
+                "machine_model": "maskinmodell",
+                "machine_serial": "serienummer",
+                "part_number": "konkret delnummer",
+                "project_number": "prosjektnummer",
+                "supplier_info": "leverandør av deler",
+                "work_description": "hva som ble gjort"
               }
-            }
-            
-            Hvis du ikke kan finne noe informasjon, returner tomme arrays/objekter.`
+            }`
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Analyser denne fakturaen og trekk ut relevant informasjon for et reklamasjonssystem. Fil: ${filename}`
+                text: `Analyser denne T.Myhrvold fakturaen og trekk ut relevant informasjon for reklamasjonssystemet. 
+                Focus spesielt på å finne den faktiske kunden (ikke bare T.Myhrvold), tekniske detaljer om jobben, 
+                og konkrete deler som ble brukt. Fil: ${filename}`
               },
               {
                 type: 'image_url',
@@ -68,7 +91,7 @@ serve(async (req) => {
             ]
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
         temperature: 0.1
       }),
     });
@@ -82,14 +105,14 @@ serve(async (req) => {
 
     try {
       const parsedResult = JSON.parse(content);
-      console.log('Parsed invoice data:', parsedResult);
+      console.log('Parsed T.Myhrvold invoice data:', parsedResult);
       
       return new Response(JSON.stringify(parsedResult), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
       console.error('Failed to parse AI response:', content);
-      throw new Error('AI kunne ikke analysere fakturaen som forventet');
+      throw new Error('AI kunne ikke analysere T.Myhrvold fakturaen som forventet');
     }
 
   } catch (error) {
