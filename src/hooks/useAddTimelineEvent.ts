@@ -4,16 +4,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 import { useToast } from '@/hooks/use-toast';
 
+interface AddTimelineEventData {
+  claim_id: string;
+  message: string;
+  created_by: string;
+  event_type?: 'manual' | 'status_change' | 'file_upload' | 'file_delete' | 'claim_update' | 'cost_added' | 'credit_added';
+  metadata?: any;
+}
+
 export function useAddTimelineEvent() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: {
-      claim_id: string;
-      message: string;
-      created_by: string;
-    }) => {
+    mutationFn: async (data: AddTimelineEventData) => {
       return withRetry(async () => {
         const { data: result, error } = await supabase
           .from('timeline_item')
@@ -21,6 +25,8 @@ export function useAddTimelineEvent() {
             claim_id: data.claim_id,
             message: data.message,
             created_by: data.created_by,
+            event_type: data.event_type || 'manual',
+            metadata: data.metadata || {},
           })
           .select()
           .single();

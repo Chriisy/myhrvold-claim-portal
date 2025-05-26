@@ -3,10 +3,20 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { handleSupabaseError, withRetry } from '@/utils/supabaseErrorHandler';
 
+interface TimelineEvent {
+  id: string;
+  claim_id: string;
+  message: string;
+  event_type: 'manual' | 'status_change' | 'file_upload' | 'file_delete' | 'claim_update' | 'cost_added' | 'credit_added';
+  metadata: any;
+  created_by: string;
+  created_at: string;
+}
+
 export function useClaimTimeline(claimIdOrNumber: string) {
   return useQuery({
     queryKey: ['timeline', claimIdOrNumber],
-    queryFn: async () => {
+    queryFn: async (): Promise<TimelineEvent[]> => {
       return withRetry(async () => {
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimIdOrNumber);
         
@@ -38,7 +48,7 @@ export function useClaimTimeline(claimIdOrNumber: string) {
           .from('timeline_item')
           .select('*')
           .eq('claim_id', actualClaimId)
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: false });
         
         if (error) {
           handleSupabaseError(error, 'laste tidslinje');

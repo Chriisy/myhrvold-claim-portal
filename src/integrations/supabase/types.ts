@@ -453,22 +453,28 @@ export type Database = {
           claim_id: string
           created_at: string
           created_by: string
+          event_type: Database["public"]["Enums"]["timeline_event_type"] | null
           id: string
           message: string
+          metadata: Json | null
         }
         Insert: {
           claim_id: string
           created_at?: string
           created_by: string
+          event_type?: Database["public"]["Enums"]["timeline_event_type"] | null
           id?: string
           message: string
+          metadata?: Json | null
         }
         Update: {
           claim_id?: string
           created_at?: string
           created_by?: string
+          event_type?: Database["public"]["Enums"]["timeline_event_type"] | null
           id?: string
           message?: string
+          metadata?: Json | null
         }
         Relationships: [
           {
@@ -603,6 +609,14 @@ export type Database = {
         | "view_department_claims"
         | "edit_own_claims"
         | "create_claims"
+      timeline_event_type:
+        | "manual"
+        | "status_change"
+        | "file_upload"
+        | "file_delete"
+        | "claim_update"
+        | "cost_added"
+        | "credit_added"
       user_role: "admin" | "saksbehandler" | "tekniker" | "avdelingsleder"
     }
     CompositeTypes: {
@@ -753,6 +767,15 @@ export const Constants = {
         "view_department_claims",
         "edit_own_claims",
         "create_claims",
+      ],
+      timeline_event_type: [
+        "manual",
+        "status_change",
+        "file_upload",
+        "file_delete",
+        "claim_update",
+        "cost_added",
+        "credit_added",
       ],
       user_role: ["admin", "saksbehandler", "tekniker", "avdelingsleder"],
     },
