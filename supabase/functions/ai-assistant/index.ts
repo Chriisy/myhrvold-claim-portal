@@ -15,6 +15,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting AI assistant request...');
+    console.log('OpenAI API Key available:', !!openAIApiKey);
+
     if (!openAIApiKey) {
       console.error('OpenAI API key is not configured');
       return new Response(JSON.stringify({ 
@@ -26,6 +29,7 @@ serve(async (req) => {
     }
 
     const { messages, context } = await req.json();
+    console.log('Request payload received, messages count:', messages?.length || 0);
 
     const systemPrompt = `Du er Myhrvold Mentor, en intelligent assistent for Myhrvold reklamasjonssystem. Du hjelper brukere med:
 
@@ -71,17 +75,39 @@ Svar alltid på norsk og vær hjelpsom og profesjonell. Gi konkrete, praktiske r
       }),
     });
 
+    console.log('OpenAI response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('OpenAI API error:', errorData);
-      throw new Error(errorData.error?.message || 'AI request failed');
+      
+      let userMessage = 'En uventet feil oppstod. Prøv igjen om litt.';
+      
+      if (errorData.error?.code === 'insufficient_quota') {
+        userMessage = 'OpenAI API har nådd sin kvotegrense. Kontakt administrator for å oppgradere planen.';
+      } else if (errorData.error?.code === 'rate_limit_exceeded') {
+        userMessage = 'For mange forespørsler til AI-tjenesten. Vent litt og prøv igjen.';
+      } else if (errorData.error?.code === 'invalid_api_key') {
+        userMessage = 'Problem med AI-tjenestens konfigurasjon. Kontakt administrator.';
+      }
+      
+      return new Response(JSON.stringify({ error: userMessage }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();
+    console.log('OpenAI response received successfully');
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error('Unexpected OpenAI response structure:', data);
-      throw new Error('Invalid response from AI service');
+      return new Response(JSON.stringify({ 
+        error: 'Uventet svar fra AI-tjenesten. Prøv igjen.' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const aiResponse = data.choices[0].message.content;
@@ -97,10 +123,8 @@ Svar alltid på norsk og vær hjelpsom og profesjonell. Gi konkrete, praktiske r
     
     if (error.message?.includes('API key')) {
       errorMessage = 'Problem med AI-tjenesten. Kontakt administrator.';
-    } else if (error.message?.includes('rate limit')) {
-      errorMessage = 'For mange forespørsler. Vent litt og prøv igjen.';
-    } else if (error.message?.includes('quota')) {
-      errorMessage = 'AI-tjenesten har nådd sin grense. Kontakt administrator.';
+    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      errorMessage = 'Nettverksfeil. Sjekk internettforbindelsen og prøv igjen.';
     }
     
     return new Response(JSON.stringify({ error: errorMessage }), {
