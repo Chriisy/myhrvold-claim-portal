@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ClaimTimeline } from '@/components/claim-detail/ClaimTimeline';
 import ClaimCosts from '@/components/claim-detail/ClaimCosts';
 import ClaimCredits from '@/components/claim-detail/ClaimCredits';
+import { ClaimFiles } from '@/components/claim-detail/ClaimFiles';
 import { EditableClaimOverview } from '@/components/claim-detail/EditableClaimOverview';
 import { useClaimQuery } from '@/hooks/useClaimsQuery';
 
@@ -85,8 +87,9 @@ const ClaimDetail = () => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Oversikt</TabsTrigger>
+          <TabsTrigger value="files">Vedlegg</TabsTrigger>
           <TabsTrigger value="timeline">Tidslinje</TabsTrigger>
           <TabsTrigger value="costs">Kostnader</TabsTrigger>
           <TabsTrigger value="credits">Kreditnotaer</TabsTrigger>
@@ -94,6 +97,10 @@ const ClaimDetail = () => {
 
         <TabsContent value="overview" className="mt-6">
           <EditableClaimOverview claim={claim} />
+        </TabsContent>
+
+        <TabsContent value="files" className="mt-6">
+          <ClaimFiles claimId={claim.id} />
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-6">

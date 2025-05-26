@@ -104,6 +104,47 @@ export type Database = {
           },
         ]
       }
+      claim_files: {
+        Row: {
+          claim_id: string | null
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+        }
+        Insert: {
+          claim_id?: string | null
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+        }
+        Update: {
+          claim_id?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_files_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       claims: {
         Row: {
           account_code_id: number | null

@@ -15,10 +15,20 @@ import {
   Eye,
   AlertCircle 
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 interface ClaimFilesProps {
   claimId: string;
+}
+
+interface ClaimFile {
+  id: string;
+  claim_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: string;
+  file_url: string;
+  created_at: string;
 }
 
 export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
@@ -55,7 +65,7 @@ export const ClaimFiles: React.FC<ClaimFilesProps> = ({ claimId }) => {
     return `${mb.toFixed(2)} MB`;
   };
 
-  const handleDownload = (file: any) => {
+  const handleDownload = (file: ClaimFile) => {
     window.open(file.file_url, '_blank');
   };
 
