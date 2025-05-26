@@ -36,6 +36,13 @@ export function handleSupabaseError(error: PostgrestError | Error, operation: st
       case '42P17':
         userMessage = 'Database konfigurasjonsfeil - kontakt administrator';
         break;
+      case '22P02':
+        if (error.message?.includes('enum claim_status')) {
+          userMessage = 'Ugyldig status-verdi. Vennligst last siden på nytt.';
+        } else {
+          userMessage = 'Ugyldig dataformat';
+        }
+        break;
       default:
         userMessage = error.message || userMessage;
     }

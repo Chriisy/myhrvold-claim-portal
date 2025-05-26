@@ -64,7 +64,11 @@ const statusOptions = [
 
 export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(claim);
+  const [formData, setFormData] = useState({
+    ...claim,
+    // Ensure status has a valid default value
+    status: claim.status || 'Ny' as ClaimStatus
+  });
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
 
@@ -73,6 +77,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
 
   const handleSave = async () => {
     // Only send the database columns, not the joined relationship data
+    // Filter out undefined/null values and ensure valid enum values
     const updateData = {
       id: formData.id,
       customer_name: formData.customer_name,
@@ -88,16 +93,20 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       customer_po: formData.customer_po,
       reported_by: formData.reported_by,
       internal_note: formData.internal_note,
-      status: formData.status,
+      status: formData.status || 'Ny' as ClaimStatus, // Ensure we always have a valid status
       account_code_id: formData.account_code_id,
     };
     
+    console.log('Saving claim with data:', updateData);
     await editClaim.mutateAsync(updateData);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setFormData(claim);
+    setFormData({
+      ...claim,
+      status: claim.status || 'Ny' as ClaimStatus
+    });
     setIsEditing(false);
   };
 
@@ -243,7 +252,10 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status || ''} onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}>
+                <Select 
+                  value={formData.status || 'Ny'} 
+                  onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg status" />
                   </SelectTrigger>
