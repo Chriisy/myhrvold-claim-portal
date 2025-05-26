@@ -8,21 +8,6 @@ import { Database } from '@/integrations/supabase/types';
 type ClaimCategory = Database['public']['Enums']['claim_category'];
 type ClaimStatus = Database['public']['Enums']['claim_status'];
 
-// Helper function to ensure valid status
-const validateStatus = (status?: ClaimStatus | string | null): ClaimStatus => {
-  const validStatuses: ClaimStatus[] = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
-  
-  console.log('validateStatus called with:', status, 'type:', typeof status);
-  
-  if (status && typeof status === 'string' && validStatuses.includes(status as ClaimStatus)) {
-    console.log('Status is valid:', status);
-    return status as ClaimStatus;
-  }
-  
-  console.warn('Invalid status in useEditClaim, defaulting to "Ny". Original status was:', status);
-  return 'Ny';
-};
-
 export function useEditClaim() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -51,19 +36,11 @@ export function useEditClaim() {
       return withRetry(async () => {
         const { id, ...updateData } = data;
         
-        // Validate status before sending to database
-        const validatedUpdateData = {
-          ...updateData,
-          status: validateStatus(updateData.status)
-        };
-        
-        console.log('useEditClaim mutationFn - Original data:', data);
-        console.log('useEditClaim mutationFn - Validated data:', validatedUpdateData);
-        console.log('useEditClaim mutationFn - Status being sent:', validatedUpdateData.status);
+        console.log('useEditClaim mutationFn - Update data:', updateData);
         
         const { data: result, error } = await supabase
           .from('claims')
-          .update(validatedUpdateData)
+          .update(updateData)
           .eq('id', id)
           .is('deleted_at', null)
           .select()

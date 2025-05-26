@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,35 +62,9 @@ const statusOptions = [
   { value: 'Lukket', label: 'Lukket' },
 ];
 
-// Helper function to validate and normalize status
-const getValidStatus = (status?: ClaimStatus | string | null): ClaimStatus => {
-  const validStatuses: ClaimStatus[] = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
-  
-  console.log('getValidStatus called with:', status, 'type:', typeof status);
-  
-  if (status && typeof status === 'string' && validStatuses.includes(status as ClaimStatus)) {
-    console.log('Status is valid, returning:', status);
-    return status as ClaimStatus;
-  }
-  
-  console.log('Invalid status detected, defaulting to "Ny". Original status was:', status);
-  return 'Ny';
-};
-
 export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
-  
-  console.log('EditableClaimOverview - Original claim status:', claim.status);
-  
-  // Normalize the status before setting it in state
-  const normalizedClaim = {
-    ...claim,
-    status: getValidStatus(claim.status)
-  };
-  
-  console.log('EditableClaimOverview - Normalized claim status:', normalizedClaim.status);
-  
-  const [formData, setFormData] = useState(normalizedClaim);
+  const [formData, setFormData] = useState(claim);
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
 
@@ -97,11 +72,6 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
 
   const handleSave = async () => {
-    console.log('handleSave - formData.status before validation:', formData.status);
-    
-    const validatedStatus = getValidStatus(formData.status);
-    console.log('handleSave - validated status:', validatedStatus);
-    
     // Only send the database columns, not the joined relationship data
     const updateData = {
       id: formData.id,
@@ -118,23 +88,20 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       customer_po: formData.customer_po || null,
       reported_by: formData.reported_by || null,
       internal_note: formData.internal_note || null,
-      status: validatedStatus, // Always use validated status
+      status: formData.status || 'Ny',
       account_code_id: formData.account_code_id || null,
     };
     
     console.log('handleSave - Final updateData:', updateData);
-    console.log('handleSave - Status being sent to database:', updateData.status);
     
     await editClaim.mutateAsync(updateData);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setFormData(normalizedClaim);
+    setFormData(claim);
     setIsEditing(false);
   };
-
-  const displayStatus = getValidStatus(claim.status);
 
   return (
     <Card>
@@ -167,7 +134,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Status:</span> 
-                  <Badge className="bg-orange-100 text-orange-800">{displayStatus}</Badge>
+                  <Badge className="bg-orange-100 text-orange-800">{claim.status || 'Ny'}</Badge>
                 </div>
                 <div><span className="font-medium">Kunde:</span> {claim.customer_name || 'Ikke angitt'}</div>
                 <div><span className="font-medium">Kundenummer:</span> {claim.customer_no || 'Ikke angitt'}</div>
@@ -279,11 +246,8 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select 
-                  value={getValidStatus(formData.status)} 
-                  onValueChange={(value: ClaimStatus) => {
-                    console.log('Status select onChange:', value);
-                    setFormData({ ...formData, status: value });
-                  }}
+                  value={formData.status || 'Ny'} 
+                  onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg status" />
