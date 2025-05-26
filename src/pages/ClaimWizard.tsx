@@ -21,7 +21,13 @@ interface FileWithPreview extends File {
   preview?: string;
 }
 
-const steps = [
+type Step = {
+  id: number;
+  title: string;
+  component: React.ComponentType<any>;
+};
+
+const steps: Step[] = [
   { id: 1, title: 'Kunde og utstyr', component: CustomerEquipmentStep },
   { id: 2, title: 'Kategori og leverandør', component: CategorySupplierStep },
   { id: 3, title: 'Beskrivelse', component: DescriptionStep },
@@ -55,7 +61,7 @@ const ClaimWizard = () => {
   });
 
   const currentStepData = steps.find(step => step.id === currentStep);
-  const CurrentStepComponent = currentStepData?.component;
+  const CurrentStepComponent = currentStepData?.component as React.ComponentType<any>;
 
   const validateCurrentStep = async () => {
     const fieldsToValidate = getFieldsForStep(currentStep);
