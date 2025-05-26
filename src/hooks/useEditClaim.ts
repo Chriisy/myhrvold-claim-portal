@@ -30,7 +30,7 @@ export function useEditClaim() {
       customer_po?: string | null;
       reported_by?: string | null;
       internal_note?: string | null;
-      status?: ClaimStatus | string | null;
+      status?: ClaimStatus | null;
       account_code_id?: number | null;
     }) => {
       return withRetry(async () => {
