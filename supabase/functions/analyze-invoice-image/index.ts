@@ -18,12 +18,12 @@ serve(async (req) => {
     console.log('Starting invoice analysis...');
     console.log('OpenAI API Key available:', !!openAIApiKey);
     
-    const { image, filename } = await req.json();
-
     if (!openAIApiKey) {
       console.error('OpenAI API key not found in environment');
       throw new Error('OpenAI API-nøkkel er ikke konfigurert. Vennligst legg til OPENAI_API_KEY i Supabase secrets.');
     }
+
+    const { image, filename } = await req.json();
 
     if (!image) {
       throw new Error('Ingen bilde data mottatt');
