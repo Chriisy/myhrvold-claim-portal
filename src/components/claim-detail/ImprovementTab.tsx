@@ -182,49 +182,52 @@ export function ImprovementTab({ claim }: ImprovementTabProps) {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Edit Mode */}
-            <div className="grid grid-cols-1 gap-6">
+            {/* Edit Mode - All Fields */}
+            <div className="space-y-6">
               <div>
-                <Label htmlFor="root_cause">Rotårsak</Label>
+                <Label htmlFor="root_cause" className="text-sm font-medium">Rotårsak</Label>
                 <Textarea
                   id="root_cause"
                   value={formData.root_cause || ''}
                   onChange={(e) => setFormData({ ...formData, root_cause: e.target.value })}
                   placeholder="Beskriv rotårsaken til problemet..."
                   rows={3}
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <Label htmlFor="corrective_action">Korrigerende tiltak</Label>
+                <Label htmlFor="corrective_action" className="text-sm font-medium">Korrigerende tiltak</Label>
                 <Textarea
                   id="corrective_action"
                   value={formData.corrective_action || ''}
                   onChange={(e) => setFormData({ ...formData, corrective_action: e.target.value })}
                   placeholder="Beskriv korrigerende tiltak som er iverksatt..."
                   rows={3}
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <Label htmlFor="preventive_action">Forebyggende tiltak</Label>
+                <Label htmlFor="preventive_action" className="text-sm font-medium">Forebyggende tiltak</Label>
                 <Textarea
                   id="preventive_action"
                   value={formData.preventive_action || ''}
                   onChange={(e) => setFormData({ ...formData, preventive_action: e.target.value })}
                   placeholder="Beskriv forebyggende tiltak for å unngå lignende problemer..."
                   rows={3}
+                  className="mt-1"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="action_owner">Ansvarlig</Label>
+                  <Label htmlFor="action_owner" className="text-sm font-medium">Ansvarlig</Label>
                   <Select 
                     value={formData.action_owner || ''} 
                     onValueChange={(value) => setFormData({ ...formData, action_owner: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Velg ansvarlig person" />
                     </SelectTrigger>
                     <SelectContent>
@@ -238,23 +241,24 @@ export function ImprovementTab({ claim }: ImprovementTabProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="action_due_date">Frist</Label>
+                  <Label htmlFor="action_due_date" className="text-sm font-medium">Frist</Label>
                   <Input
                     id="action_due_date"
                     type="date"
                     value={formData.action_due_date || ''}
                     onChange={(e) => setFormData({ ...formData, action_due_date: e.target.value })}
+                    className="mt-1"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="action_status">Tiltaksstatus</Label>
+                <Label htmlFor="action_status" className="text-sm font-medium">Tiltaksstatus</Label>
                 <Select 
                   value={formData.action_status || 'Planlagt'} 
                   onValueChange={(value: ActionStatus) => setFormData({ ...formData, action_status: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Velg status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -268,24 +272,26 @@ export function ImprovementTab({ claim }: ImprovementTabProps) {
               </div>
 
               {formData.action_status === 'Ferdig' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="action_completed_at">Fullført dato</Label>
+                    <Label htmlFor="action_completed_at" className="text-sm font-medium">Fullført dato</Label>
                     <Input
                       id="action_completed_at"
                       type="date"
                       value={formData.action_completed_at ? formData.action_completed_at.split('T')[0] : ''}
                       onChange={(e) => setFormData({ ...formData, action_completed_at: e.target.value ? new Date(e.target.value).toISOString() : '' })}
+                      className="mt-1"
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="action_effectiveness">Effektkontroll / Kommentar</Label>
+                  <div>
+                    <Label htmlFor="action_effectiveness" className="text-sm font-medium">Effektkontroll / Kommentar</Label>
                     <Textarea
                       id="action_effectiveness"
                       value={formData.action_effectiveness || ''}
                       onChange={(e) => setFormData({ ...formData, action_effectiveness: e.target.value })}
                       placeholder="Beskriv effekten av tiltaket og eventuelle oppfølgingskommentarer..."
                       rows={3}
+                      className="mt-1"
                     />
                   </div>
                 </div>
