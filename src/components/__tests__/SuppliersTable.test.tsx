@@ -1,6 +1,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SuppliersTable } from '../SuppliersTable';
 import * as useSuppliers from '@/hooks/useSuppliers';
@@ -121,6 +123,8 @@ describe('SuppliersTable', () => {
   });
 
   it('opens edit modal when edit button is clicked', async () => {
+    const user = userEvent.setup();
+    
     vi.mocked(useSuppliers.useSuppliers).mockReturnValue({
       data: mockSuppliers,
       isLoading: false,
@@ -135,7 +139,7 @@ describe('SuppliersTable', () => {
     renderWithQueryClient(<SuppliersTable />);
     
     const editButtons = screen.getAllByTitle('Rediger leverandør');
-    fireEvent.click(editButtons[0]);
+    await user.click(editButtons[0]);
     
     await waitFor(() => {
       expect(screen.getByText('Rediger leverandør')).toBeInTheDocument();
@@ -143,6 +147,8 @@ describe('SuppliersTable', () => {
   });
 
   it('opens archive confirmation when archive button is clicked', async () => {
+    const user = userEvent.setup();
+    
     vi.mocked(useSuppliers.useSuppliers).mockReturnValue({
       data: mockSuppliers,
       isLoading: false,
@@ -157,7 +163,7 @@ describe('SuppliersTable', () => {
     renderWithQueryClient(<SuppliersTable />);
     
     const archiveButtons = screen.getAllByTitle('Arkiver leverandør');
-    fireEvent.click(archiveButtons[0]);
+    await user.click(archiveButtons[0]);
     
     await waitFor(() => {
       expect(screen.getByText('Arkiver leverandør')).toBeInTheDocument();
