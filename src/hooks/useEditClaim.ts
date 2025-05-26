@@ -7,6 +7,7 @@ import { Database } from '@/integrations/supabase/types';
 
 type ClaimCategory = Database['public']['Enums']['claim_category'];
 type ClaimStatus = Database['public']['Enums']['claim_status'];
+type ActionStatus = Database['public']['Enums']['action_status'];
 
 export function useEditClaim() {
   const queryClient = useQueryClient();
@@ -32,6 +33,14 @@ export function useEditClaim() {
       internal_note?: string | null;
       status?: ClaimStatus | null;
       account_code_id?: number | null;
+      root_cause?: string | null;
+      corrective_action?: string | null;
+      preventive_action?: string | null;
+      action_owner?: string | null;
+      action_due_date?: string | null;
+      action_status?: ActionStatus | null;
+      action_completed_at?: string | null;
+      action_effectiveness?: string | null;
     }) => {
       return withRetry(async () => {
         const { id, ...updateData } = data;

@@ -10,10 +10,13 @@ import ClaimCosts from '@/components/claim-detail/ClaimCosts';
 import ClaimCredits from '@/components/claim-detail/ClaimCredits';
 import { ClaimFiles } from '@/components/claim-detail/ClaimFiles';
 import { EditableClaimOverview } from '@/components/claim-detail/EditableClaimOverview';
+import { ImprovementTab } from '@/components/claim-detail/ImprovementTab';
 import { useClaimQuery } from '@/hooks/useClaimsQuery';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const ClaimDetail = () => {
   const { id } = useParams();
+  const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
 
   const { data: claim, isLoading, error } = useClaimQuery(id || '');
 
@@ -68,6 +71,10 @@ const ClaimDetail = () => {
     );
   }
 
+  // Check if improvement tab should be visible
+  const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
+  const shouldShowImprovementTab = canEdit || ['Godkjent', 'Avslått', 'Bokført', 'Lukket'].includes(claim.status || '');
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4">
@@ -87,12 +94,15 @@ const ClaimDetail = () => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className={`grid w-full ${shouldShowImprovementTab ? 'grid-cols-6' : 'grid-cols-5'}`}>
           <TabsTrigger value="overview">Oversikt</TabsTrigger>
           <TabsTrigger value="files">Vedlegg</TabsTrigger>
           <TabsTrigger value="timeline">Tidslinje</TabsTrigger>
           <TabsTrigger value="costs">Kostnader</TabsTrigger>
           <TabsTrigger value="credits">Kreditnotaer</TabsTrigger>
+          {shouldShowImprovementTab && (
+            <TabsTrigger value="improvement">Tiltak & Forbedring</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -120,6 +130,12 @@ const ClaimDetail = () => {
             <ClaimCredits claimId={claim.id} />
           </div>
         </TabsContent>
+
+        {shouldShowImprovementTab && (
+          <TabsContent value="improvement" className="mt-6">
+            <ImprovementTab claim={claim} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

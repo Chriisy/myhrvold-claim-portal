@@ -148,6 +148,11 @@ export type Database = {
       claims: {
         Row: {
           account_code_id: number | null
+          action_completed_at: string | null
+          action_due_date: string | null
+          action_effectiveness: string | null
+          action_owner: string | null
+          action_status: Database["public"]["Enums"]["action_status"] | null
           category: Database["public"]["Enums"]["claim_category"] | null
           closed_at: string | null
           corrective_action: string | null
@@ -189,6 +194,11 @@ export type Database = {
         }
         Insert: {
           account_code_id?: number | null
+          action_completed_at?: string | null
+          action_due_date?: string | null
+          action_effectiveness?: string | null
+          action_owner?: string | null
+          action_status?: Database["public"]["Enums"]["action_status"] | null
           category?: Database["public"]["Enums"]["claim_category"] | null
           closed_at?: string | null
           corrective_action?: string | null
@@ -230,6 +240,11 @@ export type Database = {
         }
         Update: {
           account_code_id?: number | null
+          action_completed_at?: string | null
+          action_due_date?: string | null
+          action_effectiveness?: string | null
+          action_owner?: string | null
+          action_status?: Database["public"]["Enums"]["action_status"] | null
           category?: Database["public"]["Enums"]["claim_category"] | null
           closed_at?: string | null
           corrective_action?: string | null
@@ -276,6 +291,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "account_codes"
             referencedColumns: ["konto_nr"]
+          },
+          {
+            foreignKeyName: "claims_action_owner_fkey"
+            columns: ["action_owner"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_salesperson_id_fkey"
@@ -578,6 +600,7 @@ export type Database = {
       }
     }
     Enums: {
+      action_status: "Planlagt" | "Pågår" | "Ferdig"
       claim_category: "Service" | "Installasjon" | "Produkt" | "Del"
       claim_status:
         | "Ny"
@@ -733,6 +756,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_status: ["Planlagt", "Pågår", "Ferdig"],
       claim_category: ["Service", "Installasjon", "Produkt", "Del"],
       claim_status: [
         "Ny",

@@ -3,6 +3,7 @@ import { Database } from '@/integrations/supabase/types';
 
 export type ClaimCategory = Database['public']['Enums']['claim_category'];
 export type ClaimStatus = Database['public']['Enums']['claim_status'];
+export type ActionStatus = Database['public']['Enums']['action_status'];
 
 export interface ClaimFormData {
   // Step 1: Customer & Equipment
