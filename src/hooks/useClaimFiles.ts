@@ -45,39 +45,25 @@ export const useUploadClaimFiles = () => {
           .from('claim-files')
           .getPublicUrl(filePath);
 
-        // Save file metadata to database using raw SQL since TypeScript types aren't updated yet
+        // Save file metadata to database
         const { data: fileRecord, error: dbError } = await supabase
-          .rpc('insert_claim_file', {
-            p_claim_id: claimId,
-            p_file_name: file.name,
-            p_file_path: filePath,
-            p_file_size: file.size,
-            p_file_type: file.type,
-            p_file_url: publicUrl,
-          });
+          .from('claim_files')
+          .insert({
+            claim_id: claimId,
+            file_name: file.name,
+            file_path: filePath,
+            file_size: file.size,
+            file_type: file.type,
+            file_url: publicUrl,
+          })
+          .select()
+          .single();
 
         if (dbError) {
-          // Fallback to direct insert
-          const { data: directInsert, error: directError } = await supabase
-            .from('claim_files' as any)
-            .insert({
-              claim_id: claimId,
-              file_name: file.name,
-              file_path: filePath,
-              file_size: file.size,
-              file_type: file.type,
-              file_url: publicUrl,
-            })
-            .select()
-            .single();
-
-          if (directError) {
-            throw new Error(`Kunne ikke lagre filinfo: ${directError.message}`);
-          }
-          uploadedFiles.push(directInsert);
-        } else {
-          uploadedFiles.push(fileRecord);
+          throw new Error(`Kunne ikke lagre filinfo: ${dbError.message}`);
         }
+        
+        uploadedFiles.push(fileRecord);
       }
 
       return uploadedFiles;
@@ -104,7 +90,7 @@ export const useClaimFiles = (claimId: string) => {
     queryKey: ['claim-files', claimId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('claim_files' as any)
+        .from('claim_files')
         .select('*')
         .eq('claim_id', claimId)
         .order('created_at', { ascending: false });
@@ -113,7 +99,7 @@ export const useClaimFiles = (claimId: string) => {
         throw error;
       }
 
-      return data as ClaimFile[];
+      return data || [];
     },
     enabled: !!claimId,
   });
@@ -126,7 +112,7 @@ export const useDeleteClaimFile = () => {
     mutationFn: async (fileId: string) => {
       // First get the file info
       const { data: fileData, error: fetchError } = await supabase
-        .from('claim_files' as any)
+        .from('claim_files')
         .select('file_path, claim_id')
         .eq('id', fileId)
         .single();
@@ -146,7 +132,7 @@ export const useDeleteClaimFile = () => {
 
       // Delete from database
       const { error: dbError } = await supabase
-        .from('claim_files' as any)
+        .from('claim_files')
         .delete()
         .eq('id', fileId);
 

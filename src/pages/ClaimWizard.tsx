@@ -140,6 +140,8 @@ const ClaimWizard = () => {
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {currentStep === 4 ? (
                 <FileUploadStep files={files} onFilesChange={setFiles} />
+              ) : currentStep === 5 ? (
+                <ReviewStep />
               ) : (
                 CurrentStepComponent && <CurrentStepComponent />
               )}
