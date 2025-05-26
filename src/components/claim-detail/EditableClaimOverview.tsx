@@ -62,25 +62,32 @@ const statusOptions = [
 ];
 
 // Helper function to validate and normalize status
-const getValidStatus = (status?: ClaimStatus | string): ClaimStatus => {
+const getValidStatus = (status?: ClaimStatus | string | null): ClaimStatus => {
   const validStatuses: ClaimStatus[] = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket'];
   
-  if (status && validStatuses.includes(status as ClaimStatus)) {
+  console.log('getValidStatus called with:', status, 'type:', typeof status);
+  
+  if (status && typeof status === 'string' && validStatuses.includes(status as ClaimStatus)) {
+    console.log('Status is valid, returning:', status);
     return status as ClaimStatus;
   }
   
-  console.log('Invalid status detected, defaulting to "Ny":', status);
+  console.log('Invalid status detected, defaulting to "Ny". Original status was:', status);
   return 'Ny';
 };
 
 export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [isEditing, setIsEditing] = useState(false);
   
+  console.log('EditableClaimOverview - Original claim status:', claim.status);
+  
   // Normalize the status before setting it in state
   const normalizedClaim = {
     ...claim,
     status: getValidStatus(claim.status)
   };
+  
+  console.log('EditableClaimOverview - Normalized claim status:', normalizedClaim.status);
   
   const [formData, setFormData] = useState(normalizedClaim);
   const editClaim = useEditClaim();
@@ -90,28 +97,34 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
 
   const handleSave = async () => {
+    console.log('handleSave - formData.status before validation:', formData.status);
+    
+    const validatedStatus = getValidStatus(formData.status);
+    console.log('handleSave - validated status:', validatedStatus);
+    
     // Only send the database columns, not the joined relationship data
-    // Filter out undefined/null values and ensure valid enum values
     const updateData = {
       id: formData.id,
-      customer_name: formData.customer_name,
-      customer_no: formData.customer_no,
-      department: formData.department,
-      machine_model: formData.machine_model,
-      machine_serial: formData.machine_serial,
-      warranty: formData.warranty,
-      quantity: formData.quantity,
-      category: formData.category,
-      description: formData.description,
-      visma_order_no: formData.visma_order_no,
-      customer_po: formData.customer_po,
-      reported_by: formData.reported_by,
-      internal_note: formData.internal_note,
-      status: getValidStatus(formData.status), // Always ensure valid status
-      account_code_id: formData.account_code_id,
+      customer_name: formData.customer_name || null,
+      customer_no: formData.customer_no || null,
+      department: formData.department || null,
+      machine_model: formData.machine_model || null,
+      machine_serial: formData.machine_serial || null,
+      warranty: formData.warranty || false,
+      quantity: formData.quantity || null,
+      category: formData.category || null,
+      description: formData.description || null,
+      visma_order_no: formData.visma_order_no || null,
+      customer_po: formData.customer_po || null,
+      reported_by: formData.reported_by || null,
+      internal_note: formData.internal_note || null,
+      status: validatedStatus, // Always use validated status
+      account_code_id: formData.account_code_id || null,
     };
     
-    console.log('Saving claim with data:', updateData);
+    console.log('handleSave - Final updateData:', updateData);
+    console.log('handleSave - Status being sent to database:', updateData.status);
+    
     await editClaim.mutateAsync(updateData);
     setIsEditing(false);
   };
@@ -267,7 +280,10 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <Label htmlFor="status">Status</Label>
                 <Select 
                   value={getValidStatus(formData.status)} 
-                  onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
+                  onValueChange={(value: ClaimStatus) => {
+                    console.log('Status select onChange:', value);
+                    setFormData({ ...formData, status: value });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg status" />
