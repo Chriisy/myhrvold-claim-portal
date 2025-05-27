@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,16 +65,16 @@ const ClaimWizard = () => {
     },
   });
 
-  const currentStepData = steps.find(step => step.id === currentStep);
+  // Memoize the current step data
+  const currentStepData = useMemo(() => 
+    steps.find(step => step.id === currentStep), 
+    [currentStep]
+  );
+  
   const CurrentStepComponent = currentStepData?.component as React.ComponentType<any>;
 
-  const validateCurrentStep = async () => {
-    const fieldsToValidate = getFieldsForStep(currentStep);
-    const isValid = await form.trigger(fieldsToValidate);
-    return isValid;
-  };
-
-  const getFieldsForStep = (step: number): (keyof ClaimFormData)[] => {
+  // Memoize field validation function
+  const getFieldsForStep = useCallback((step: number): (keyof ClaimFormData)[] => {
     switch (step) {
       case 1:
         return ['customer_name'];
@@ -89,22 +89,31 @@ const ClaimWizard = () => {
       default:
         return [];
     }
-  };
+  }, []);
 
-  const handleNext = async () => {
+  // Memoize validation function
+  const validateCurrentStep = useCallback(async () => {
+    const fieldsToValidate = getFieldsForStep(currentStep);
+    const isValid = await form.trigger(fieldsToValidate);
+    return isValid;
+  }, [currentStep, form, getFieldsForStep]);
+
+  // Memoize navigation handlers
+  const handleNext = useCallback(async () => {
     const isValid = await validateCurrentStep();
     if (isValid && currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
-  };
+  }, [currentStep, validateCurrentStep]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
-  };
+  }, [currentStep]);
 
-  const handleSubmit = async (data: ClaimFormData) => {
+  // Memoize submit handler
+  const handleSubmit = useCallback(async (data: ClaimFormData) => {
     try {
       await createClaim.mutateAsync({
         ...data,
@@ -113,9 +122,15 @@ const ClaimWizard = () => {
     } catch (error) {
       // Error is handled in the mutation
     }
-  };
+  }, [createClaim, files]);
 
-  const progress = (currentStep / steps.length) * 100;
+  // Memoize progress calculation
+  const progress = useMemo(() => (currentStep / steps.length) * 100, [currentStep]);
+
+  // Memoize files change handler
+  const handleFilesChange = useCallback((newFiles: FileWithPreview[]) => {
+    setFiles(newFiles);
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -150,7 +165,7 @@ const ClaimWizard = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {currentStep === 4 ? (
-                <FileUploadStep files={files} onFilesChange={setFiles} />
+                <FileUploadStep files={files} onFilesChange={handleFilesChange} />
               ) : currentStep === 5 ? (
                 <ReviewStep />
               ) : (

@@ -32,18 +32,29 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
+// Optimized query client with better caching and performance settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache for 30 minutes
       retry: (failureCount, error) => {
         if (error && typeof error === 'object' && 'status' in error) {
+          // Don't retry on 4xx errors (client errors)
+          if ((error as any).status >= 400 && (error as any).status < 500) {
+            return false;
+          }
           return (error as any).status >= 500 && failureCount < 2;
         }
         return failureCount < 2;
       },
       retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
+      refetchOnWindowFocus: false, // Prevent unnecessary refetches on window focus
+      refetchOnMount: 'always', // Always refetch when component mounts
+      refetchOnReconnect: 'always', // Refetch when reconnecting to network
+    },
+    mutations: {
+      retry: 1, // Retry mutations once on failure
     },
   },
 });

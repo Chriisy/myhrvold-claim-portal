@@ -1,4 +1,5 @@
 
+import React, { memo, useMemo } from 'react';
 import { Home, FileText, Plus, Users, BarChart3, Upload, Settings, LogOut, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -18,7 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
 
-const menuItems = [
+const baseMenuItems = [
   {
     title: 'Dashboard',
     url: '/dashboard',
@@ -51,29 +52,50 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar() {
+const AppSidebar = memo(() => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { isAdmin, canManageUsers } = usePermissions();
 
   console.log('AppSidebar - User role:', user?.user_role, 'isAdmin:', isAdmin(), 'canManageUsers:', canManageUsers());
 
-  // Check if user should see admin menu
-  const showAdminMenu = user?.user_role === 'admin' || canManageUsers();
-  
-  // Combine regular menu items with admin items
-  const allMenuItems = [...menuItems];
-  
-  if (showAdminMenu) {
-    console.log('Adding admin menu items');
-    allMenuItems.push({
-      title: 'Brukere',
-      url: '/admin/users',
-      icon: Shield,
-    });
-  }
+  // Memoize the menu items computation
+  const allMenuItems = useMemo(() => {
+    const items = [...baseMenuItems];
+    
+    // Check if user should see admin menu
+    const showAdminMenu = user?.user_role === 'admin' || canManageUsers();
+    
+    if (showAdminMenu) {
+      console.log('Adding admin menu items');
+      items.push({
+        title: 'Brukere',
+        url: '/admin/users',
+        icon: Shield,
+      });
+    }
 
-  console.log('All menu items:', allMenuItems.map(item => item.title));
+    console.log('All menu items:', items.map(item => item.title));
+    return items;
+  }, [user?.user_role, canManageUsers]);
+
+  // Memoize the user debug info
+  const debugInfo = useMemo(() => {
+    if (process.env.NODE_ENV !== 'development') return null;
+    
+    const showAdminMenu = user?.user_role === 'admin' || canManageUsers();
+    
+    return (
+      <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
+        <p>Debug info:</p>
+        <p>Role: {user?.user_role}</p>
+        <p>Is Admin: {isAdmin() ? 'Yes' : 'No'}</p>
+        <p>Can Manage Users: {canManageUsers() ? 'Yes' : 'No'}</p>
+        <p>Show Admin Menu: {showAdminMenu ? 'Yes' : 'No'}</p>
+        <p>Permissions: {user?.permissions?.join(', ') || 'None'}</p>
+      </div>
+    );
+  }, [user?.user_role, user?.permissions, isAdmin, canManageUsers]);
 
   return (
     <Sidebar className="border-r border-myhrvold-border">
@@ -117,16 +139,7 @@ export function AppSidebar() {
             <p className="text-xs text-gray-500 capitalize">
               {user?.user_role} {user?.user_role === 'admin' && '(Administrator)'}
             </p>
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
-                <p>Debug info:</p>
-                <p>Role: {user?.user_role}</p>
-                <p>Is Admin: {isAdmin() ? 'Yes' : 'No'}</p>
-                <p>Can Manage Users: {canManageUsers() ? 'Yes' : 'No'}</p>
-                <p>Show Admin Menu: {showAdminMenu ? 'Yes' : 'No'}</p>
-                <p>Permissions: {user?.permissions?.join(', ') || 'None'}</p>
-              </div>
-            )}
+            {debugInfo}
           </div>
           <Button 
             variant="outline" 
@@ -141,4 +154,8 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+});
+
+AppSidebar.displayName = 'AppSidebar';
+
+export { AppSidebar };
