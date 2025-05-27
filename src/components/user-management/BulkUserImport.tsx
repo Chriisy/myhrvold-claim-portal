@@ -134,14 +134,14 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
         department = 'kristiansand'; // Map stavanger to kristiansand
       }
 
+      const userRole = parts[2].trim();
+      
+      // Fix the role mapping - remove the problematic 'role' field for now
       return {
         name: parts[0].trim(),
         email: parts[1].trim(),
-        user_role: parts[2].trim() as 'tekniker' | 'saksbehandler' | 'admin' | 'avdelingsleder',
-        department: department as 'oslo' | 'bergen' | 'trondheim' | 'kristiansand' | 'sornorge' | 'nord',
-        role: parts[2].trim() === 'tekniker' ? 'technician' : 
-              parts[2].trim() === 'saksbehandler' ? 'case_handler' :
-              parts[2].trim() === 'admin' ? 'admin' : 'department_manager'
+        user_role: userRole as 'tekniker' | 'saksbehandler' | 'admin' | 'avdelingsleder',
+        department: department as 'oslo' | 'bergen' | 'trondheim' | 'kristiansand' | 'sornorge' | 'nord'
       };
     });
   };
@@ -181,6 +181,25 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
           // Create a fake UUID for the user (since we don't have real auth users)
           const fakeUserId = crypto.randomUUID();
 
+          // Map user_role to role for the legacy role field
+          let legacyRole;
+          switch (user.user_role) {
+            case 'tekniker':
+              legacyRole = 'technician';
+              break;
+            case 'saksbehandler':
+              legacyRole = 'case_handler';
+              break;
+            case 'admin':
+              legacyRole = 'admin';
+              break;
+            case 'avdelingsleder':
+              legacyRole = 'department_manager';
+              break;
+            default:
+              legacyRole = 'technician';
+          }
+
           const { error } = await supabase
             .from('users')
             .insert({
@@ -189,16 +208,18 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
               email: user.email,
               user_role: user.user_role,
               department: user.department,
-              role: user.role,
+              role: legacyRole,
             });
 
           if (error) {
+            console.error('Insert error for user:', user.name, error);
             results.errors.push(`${user.name}: ${error.message}`);
             results.failed++;
           } else {
             results.success++;
           }
         } catch (error) {
+          console.error('Catch error for user:', user.name, error);
           results.errors.push(`${user.name}: ${error instanceof Error ? error.message : 'Ukjent feil'}`);
           results.failed++;
         }
@@ -220,6 +241,7 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
         });
       }
     } catch (error) {
+      console.error('Parse error:', error);
       toast({
         title: 'Feil',
         description: error instanceof Error ? error.message : 'Ukjent feil under import',
