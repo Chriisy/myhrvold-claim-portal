@@ -4,10 +4,14 @@ import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiredPermission?: string;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, session, isLoading } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requiredPermission 
+}) => {
+  const { user, session, isLoading, hasPermission } = useAuth();
 
   if (process.env.NODE_ENV === 'development') {
     console.log('ProtectedRoute: user:', !!user, 'session:', !!session, 'isLoading:', isLoading);
@@ -33,6 +37,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       console.log('ProtectedRoute: Redirecting to login - user or session missing');
     }
     return <Navigate to="/login" replace />;
+  }
+
+  // Check required permission if specified
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('ProtectedRoute: Access denied - missing permission:', requiredPermission);
+    }
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
