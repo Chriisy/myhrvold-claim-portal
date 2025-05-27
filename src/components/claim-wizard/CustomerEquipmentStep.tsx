@@ -8,7 +8,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
@@ -62,25 +61,69 @@ export function CustomerEquipmentStep() {
             </FormItem>
           )}
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="customer_address"
-          render={({ field }) => (
-            <FormItem className="md:col-span-2">
-              <FormLabel>Kundens adresse</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Fullstendig adresse til kunden"
-                  rows={2}
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Customer Address Section */}
+      <div className="space-y-4">
+        <h4 className="text-md font-medium text-gray-900">Kundens adresse</h4>
+        <div className="grid grid-cols-1 gap-4">
+          <FormField
+            control={form.control}
+            name="customer_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gateadresse</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Gatenavn og husnummer"
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="customer_postal_code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Postnummer</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="0000"
+                      maxLength={4}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="customer_city"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Poststed</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Poststed"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
           name="department"

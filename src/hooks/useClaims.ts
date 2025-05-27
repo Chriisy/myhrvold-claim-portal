@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,10 +18,16 @@ export const useCreateClaim = () => {
         throw new Error('Du må være logget inn for å opprette reklamasjoner');
       }
 
+      // Combine address fields into a single address string for storage
+      const fullAddress = [
+        data.customer_address,
+        data.customer_postal_code && data.customer_city ? `${data.customer_postal_code} ${data.customer_city}` : data.customer_postal_code || data.customer_city
+      ].filter(Boolean).join(', ');
+
       const claimData = {
         customer_name: data.customer_name,
         customer_no: data.customer_no || null,
-        customer_address: data.customer_address || null,
+        customer_address: fullAddress || null,
         department: data.department || null,
         machine_model: data.machine_model || null,
         machine_serial: data.machine_serial || null,

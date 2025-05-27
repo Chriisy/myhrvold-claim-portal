@@ -6,6 +6,8 @@ export const claimFormSchema = z.object({
   customer_name: z.string().min(1, 'Kundenavn er påkrevd'),
   customer_no: z.string().optional(),
   customer_address: z.string().optional(),
+  customer_postal_code: z.string().optional(),
+  customer_city: z.string().optional(),
   department: z.string().optional(),
   machine_model: z.string().optional(),
   machine_serial: z.string().optional(),

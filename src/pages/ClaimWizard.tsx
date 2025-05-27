@@ -45,6 +45,9 @@ const ClaimWizard = () => {
     defaultValues: {
       customer_name: '',
       customer_no: '',
+      customer_address: '',
+      customer_postal_code: '',
+      customer_city: '',
       department: '',
       machine_model: '',
       machine_serial: '',

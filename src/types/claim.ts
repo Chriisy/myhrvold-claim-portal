@@ -10,6 +10,8 @@ export interface ClaimFormData {
   customer_name: string;
   customer_no?: string;
   customer_address?: string;
+  customer_postal_code?: string;
+  customer_city?: string;
   department?: string;
   machine_model?: string;
   machine_serial?: string;
