@@ -10,7 +10,7 @@ export const useTechnicians = () => {
       const { data, error } = await supabase
         .from('users')
         .select('id, name, user_role, department, seller_no')
-        .in('user_role', ['tekniker', 'montør'])
+        .eq('user_role', 'tekniker')
         .order('name');
 
       if (error) throw error;
