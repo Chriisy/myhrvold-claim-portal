@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   FormControl,
@@ -8,6 +9,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { ClaimFormData } from '@/lib/validations/claim';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useTechnicians } from '@/hooks/useTechnicians';
@@ -24,6 +27,11 @@ export function CategorySupplierStep() {
   const form = useFormContext<ClaimFormData>();
   const { data: suppliers = [] } = useSuppliers();
   const { data: technicians = [] } = useTechnicians();
+  const [isNewSupplierModalOpen, setIsNewSupplierModalOpen] = useState(false);
+
+  const handleSupplierCreated = (supplierId: string) => {
+    form.setValue('supplier_id', supplierId);
+  };
 
   return (
     <div className="space-y-6">
@@ -84,7 +92,14 @@ export function CategorySupplierStep() {
                     ))}
                   </SelectContent>
                 </Select>
-                <NewSupplierModal />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setIsNewSupplierModalOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
               <FormMessage />
             </FormItem>
@@ -143,6 +158,12 @@ export function CategorySupplierStep() {
           )}
         />
       </div>
+
+      <NewSupplierModal
+        open={isNewSupplierModalOpen}
+        onOpenChange={setIsNewSupplierModalOpen}
+        onSupplierCreated={handleSupplierCreated}
+      />
     </div>
   );
 }
