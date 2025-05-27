@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useTechnicians } from '@/hooks/useTechnicians';
+import { useTechnicians, useSalespersons } from '@/hooks/useTechnicians';
 import { AccountCodeSelector } from './AccountCodeSelector';
 import { Database } from '@/integrations/supabase/types';
 import { departmentOptions, getDepartmentLabel } from '@/lib/constants/departments';
@@ -72,6 +71,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
   const { data: technicians } = useTechnicians();
+  const { data: salespersons } = useSalespersons();
 
   // Check if user can edit this claim
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
@@ -282,9 +282,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ingen valgt</SelectItem>
-                    {allUsers.map((user) => (
+                    {technicians?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.name}
+                        {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -301,9 +301,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ingen valgt</SelectItem>
-                    {allUsers.map((user) => (
+                    {salespersons?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.name}
+                        {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>

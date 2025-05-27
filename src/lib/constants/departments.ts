@@ -3,21 +3,16 @@ import { Database } from '@/integrations/supabase/types';
 
 type Department = Database['public']['Enums']['department'];
 
-export interface DepartmentOption {
-  value: Department;
-  label: string;
-}
-
-export const departmentOptions: DepartmentOption[] = [
+export const departmentOptions: Array<{ value: Department; label: string }> = [
   { value: 'oslo', label: 'Oslo' },
   { value: 'bergen', label: 'Bergen' },
   { value: 'trondheim', label: 'Trondheim' },
-  { value: 'kristiansand', label: 'Kristiansand' },
-  { value: 'sornorge', label: 'Sør-Norge' },
+  // Adding support for additional departments
+  { value: 'innlandet', label: 'Innlandet' },
   { value: 'nord', label: 'Nord' },
 ];
 
-export const getDepartmentLabel = (value: Department | string): string => {
-  const option = departmentOptions.find(dept => dept.value === value);
-  return option?.label || value || 'Ikke angitt';
+export const getDepartmentLabel = (department?: Department): string => {
+  const option = departmentOptions.find(opt => opt.value === department);
+  return option?.label || 'Ukjent avdeling';
 };

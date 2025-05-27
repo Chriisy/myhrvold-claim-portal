@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ClaimFormData } from '@/lib/validations/claim';
 import { useSuppliers } from '@/hooks/useSuppliers';
-import { useTechnicians } from '@/hooks/useTechnicians';
+import { useTechnicians, useSalespersons } from '@/hooks/useTechnicians';
 import { NewSupplierModal } from './NewSupplierModal';
 
 const categoryOptions = [
@@ -27,6 +26,7 @@ export function CategorySupplierStep() {
   const form = useFormContext<ClaimFormData>();
   const { data: suppliers = [] } = useSuppliers();
   const { data: technicians = [] } = useTechnicians();
+  const { data: salespersons = [] } = useSalespersons();
   const [isNewSupplierModalOpen, setIsNewSupplierModalOpen] = useState(false);
 
   const handleSupplierCreated = (supplierId: string) => {
@@ -122,7 +122,7 @@ export function CategorySupplierStep() {
                   <SelectItem value="none">Ingen valgt</SelectItem>
                   {technicians.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name}
+                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -146,9 +146,9 @@ export function CategorySupplierStep() {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">Ingen valgt</SelectItem>
-                  {technicians.map((user) => (
+                  {salespersons.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name}
+                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
