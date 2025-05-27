@@ -1,7 +1,6 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, FileX, Search, Plus, Edit } from 'lucide-react';
+import { Eye, FileX, Search, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ClaimData {
@@ -129,20 +128,12 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
                   <p className="text-sm text-gray-600">Opprettet</p>
                   <p className="font-semibold">{claim.created_by || 'Ukjent'}</p>
                 </div>
-                <div className="flex gap-2">
-                  <Link to={`/claim/${claim.id}`}>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Endre
-                    </Button>
-                  </Link>
-                  <Link to={`/claim/${claim.id}`}>
-                    <Button variant="outline" size="sm">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Se
-                    </Button>
-                  </Link>
-                </div>
+                <Link to={`/claim/${claim.id}`}>
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Se
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
