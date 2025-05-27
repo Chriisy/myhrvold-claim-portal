@@ -315,7 +315,7 @@
   }
   
   .container {
-    @apply max-width-7xl;
+    @apply max-w-7xl;
   }
   
   /* Better spacing for desktop */
