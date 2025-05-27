@@ -2,6 +2,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
 
+// Debounce hook
 export const useDebounce = <T extends (...args: any[]) => any>(
   callback: T,
   delay: number
@@ -17,6 +18,7 @@ export const useDebounce = <T extends (...args: any[]) => any>(
   }, []) as T;
 };
 
+// Throttle hook
 export const useThrottle = <T extends (...args: any[]) => any>(
   callback: T,
   delay: number
@@ -31,6 +33,7 @@ export const useThrottle = <T extends (...args: any[]) => any>(
   }, [callback, delay]) as T;
 };
 
+// Performance monitoring
 export const usePerformanceMonitor = (componentName: string) => {
   const renderStart = useRef<number>(0);
   const mountCount = useRef<number>(0);
@@ -50,10 +53,27 @@ export const usePerformanceMonitor = (componentName: string) => {
 
   const endRender = useCallback(() => {
     const renderTime = performance.now() - renderStart.current;
-    if (renderTime > 16) { // More than one frame at 60fps
+    if (renderTime > 16) {
       console.warn(`${componentName} slow render: ${renderTime.toFixed(2)}ms`);
     }
   }, [componentName]);
 
   return { startRender, endRender };
+};
+
+// Memory efficient list virtualization
+export const useVirtualization = (
+  items: any[],
+  itemHeight: number,
+  containerHeight: number
+) => {
+  const visibleCount = Math.ceil(containerHeight / itemHeight);
+  const startIndex = 0; // This would be dynamic based on scroll position
+  const endIndex = Math.min(startIndex + visibleCount + 1, items.length);
+  
+  return {
+    visibleItems: items.slice(startIndex, endIndex),
+    offsetY: startIndex * itemHeight,
+    totalHeight: items.length * itemHeight
+  };
 };

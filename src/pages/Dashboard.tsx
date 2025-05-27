@@ -1,35 +1,27 @@
 
+import React from 'react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { DashboardKpiSection } from '@/components/dashboard/DashboardKpiSection';
-import { DashboardChartsGrid } from '@/components/dashboard/DashboardChartsGrid';
-import { MobileOptimizedFilters } from '@/components/dashboard/MobileOptimizedFilters';
-import { NotificationToasts } from '@/components/dashboard/NotificationToasts';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { DashboardContainer } from '@/components/dashboard/core/DashboardContainer';
+import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 
-const DashboardContent = () => {
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <NotificationToasts />
-      
-      <DashboardHeader />
-
-      <DashboardKpiSection />
-
-      {/* Mobile Optimized Filters */}
-      <ImprovedErrorBoundary title="Feil ved lasting av filtre">
-        <MobileOptimizedFilters />
-      </ImprovedErrorBoundary>
-
-      <DashboardChartsGrid />
-    </div>
-  );
-};
-
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   return (
     <DashboardFiltersProvider>
-      <DashboardContent />
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <div>
+              <h1 className="text-3xl font-bold text-myhrvold-primary">Dashboard</h1>
+              <p className="text-gray-600">Oversikt over reklamasjoner og nøkkeltall</p>
+            </div>
+          </div>
+        </div>
+        
+        <DashboardFilters />
+        <DashboardContainer />
+      </div>
     </DashboardFiltersProvider>
   );
 };

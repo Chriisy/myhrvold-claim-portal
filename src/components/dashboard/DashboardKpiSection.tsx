@@ -1,5 +1,5 @@
 
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import KpiCardsGrid from '@/components/dashboard/KpiCardsGrid';
 import AdditionalKpiCards from '@/components/dashboard/AdditionalKpiCards';
 import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards';
@@ -8,19 +8,19 @@ export const DashboardKpiSection = () => {
   return (
     <div className="space-y-6">
       {/* Quick Stats Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
+      <UnifiedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
         <QuickStatsCards />
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
 
       {/* Main KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av nøkkeltall">
+      <UnifiedErrorBoundary title="Feil ved lasting av nøkkeltall">
         <KpiCardsGrid />
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
 
       {/* Additional KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
+      <UnifiedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
         <AdditionalKpiCards />
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
     </div>
   );
 };
