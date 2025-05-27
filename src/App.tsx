@@ -1,108 +1,161 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { DashboardFiltersProvider } from "@/contexts/DashboardFiltersContext";
-import { CookieConsentProvider } from "@/contexts/CookieConsentContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { ImprovedErrorBoundary } from "@/components/shared/ImprovedErrorBoundary";
-import { CookieBanner } from "@/components/privacy/CookieBanner";
-import { AIAssistantWidget } from "@/components/ai/AIAssistantWidget";
-import Dashboard from "./pages/Dashboard";
-import ClaimsList from "./pages/ClaimsList";
-import ClaimDetail from "./pages/ClaimDetail";
-import ClaimWizard from "./pages/ClaimWizard";
-import Suppliers from "./pages/Suppliers";
-import Reports from "./pages/Reports";
-import InvoiceImport from "./pages/InvoiceImport";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import CookiePolicy from "./pages/CookiePolicy";
-import TermsOfService from "./pages/TermsOfService";
-import UserProfile from "./pages/UserProfile";
-import UserManagement from "./pages/UserManagement";
+import { Suspense, lazy } from 'react';
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { CookieConsentProvider } from './contexts/CookieConsentContext';
+import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
+import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
+
+// Lazy load all pages for better performance
+const Index = lazy(() => import('./pages/Index'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Login = lazy(() => import('./pages/Login'));
+const ClaimsList = lazy(() => import('./pages/ClaimsList'));
+const ClaimDetail = lazy(() => import('./pages/ClaimDetail'));
+const ClaimWizard = lazy(() => import('./pages/ClaimWizard'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const Suppliers = lazy(() => import('./pages/Suppliers'));
+const Reports = lazy(() => import('./pages/Reports'));
+const InvoiceImport = lazy(() => import('./pages/InvoiceImport'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
       retry: (failureCount, error) => {
-        // Don't retry on auth errors
-        if ('code' in error && error.code === '42501') {
-          return false;
+        if (error && typeof error === 'object' && 'status' in error) {
+          return (error as any).status >= 500 && failureCount < 2;
         }
         return failureCount < 2;
-      }
-    }
-  }
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
+    },
+  },
 });
 
-const App = () => (
-  <ImprovedErrorBoundary
-    title="Applikasjonfeil"
-    description="Det oppstod en alvorlig feil i applikasjonen. Vennligst last siden på nytt."
-  >
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <CookieConsentProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/cookie-policy" element={<CookiePolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardFiltersProvider>
-                        <SidebarProvider>
-                          <div className="min-h-screen flex w-full">
-                            <AppSidebar />
-                            <main className="flex-1 p-6 bg-myhrvold-bg">
+function App() {
+  return (
+    <OptimizedErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CookieConsentProvider>
+            <AuthProvider>
+              <DashboardFiltersProvider>
+                <BrowserRouter>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full bg-background">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="flex-1 overflow-auto">
+                          <div className="container mx-auto p-4 max-w-7xl">
+                            <Suspense fallback={<DashboardSkeleton />}>
                               <Routes>
-                                <Route path="/" element={<Dashboard />} />
-                                <Route path="/claims" element={<ClaimsList />} />
-                                <Route path="/claim/new" element={<ClaimWizard />} />
-                                <Route path="/claim/:id" element={<ClaimDetail />} />
-                                <Route path="/suppliers" element={<Suppliers />} />
-                                <Route path="/import" element={<InvoiceImport />} />
-                                <Route path="/reports" element={<Reports />} />
-                                <Route path="/profile" element={<UserProfile />} />
-                                <Route path="/admin/users" element={<UserManagement />} />
-                                <Route path="/404" element={<NotFound />} />
-                                <Route path="*" element={<Navigate to="/404" replace />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/privacy" element={<PrivacyPolicy />} />
+                                <Route path="/cookies" element={<CookiePolicy />} />
+                                <Route path="/terms" element={<TermsOfService />} />
+                                
+                                <Route path="/" element={
+                                  <ProtectedRoute>
+                                    <Index />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/dashboard" element={
+                                  <ProtectedRoute>
+                                    <Suspense fallback={<DashboardSkeleton />}>
+                                      <Dashboard />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/claims" element={
+                                  <ProtectedRoute>
+                                    <Suspense fallback={<TableSkeleton />}>
+                                      <ClaimsList />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/claims/:id" element={
+                                  <ProtectedRoute>
+                                    <ClaimDetail />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/new-claim" element={
+                                  <ProtectedRoute>
+                                    <ClaimWizard />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/admin/users" element={
+                                  <ProtectedRoute requiredPermission="manage_users">
+                                    <Suspense fallback={<TableSkeleton />}>
+                                      <UserManagement />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/suppliers" element={
+                                  <ProtectedRoute>
+                                    <Suspense fallback={<TableSkeleton />}>
+                                      <Suppliers />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/reports" element={
+                                  <ProtectedRoute requiredPermission="view_reports">
+                                    <Reports />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/import" element={
+                                  <ProtectedRoute>
+                                    <InvoiceImport />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/profile" element={
+                                  <ProtectedRoute>
+                                    <UserProfile />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="*" element={<NotFound />} />
                               </Routes>
-                              {/* AI Assistant Widget - visible on all authenticated pages */}
-                              <AIAssistantWidget 
-                                context={{
-                                  currentPage: window.location.pathname,
-                                  userRole: 'user'
-                                }}
-                              />
-                            </main>
+                            </Suspense>
                           </div>
-                        </SidebarProvider>
-                      </DashboardFiltersProvider>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-              <CookieBanner />
-            </BrowserRouter>
-          </AuthProvider>
-        </CookieConsentProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ImprovedErrorBoundary>
-);
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                  <Toaster />
+                  <Sonner />
+                </BrowserRouter>
+              </DashboardFiltersProvider>
+            </AuthProvider>
+          </CookieConsentProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </OptimizedErrorBoundary>
+  );
+}
 
 export default App;
