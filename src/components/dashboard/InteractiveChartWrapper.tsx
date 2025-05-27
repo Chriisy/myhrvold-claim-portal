@@ -37,33 +37,29 @@ export const InteractiveChartWrapper = ({
       isExpanded ? 'fixed inset-4 z-50 bg-white' : ''
     }`}>
       <CardHeader className="flex flex-row items-center justify-between pb-4 lg:pb-6">
-        <div className="flex-1">
-          <CardTitle className="text-lg lg:text-xl xl:text-2xl">{title}</CardTitle>
+        <div className="flex-1 card-header-spacing">
+          <CardTitle className="text-heading-3">{title}</CardTitle>
           {description && (
-            <p className="text-sm lg:text-base text-gray-600 mt-1">{description}</p>
+            <p className="text-body text-muted-foreground">{description}</p>
           )}
         </div>
         <div className="flex gap-2">
           {onExport && (
-            <Button variant="outline" size="sm" onClick={handleExport} className="lg:px-3 lg:py-2">
-              <Download className="w-4 h-4" />
+            <Button variant="outline" size="sm" onClick={handleExport} className="btn-icon-sm">
+              <Download />
             </Button>
           )}
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="lg:px-3 lg:py-2"
+            className="btn-icon-sm"
           >
-            {isExpanded ? (
-              <Minimize2 className="w-4 h-4" />
-            ) : (
-              <Maximize2 className="w-4 h-4" />
-            )}
+            {isExpanded ? <Minimize2 /> : <Maximize2 />}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : 'min-h-[400px] lg:min-h-[450px] xl:min-h-[500px]'}>
+      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : 'min-h-[350px] lg:min-h-[400px] xl:min-h-[450px]'}>
         {children}
       </CardContent>
     </Card>

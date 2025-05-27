@@ -10,15 +10,14 @@ import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary
 const DashboardContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="space-y-6 lg:space-y-8 xl:space-y-10 animate-fade-in">
+      <div className="max-w-screen-xl mx-auto px-4 lg:px-8 xl:px-12 py-6 lg:py-8 xl:py-10">
+        <div className="card-content-spacing animate-fade-in">
           <NotificationToasts />
           
           <DashboardHeader />
 
           <DashboardKpiSection />
 
-          {/* Mobile Optimized Filters */}
           <ImprovedErrorBoundary title="Feil ved lasting av filtre">
             <MobileOptimizedFilters />
           </ImprovedErrorBoundary>
