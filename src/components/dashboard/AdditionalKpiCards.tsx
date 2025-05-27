@@ -1,3 +1,4 @@
+
 import { Calculator, TrendingDown, DollarSign } from 'lucide-react';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { useQuery } from '@tanstack/react-query';
@@ -91,7 +92,7 @@ const AdditionalKpiCards = memo(() => {
   });
 
   return (
-    <div className="kpi-grid">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <KpiCard
         title="Snitt Kostnad/Reklamasjon"
         value={`${(additionalKpis?.avgCostPerClaim || 0).toLocaleString('nb-NO')} kr`}

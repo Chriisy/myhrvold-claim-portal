@@ -29,47 +29,46 @@ export const ClaimsListFilters = ({
   setPartNumberFilter
 }: ClaimsListFiltersProps) => {
   return (
-    <Card className="shadow-lg">
-      <CardHeader className="card-padding">
-        <CardTitle className="icon-text-md">
-          <Filter strokeWidth={2} />
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Filter className="w-5 h-5" />
           Filtre
         </CardTitle>
       </CardHeader>
-      <CardContent className="card-padding">
-        <div className="filters-grid">
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 lg:w-5 lg:h-5" strokeWidth={2} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Søk kunde, ID, maskin eller adresse..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 lg:pl-12 text-body"
+              className="pl-10"
             />
           </div>
           <Input
             placeholder="Søk på delenummer..."
             value={partNumberFilter}
             onChange={(e) => setPartNumberFilter(e.target.value)}
-            className="text-body"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="text-body">
+            <SelectTrigger>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map(status => (
-                <SelectItem key={status} value={status} className="text-body">{status}</SelectItem>
+                <SelectItem key={status} value={status}>{status}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="text-body">
+            <SelectTrigger>
               <SelectValue placeholder="Kategori" />
             </SelectTrigger>
             <SelectContent>
               {categoryOptions.map(category => (
-                <SelectItem key={category} value={category} className="text-body">{category}</SelectItem>
+                <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
             </SelectContent>
           </Select>

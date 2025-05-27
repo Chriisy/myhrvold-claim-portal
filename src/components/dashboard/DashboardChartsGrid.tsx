@@ -5,13 +5,16 @@ import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBar
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
 import { EnhancedRecentClaimsTable } from '@/components/dashboard/EnhancedRecentClaimsTable';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CHART_DEFINITIONS } from '@/config/dashboardConfig';
 
 export const DashboardChartsGrid = () => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="desktop-spacing">
+    <div className="space-y-6">
       {/* Main Charts Row */}
-      <div className="charts-grid">
+      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.stackedBar.title}
@@ -32,7 +35,7 @@ export const DashboardChartsGrid = () => {
       </div>
 
       {/* Secondary Charts Row */}
-      <div className="charts-grid">
+      <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
         <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.rootCause.title}
@@ -47,9 +50,7 @@ export const DashboardChartsGrid = () => {
             title={CHART_DEFINITIONS.recentClaims.title}
             description={CHART_DEFINITIONS.recentClaims.description}
           >
-            <div className="recent-claims-list">
-              <EnhancedRecentClaimsTable />
-            </div>
+            <EnhancedRecentClaimsTable />
           </InteractiveChartWrapper>
         </ImprovedErrorBoundary>
       </div>

@@ -33,33 +33,36 @@ export const InteractiveChartWrapper = ({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-xl shadow-lg ${
+    <Card className={`transition-all duration-300 hover:shadow-lg ${
       isExpanded ? 'fixed inset-4 z-50 bg-white' : ''
     }`}>
-      <CardHeader className="flex flex-row items-center justify-between card-padding">
-        <div className="flex-1 card-header-spacing">
-          <CardTitle className="text-heading-3">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-lg">{title}</CardTitle>
           {description && (
-            <p className="text-body text-muted-foreground">{description}</p>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           )}
         </div>
-        <div className="flex gap-2 lg:gap-3">
+        <div className="flex gap-2">
           {onExport && (
-            <Button variant="outline" size="sm" onClick={handleExport} className="btn-icon-sm">
-              <Download strokeWidth={2} />
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="w-4 h-4" />
             </Button>
           )}
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="btn-icon-sm"
           >
-            {isExpanded ? <Minimize2 strokeWidth={2} /> : <Maximize2 strokeWidth={2} />}
+            {isExpanded ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className={`chart-container ${isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : ''}`}>
+      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : ''}>
         {children}
       </CardContent>
     </Card>

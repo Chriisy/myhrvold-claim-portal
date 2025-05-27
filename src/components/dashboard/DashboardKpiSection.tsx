@@ -6,7 +6,7 @@ import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards';
 
 export const DashboardKpiSection = () => {
   return (
-    <div className="desktop-spacing">
+    <div className="space-y-6">
       {/* Quick Stats Cards */}
       <ImprovedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
         <QuickStatsCards />

@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 // Lazy load all pages for better performance
@@ -62,7 +62,7 @@ function App() {
                       <AppSidebar />
                       <main className="flex-1 flex flex-col overflow-hidden">
                         <div className="flex-1 overflow-auto">
-                          <div className="w-full max-w-screen-xl mx-auto px-6 lg:px-8 xl:px-12 py-8 lg:py-12">
+                          <div className="container mx-auto p-4 max-w-7xl">
                             <Suspense fallback={<DashboardSkeleton />}>
                               <Routes>
                                 <Route path="/login" element={<Login />} />
@@ -72,7 +72,7 @@ function App() {
                                 
                                 <Route path="/" element={
                                   <ProtectedRoute>
-                                    <Dashboard />
+                                    <Index />
                                   </ProtectedRoute>
                                 } />
                                 
@@ -98,19 +98,7 @@ function App() {
                                   </ProtectedRoute>
                                 } />
                                 
-                                <Route path="/claim/:id" element={
-                                  <ProtectedRoute>
-                                    <ClaimDetail />
-                                  </ProtectedRoute>
-                                } />
-                                
                                 <Route path="/new-claim" element={
-                                  <ProtectedRoute>
-                                    <ClaimWizard />
-                                  </ProtectedRoute>
-                                } />
-                                
-                                <Route path="/claim/new" element={
                                   <ProtectedRoute>
                                     <ClaimWizard />
                                   </ProtectedRoute>

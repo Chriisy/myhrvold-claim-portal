@@ -24,10 +24,10 @@ export const EnhancedRecentClaimsTable = () => {
 
   if (isLoading) {
     return (
-      <div className="mobile-spacing lg:desktop-spacing">
+      <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="animate-pulse border rounded-lg mobile-padding">
-            <div className="grid grid-cols-1 md:grid-cols-5 mobile-grid-gap">
+          <div key={i} className="animate-pulse border rounded-lg p-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div className="space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-24"></div>
                 <div className="h-3 bg-gray-200 rounded w-20"></div>
@@ -55,7 +55,7 @@ export const EnhancedRecentClaimsTable = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <p className="text-body text-red-600">Feil ved lasting av nylige reklamasjoner</p>
+        <p className="text-red-600">Feil ved lasting av nylige reklamasjoner</p>
       </div>
     );
   }
@@ -63,41 +63,41 @@ export const EnhancedRecentClaimsTable = () => {
   if (!claims || claims.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-body text-muted-foreground">Ingen nylige reklamasjoner funnet</p>
+        <p className="text-gray-500">Ingen nylige reklamasjoner funnet</p>
       </div>
     );
   }
 
   return (
-    <div className="mobile-spacing lg:desktop-spacing">
+    <div className="space-y-3">
       {claims.map((claim) => (
-        <div key={claim.id} className="border rounded-lg mobile-padding hover:bg-gray-50 transition-colors">
-          <div className="grid grid-cols-1 md:grid-cols-5 mobile-grid-gap items-center">
+        <div key={claim.id} className="border rounded-lg p-3 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
             <div>
-              <p className="text-body font-semibold text-myhrvold-primary">{claim.id.slice(0, 8)}...</p>
-              <p className="text-body-small text-muted-foreground">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
+              <p className="font-semibold text-myhrvold-primary text-sm">{claim.id.slice(0, 8)}...</p>
+              <p className="text-xs text-gray-600">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
             </div>
             <div>
-              <p className="text-body font-medium">{claim.customer_name || 'Ukjent kunde'}</p>
-              <p className="text-body-small text-muted-foreground">{claim.machine_model || 'Ingen maskin'}</p>
+              <p className="font-medium text-sm">{claim.customer_name || 'Ukjent kunde'}</p>
+              <p className="text-xs text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
               {claim.part_number && (
-                <p className="text-body-small text-blue-600 font-mono">Del: {claim.part_number}</p>
+                <p className="text-xs text-blue-600 font-mono">Del: {claim.part_number}</p>
               )}
             </div>
             <div>
-              <Badge className={`status-badge ${getStatusColor(claim.status)}`}>
+              <Badge className={`${getStatusColor(claim.status)} text-xs`}>
                 {claim.status}
               </Badge>
             </div>
             <div>
-              <p className="text-caption">Leverandør</p>
-              <p className="text-body font-medium">{claim.suppliers?.name || 'Ingen'}</p>
-              <p className="text-body-small text-muted-foreground">Tekniker: {claim.technician?.name || 'Ingen'}</p>
+              <p className="text-xs text-gray-600">Leverandør</p>
+              <p className="font-medium text-sm">{claim.suppliers?.name || 'Ingen'}</p>
+              <p className="text-xs text-gray-600">Tekniker: {claim.technician?.name || 'Ingen'}</p>
             </div>
             <div className="flex justify-end">
               <Link to={`/claim/${claim.id}`}>
-                <Button variant="outline" className="btn-icon-sm">
-                  <Eye strokeWidth={2} />
+                <Button variant="outline" size="sm">
+                  <Eye className="w-3 h-3 mr-1" />
                   Se
                 </Button>
               </Link>

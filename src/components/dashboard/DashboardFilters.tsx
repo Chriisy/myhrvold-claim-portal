@@ -29,21 +29,21 @@ export const DashboardFilters = () => {
   };
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
+        <CardTitle className="flex items-center gap-2">
           <Filter className="w-5 h-5" />
           Filtre
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Supplier Filter */}
           <Select 
             value={filters.supplier_id || "all"} 
             onValueChange={(value) => updateFilter('supplier_id', value === "all" ? undefined : value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger>
               <SelectValue placeholder="Leverandør" />
             </SelectTrigger>
             <SelectContent>
@@ -61,7 +61,7 @@ export const DashboardFilters = () => {
             value={filters.konto_nr?.toString() || "all"} 
             onValueChange={(value) => updateFilter('konto_nr', value === "all" ? undefined : parseInt(value))}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger>
               <SelectValue placeholder="Konto" />
             </SelectTrigger>
             <SelectContent>
@@ -79,20 +79,17 @@ export const DashboardFilters = () => {
             placeholder="Maskinmodell..."
             value={filters.machine_model || ""}
             onChange={(e) => updateFilter('machine_model', e.target.value || undefined)}
-            className="w-full"
           />
 
           {/* Date Range Filter */}
           <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-start text-left font-normal w-full">
+              <Button variant="outline" className="justify-start text-left font-normal">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                <span className="truncate">
-                  {filters.date_range.start && filters.date_range.end
-                    ? `${format(filters.date_range.start, 'dd.MM.yyyy')} - ${format(filters.date_range.end, 'dd.MM.yyyy')}`
-                    : "Velg datoperiode"
-                  }
-                </span>
+                {filters.date_range.start && filters.date_range.end
+                  ? `${format(filters.date_range.start, 'dd.MM.yyyy')} - ${format(filters.date_range.end, 'dd.MM.yyyy')}`
+                  : "Velg datoperiode"
+                }
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -109,7 +106,7 @@ export const DashboardFilters = () => {
           </Popover>
 
           {/* Reset Filters */}
-          <Button variant="outline" onClick={resetFilters} className="w-full lg:col-span-2 xl:col-span-1">
+          <Button variant="outline" onClick={resetFilters}>
             <RotateCcw className="w-4 h-4 mr-2" />
             Tilbakestill
           </Button>

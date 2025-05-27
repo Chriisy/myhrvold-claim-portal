@@ -3,20 +3,23 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const DashboardHeader = () => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
-      <div className="flex items-center gap-3 lg:gap-4">
-        <SidebarTrigger className="lg:hidden" />
-        <div className="card-header-spacing">
-          <h1 className="text-heading-1 text-myhrvold-primary">Dashboard</h1>
-          <p className="text-body text-muted-foreground">Oversikt over reklamasjoner og nøkkeltall</p>
+    <div className={`flex items-center justify-between ${isMobile ? 'flex-col gap-4' : ''}`}>
+      <div className="flex items-center gap-4">
+        <SidebarTrigger />
+        <div>
+          <h1 className="text-3xl font-bold text-myhrvold-primary">Dashboard</h1>
+          <p className="text-gray-600">Oversikt over reklamasjoner og nøkkeltall</p>
         </div>
       </div>
-      <Link to="/claim/new" className="w-full lg:w-auto">
-        <Button className="btn-primary btn-icon-md w-full lg:w-auto lg:px-6 lg:py-3">
-          <Plus />
+      <Link to="/claim/new">
+        <Button className="btn-primary">
+          <Plus className="w-4 h-4 mr-2" />
           Ny Reklamasjon
         </Button>
       </Link>

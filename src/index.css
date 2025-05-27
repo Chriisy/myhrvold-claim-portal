@@ -67,37 +67,16 @@
 @layer base {
   * {
     @apply border-border;
-    box-sizing: border-box;
   }
-  html {
-    @apply h-full;
-    font-size: 16px;
-  }
-  
-  @media (min-width: 1024px) {
-    html {
-      font-size: 112.5%; /* 18px base for desktop */
-    }
-  }
-  
   body {
-    @apply bg-background text-foreground h-full;
+    @apply bg-background text-foreground;
     font-family: "Inter", sans-serif;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  #root {
-    @apply h-full;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-myhrvold-primary hover:bg-myhrvold-primary/90 text-white font-medium;
+    @apply bg-myhrvold-primary hover:bg-myhrvold-primary/90 text-white;
   }
   
   .card-hover {
@@ -114,243 +93,6 @@
 
   .animate-bounce-in {
     animation: bounceIn 0.6s ease-out;
-  }
-
-  /* Enhanced typography hierarchy with better desktop scaling */
-  .text-display {
-    @apply text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight;
-  }
-
-  .text-heading-1 {
-    @apply text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight;
-  }
-
-  .text-heading-2 {
-    @apply text-xl lg:text-2xl xl:text-3xl font-semibold tracking-tight;
-  }
-
-  .text-heading-3 {
-    @apply text-lg lg:text-xl xl:text-2xl font-semibold;
-  }
-
-  .text-body-large {
-    @apply text-base lg:text-lg font-medium;
-  }
-
-  .text-body {
-    @apply text-sm lg:text-[1.05rem] font-normal;
-  }
-
-  .text-body-small {
-    @apply text-xs lg:text-[0.925rem] font-normal;
-  }
-
-  .text-caption {
-    @apply text-xs lg:text-sm font-medium tracking-wide uppercase text-muted-foreground;
-  }
-
-  /* Improved icon and text alignment with proper desktop sizing */
-  .icon-text-sm {
-    @apply flex items-center gap-2 lg:gap-3;
-  }
-
-  .icon-text-sm svg {
-    @apply w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0;
-  }
-
-  .icon-text-md {
-    @apply flex items-center gap-2.5 lg:gap-3;
-  }
-
-  .icon-text-md svg {
-    @apply w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0;
-  }
-
-  .icon-text-lg {
-    @apply flex items-center gap-3 lg:gap-4;
-  }
-
-  .icon-text-lg svg {
-    @apply w-6 h-6 lg:w-7 lg:h-7 flex-shrink-0;
-  }
-
-  /* Enhanced button icon alignment with proper stroke width */
-  .btn-icon-sm {
-    @apply flex items-center justify-center gap-2 lg:gap-3 text-sm lg:text-base font-medium;
-  }
-
-  .btn-icon-sm svg {
-    @apply w-4 h-4 lg:w-5 lg:h-5;
-    stroke-width: 2;
-  }
-
-  .btn-icon-md {
-    @apply flex items-center justify-center gap-2.5 lg:gap-3 text-base lg:text-lg font-medium;
-  }
-
-  .btn-icon-md svg {
-    @apply w-5 h-5 lg:w-6 lg:h-6;
-    stroke-width: 2;
-  }
-
-  .btn-icon-lg {
-    @apply flex items-center justify-center gap-3 lg:gap-4 text-lg lg:text-xl font-medium;
-  }
-
-  .btn-icon-lg svg {
-    @apply w-6 h-6 lg:w-7 lg:h-7;
-    stroke-width: 2;
-  }
-
-  /* Responsive container system */
-  .container-responsive {
-    @apply mx-auto max-w-[1440px] px-4 lg:px-8 xl:px-12;
-  }
-
-  /* Enhanced card and content spacing */
-  .card-content-spacing {
-    @apply space-y-6 lg:space-y-8 xl:space-y-10;
-  }
-
-  .card-header-spacing {
-    @apply space-y-2 lg:space-y-3 xl:space-y-4;
-  }
-
-  .card-padding {
-    @apply p-5 lg:p-6 xl:p-8;
-  }
-
-  /* Form element improvements */
-  .form-group {
-    @apply space-y-2 lg:space-y-3;
-  }
-
-  .form-label {
-    @apply text-sm lg:text-base font-medium text-foreground;
-  }
-
-  .form-description {
-    @apply text-xs lg:text-sm text-muted-foreground;
-  }
-
-  /* Enhanced status badge with better sizing */
-  .status-badge {
-    @apply inline-flex items-center gap-1.5 lg:gap-2 px-2.5 lg:px-3 py-1 lg:py-1.5 rounded-full text-xs lg:text-sm font-medium;
-  }
-
-  .status-badge svg {
-    @apply w-3 h-3 lg:w-4 lg:h-4;
-    stroke-width: 2;
-  }
-
-  /* Table improvements with better spacing */
-  .table-cell-with-icon {
-    @apply flex items-center gap-2 lg:gap-3;
-  }
-
-  .table-cell-with-icon svg {
-    @apply w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground;
-    stroke-width: 2;
-  }
-
-  /* Enhanced KPI card improvements */
-  .kpi-card {
-    @apply bg-white rounded-lg border shadow-sm p-5 lg:p-6 xl:p-7;
-  }
-
-  .kpi-header {
-    @apply flex items-center justify-between mb-3 lg:mb-4;
-  }
-
-  .kpi-icon {
-    @apply w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 p-2 lg:p-2.5 rounded-lg bg-primary/10 text-primary flex-shrink-0;
-  }
-
-  .kpi-icon svg {
-    stroke-width: 2;
-  }
-
-  .kpi-value {
-    @apply text-2xl lg:text-3xl xl:text-4xl font-bold text-foreground;
-  }
-
-  .kpi-label {
-    @apply text-sm lg:text-base xl:text-lg text-muted-foreground font-medium;
-  }
-
-  .kpi-change {
-    @apply text-xs lg:text-sm xl:text-base font-medium flex items-center gap-1 lg:gap-1.5;
-  }
-
-  .kpi-change svg {
-    @apply w-3 h-3 lg:w-4 lg:h-4;
-    stroke-width: 2;
-  }
-
-  /* Enhanced sidebar improvements */
-  .sidebar-item {
-    @apply flex items-center gap-3 lg:gap-4 px-3 lg:px-4 py-2 lg:py-3 rounded-lg text-sm lg:text-base font-medium transition-colors;
-  }
-
-  .sidebar-item svg {
-    @apply w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0;
-    stroke-width: 2;
-  }
-
-  .sidebar-item.active {
-    @apply bg-primary text-primary-foreground;
-  }
-
-  .sidebar-item:hover:not(.active) {
-    @apply bg-accent text-accent-foreground;
-  }
-
-  /* Enhanced responsive grid system */
-  .kpi-grid {
-    @apply grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6 xl:gap-8;
-  }
-
-  .charts-grid {
-    @apply grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 xl:gap-10;
-  }
-
-  .filters-grid {
-    @apply grid grid-cols-1 lg:grid-cols-2 gap-x-6 lg:gap-x-8 gap-y-4 lg:gap-y-6;
-  }
-
-  /* Chart container improvements */
-  .chart-container {
-    @apply aspect-[16/9] w-full h-auto min-h-[260px] lg:min-h-[300px] xl:min-h-[350px];
-  }
-
-  /* Recent claims list styling */
-  .recent-claims-list {
-    @apply xl:w-[320px] space-y-3 lg:space-y-4;
-  }
-
-  /* Enhanced mobile/desktop spacing */
-  .mobile-spacing {
-    @apply space-y-4 lg:space-y-6;
-  }
-
-  .mobile-grid-gap {
-    @apply gap-4 lg:gap-6;
-  }
-
-  .mobile-padding {
-    @apply p-4 lg:p-6;
-  }
-
-  .desktop-spacing {
-    @apply space-y-6 lg:space-y-8 xl:space-y-10;
-  }
-
-  .desktop-grid-gap {
-    @apply gap-6 lg:gap-8 xl:gap-10;
-  }
-
-  .desktop-padding {
-    @apply p-6 lg:p-8 xl:p-10;
   }
 }
 
@@ -410,25 +152,37 @@
   animation: shimmer 1.5s infinite;
 }
 
-/* Enhanced chart responsivity with aspect ratio */
+/* Mobile responsivity improvements */
+@media (max-width: 768px) {
+  .mobile-stack {
+    @apply flex-col space-y-4;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-1;
+  }
+  
+  .mobile-text-sm {
+    @apply text-sm;
+  }
+  
+  .mobile-p-4 {
+    @apply p-4;
+  }
+}
+
+/* Chart responsivity */
 .recharts-responsive-container {
-  min-height: 260px !important;
-  width: 100% !important;
+  min-height: 300px !important;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 640px) {
   .recharts-responsive-container {
-    min-height: 300px !important;
+    min-height: 250px !important;
   }
 }
 
-@media (min-width: 1280px) {
-  .recharts-responsive-container {
-    min-height: 350px !important;
-  }
-}
-
-/* Enhanced focus states */
+/* Improved focus states */
 .focus-visible {
   @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
 }
@@ -436,7 +190,6 @@
 /* Better scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -451,24 +204,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-}
-
-/* Layout fixes for responsive design */
-.sidebar-layout {
-  @apply flex min-h-screen w-full;
-}
-
-.main-content {
-  @apply flex-1 flex flex-col overflow-hidden;
-}
-
-.content-area {
-  @apply flex-1 overflow-auto;
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
 }

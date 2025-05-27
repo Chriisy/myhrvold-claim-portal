@@ -7,8 +7,7 @@ import { SystemHealthCheck } from '@/components/dashboard/SystemHealthCheck';
 import { PerformanceMonitor } from '@/components/dashboard/PerformanceMonitor';
 import { ErrorBoundaryWrapper } from '@/components/dashboard/ErrorBoundaryWrapper';
 import { ReportDateRangePicker } from '@/components/reports/ReportDateRangePicker';
-import { AIReportSection } from '@/components/reports/AIReportSection';
-import { BarChart3, Activity, Settings, Download, FileText, Calculator, Building, Sparkles } from 'lucide-react';
+import { BarChart3, Activity, Settings, Download, FileText, Calculator, Building } from 'lucide-react';
 import { useReports } from '@/hooks/useReports';
 import { useState } from 'react';
 import { subDays } from 'date-fns';
@@ -36,21 +35,17 @@ const Reports = () => {
         </div>
 
         <Tabs defaultValue="reports" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="reports" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" strokeWidth={2} />
+              <BarChart3 className="w-4 h-4" />
               Rapporter
             </TabsTrigger>
-            <TabsTrigger value="ai-reports" className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4" strokeWidth={2} />
-              AI Rapporter
-            </TabsTrigger>
             <TabsTrigger value="system" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" strokeWidth={2} />
+              <Activity className="w-4 h-4" />
               Systemhelse
             </TabsTrigger>
             <TabsTrigger value="performance" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" strokeWidth={2} />
+              <Settings className="w-4 h-4" />
               Ytelse
             </TabsTrigger>
           </TabsList>
@@ -60,11 +55,11 @@ const Reports = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" strokeWidth={2} />
-                    Standard Rapporter
+                    <BarChart3 className="w-5 h-5" />
+                    Tilgjengelige Rapporter
                   </CardTitle>
                   <CardDescription>
-                    Last ned forhåndsdefinerte rapporter i ulike formater
+                    Last ned detaljerte rapporter i ulike formater
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -76,9 +71,9 @@ const Reports = () => {
                   </div>
 
                   <div className="grid gap-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <FileText className="w-8 h-8 text-blue-600" strokeWidth={2} />
+                        <FileText className="w-8 h-8 text-blue-600" />
                         <div>
                           <h3 className="font-semibold">Reklamasjonsrapport</h3>
                           <p className="text-sm text-gray-600">Komplett oversikt over alle reklamasjoner</p>
@@ -92,7 +87,7 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           CSV
                         </Button>
                         <Button
@@ -102,15 +97,15 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           PDF
                         </Button>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Calculator className="w-8 h-8 text-green-600" strokeWidth={2} />
+                        <Calculator className="w-8 h-8 text-green-600" />
                         <div>
                           <h3 className="font-semibold">Kostnadsrapport</h3>
                           <p className="text-sm text-gray-600">Detaljert kostnadsanalyse per periode</p>
@@ -124,7 +119,7 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           CSV
                         </Button>
                         <Button
@@ -134,15 +129,15 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           PDF
                         </Button>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Building className="w-8 h-8 text-purple-600" strokeWidth={2} />
+                        <Building className="w-8 h-8 text-purple-600" />
                         <div>
                           <h3 className="font-semibold">Leverandørrapport</h3>
                           <p className="text-sm text-gray-600">Ytelse og kostnader per leverandør</p>
@@ -156,7 +151,7 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           CSV
                         </Button>
                         <Button
@@ -166,7 +161,7 @@ const Reports = () => {
                           disabled={isGenerating}
                           className="flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" strokeWidth={2} />
+                          <Download className="w-4 h-4" />
                           PDF
                         </Button>
                       </div>
@@ -183,12 +178,6 @@ const Reports = () => {
                   )}
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ai-reports" className="mt-6">
-            <div className="grid gap-6">
-              <AIReportSection />
             </div>
           </TabsContent>
 

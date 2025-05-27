@@ -30,6 +30,7 @@ const ClaimsList = () => {
   const totalCount = result?.count || 0;
   const totalPages = result?.totalPages || 1;
 
+  // Reset to page 1 when filters change
   const handleFilterChange = (filterType: string, value: string) => {
     setCurrentPage(1);
     switch (filterType) {
@@ -49,68 +50,62 @@ const ClaimsList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container-responsive py-6 lg:py-8 xl:py-10">
-        <div className="card-content-spacing">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
-            <div className="flex items-center gap-3 lg:gap-4">
-              <SidebarTrigger className="lg:hidden" />
-              <div className="card-header-spacing">
-                <h1 className="text-heading-1 text-myhrvold-primary">Reklamasjoner</h1>
-                <p className="text-body text-muted-foreground">Oversikt over alle reklamasjoner</p>
-              </div>
-            </div>
-            <Link to="/claim/new" className="w-full lg:w-auto">
-              <Button className="btn-primary btn-icon-md w-full lg:w-auto lg:px-6 lg:py-3">
-                <Plus strokeWidth={2} />
-                Ny Reklamasjon
-              </Button>
-            </Link>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          <div>
+            <h1 className="text-3xl font-bold text-myhrvold-primary">Reklamasjoner</h1>
+            <p className="text-gray-600">Oversikt over alle reklamasjoner</p>
           </div>
-
-          <ClaimsListFilters
-            searchTerm={searchTerm}
-            setSearchTerm={(value) => handleFilterChange('search', value)}
-            statusFilter={statusFilter}
-            setStatusFilter={(value) => handleFilterChange('status', value)}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={(value) => handleFilterChange('category', value)}
-            partNumberFilter={partNumberFilter}
-            setPartNumberFilter={(value) => handleFilterChange('partNumber', value)}
-          />
-
-          <Card className="shadow-lg">
-            <CardHeader className="card-header-spacing card-padding">
-              <CardTitle className="text-heading-3">
-                Reklamasjoner ({totalCount} totalt, viser side {currentPage} av {totalPages})
-              </CardTitle>
-              <CardDescription className="text-body">
-                {isLoading ? 'Laster reklamasjoner...' : 'Klikk på en reklamasjon for å se detaljer'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="card-content-spacing">
-              <div className="overflow-x-auto lg:overflow-visible">
-                <ClaimsListTable
-                  claims={claims}
-                  isLoading={isLoading}
-                  error={!!error}
-                  hasAnyClaims={totalCount > 0}
-                />
-              </div>
-              
-              {totalPages > 1 && (
-                <ClaimsPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  totalItems={totalCount}
-                  itemsPerPage={50}
-                />
-              )}
-            </CardContent>
-          </Card>
         </div>
+        <Link to="/claim/new">
+          <Button className="btn-primary">
+            <Plus className="w-4 h-4 mr-2" />
+            Ny Reklamasjon
+          </Button>
+        </Link>
       </div>
+
+      <ClaimsListFilters
+        searchTerm={searchTerm}
+        setSearchTerm={(value) => handleFilterChange('search', value)}
+        statusFilter={statusFilter}
+        setStatusFilter={(value) => handleFilterChange('status', value)}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={(value) => handleFilterChange('category', value)}
+        partNumberFilter={partNumberFilter}
+        setPartNumberFilter={(value) => handleFilterChange('partNumber', value)}
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Reklamasjoner ({totalCount} totalt, viser side {currentPage} av {totalPages})
+          </CardTitle>
+          <CardDescription>
+            {isLoading ? 'Laster reklamasjoner...' : 'Klikk på en reklamasjon for å se detaljer'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ClaimsListTable
+            claims={claims}
+            isLoading={isLoading}
+            error={!!error}
+            hasAnyClaims={totalCount > 0}
+          />
+          
+          {totalPages > 1 && (
+            <ClaimsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalCount}
+              itemsPerPage={50}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
