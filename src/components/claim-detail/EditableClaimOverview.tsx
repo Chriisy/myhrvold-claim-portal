@@ -98,8 +98,8 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       internal_note: formData.internal_note || null,
       status: formData.status || 'Ny',
       account_code_id: formData.account_code_id || null,
-      technician_id: formData.technician_id || null,
-      salesperson_id: formData.salesperson_id || null,
+      technician_id: formData.technician_id === 'none' ? null : formData.technician_id || null,
+      salesperson_id: formData.salesperson_id === 'none' ? null : formData.salesperson_id || null,
     };
     
     console.log('handleSave - Final updateData:', updateData);
@@ -274,14 +274,14 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div>
                 <Label htmlFor="technician_id">Tekniker</Label>
                 <Select 
-                  value={formData.technician_id || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, technician_id: value || null })}
+                  value={formData.technician_id || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, technician_id: value === 'none' ? null : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg tekniker" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ingen valgt</SelectItem>
+                    <SelectItem value="none">Ingen valgt</SelectItem>
                     {allUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
@@ -293,14 +293,14 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
               <div>
                 <Label htmlFor="salesperson_id">Selger</Label>
                 <Select 
-                  value={formData.salesperson_id || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, salesperson_id: value || null })}
+                  value={formData.salesperson_id || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, salesperson_id: value === 'none' ? null : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg selger" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ingen valgt</SelectItem>
+                    <SelectItem value="none">Ingen valgt</SelectItem>
                     {allUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
