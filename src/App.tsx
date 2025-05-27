@@ -12,7 +12,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import './App.css';
 
 // Lazy load all pages for better performance
