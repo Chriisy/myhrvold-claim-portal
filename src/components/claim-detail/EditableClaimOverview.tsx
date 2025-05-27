@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useTechnicians } from '@/hooks/useTechnicians';
 import { AccountCodeSelector } from './AccountCodeSelector';
 import { Database } from '@/integrations/supabase/types';
 import { departmentOptions, getDepartmentLabel } from '@/lib/constants/departments';
@@ -35,6 +36,8 @@ interface ClaimData {
   internal_note?: string;
   status?: ClaimStatus;
   account_code_id?: number;
+  technician_id?: string;
+  salesperson_id?: string;
   suppliers?: { name: string } | null;
   technician?: { name: string } | null;
   salesperson?: { name: string } | null;
@@ -56,6 +59,7 @@ const categoryOptions = [
 const statusOptions = [
   { value: 'Ny', label: 'Ny' },
   { value: 'Avventer', label: 'Avventer' },
+  { value: 'Venter på svar', label: 'Venter på svar' },
   { value: 'Godkjent', label: 'Godkjent' },
   { value: 'Avslått', label: 'Avslått' },
   { value: 'Bokført', label: 'Bokført' },
@@ -67,9 +71,13 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const [formData, setFormData] = useState(claim);
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
+  const { data: technicians } = useTechnicians();
 
   // Check if user can edit this claim
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
+
+  // Filter technicians to include both technicians and salespersons
+  const allUsers = technicians || [];
 
   const handleSave = async () => {
     // Only send the database columns, not the joined relationship data
@@ -90,6 +98,8 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       internal_note: formData.internal_note || null,
       status: formData.status || 'Ny',
       account_code_id: formData.account_code_id || null,
+      technician_id: formData.technician_id || null,
+      salesperson_id: formData.salesperson_id || null,
     };
     
     console.log('handleSave - Final updateData:', updateData);
@@ -256,6 +266,44 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                     {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="technician_id">Tekniker</Label>
+                <Select 
+                  value={formData.technician_id || ''} 
+                  onValueChange={(value) => setFormData({ ...formData, technician_id: value || null })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg tekniker" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Ingen valgt</SelectItem>
+                    {allUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="salesperson_id">Selger</Label>
+                <Select 
+                  value={formData.salesperson_id || ''} 
+                  onValueChange={(value) => setFormData({ ...formData, salesperson_id: value || null })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg selger" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Ingen valgt</SelectItem>
+                    {allUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

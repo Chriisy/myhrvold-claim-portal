@@ -609,6 +609,7 @@ export type Database = {
         | "Avslått"
         | "Bokført"
         | "Lukket"
+        | "Venter på svar"
       department:
         | "oslo"
         | "bergen"
@@ -765,6 +766,7 @@ export const Constants = {
         "Avslått",
         "Bokført",
         "Lukket",
+        "Venter på svar",
       ],
       department: [
         "oslo",
