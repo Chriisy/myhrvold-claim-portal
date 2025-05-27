@@ -11,14 +11,12 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { useAccountCodes } from '@/hooks/useAccountCodes';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 export const DashboardFilters = () => {
   const { filters, updateFilter, resetFilters } = useDashboardFilters();
   const { data: suppliers } = useSuppliers();
   const { data: accountCodes } = useAccountCodes();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const isMobile = useIsMobile();
 
   const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
     if (range?.from && range?.to) {
@@ -39,11 +37,7 @@ export const DashboardFilters = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`grid gap-4 ${
-          isMobile 
-            ? 'grid-cols-1' 
-            : 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
-        }`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6">
           {/* Supplier Filter */}
           <Select 
             value={filters.supplier_id || "all"} 
@@ -109,13 +103,13 @@ export const DashboardFilters = () => {
                   to: filters.date_range.end
                 }}
                 onSelect={handleDateRangeChange}
-                numberOfMonths={isMobile ? 1 : 2}
+                numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
 
           {/* Reset Filters */}
-          <Button variant="outline" onClick={resetFilters} className="w-full">
+          <Button variant="outline" onClick={resetFilters} className="w-full lg:col-span-2 xl:col-span-1">
             <RotateCcw className="w-4 h-4 mr-2" />
             Tilbakestill
           </Button>

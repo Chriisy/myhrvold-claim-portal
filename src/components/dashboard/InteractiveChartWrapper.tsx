@@ -36,9 +36,9 @@ export const InteractiveChartWrapper = ({
     <Card className={`transition-all duration-300 hover:shadow-lg ${
       isExpanded ? 'fixed inset-4 z-50 bg-white' : ''
     }`}>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="text-lg">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <div className="flex-1">
+          <CardTitle className="text-lg lg:text-xl">{title}</CardTitle>
           {description && (
             <p className="text-sm text-gray-600 mt-1">{description}</p>
           )}
@@ -62,7 +62,7 @@ export const InteractiveChartWrapper = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : ''}>
+      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : 'min-h-[400px] lg:min-h-[500px]'}>
         {children}
       </CardContent>
     </Card>

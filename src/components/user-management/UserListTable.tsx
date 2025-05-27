@@ -61,7 +61,7 @@ export const UserListTable = memo(({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
             {searchQuery ? `Søkeresultater (${users.length})` : 'Alle brukere i systemet'}
@@ -76,32 +76,35 @@ export const UserListTable = memo(({
           {users.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 lg:p-6 border rounded-lg hover:bg-gray-50 transition-colors gap-4"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start lg:items-center gap-3 flex-1">
                 <Checkbox
                   checked={selectedUsers.some(u => u.id === user.id)}
                   onCheckedChange={(checked) => onUserSelection(user, checked as boolean)}
+                  className="mt-1 lg:mt-0"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold">{user.name}</h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2">
+                    <h3 className="font-semibold text-sm lg:text-base truncate">{user.name}</h3>
                     {user.id === currentUser?.id && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs w-fit">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Du
                       </Badge>
                     )}
-                    <Badge variant={getRoleBadgeVariant(user.user_role)}>
-                      {roleLabels[user.user_role]}
-                    </Badge>
-                    <Badge variant="outline">
-                      {getDepartmentLabel(user.department)}
-                    </Badge>
-                    <UserStatusIndicator createdAt={user.created_at} />
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={getRoleBadgeVariant(user.user_role)} className="text-xs">
+                        {roleLabels[user.user_role]}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {getDepartmentLabel(user.department)}
+                      </Badge>
+                      <UserStatusIndicator createdAt={user.created_at} />
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{user.email}</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <p className="text-sm text-gray-600 mb-2 break-all lg:break-normal">{user.email}</p>
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4 text-xs text-gray-500">
                     <span>Opprettet: {new Date(user.created_at).toLocaleDateString('nb-NO')}</span>
                     <span>Tillatelser: {getPermissionCount(user.permissions)}</span>
                     {user.seller_no && <span>Selger: {user.seller_no}</span>}
@@ -127,6 +130,7 @@ export const UserListTable = memo(({
                 size="sm"
                 onClick={() => onEditUser(user)}
                 disabled={user.id === currentUser?.id && currentUser?.user_role !== 'admin'}
+                className="w-full lg:w-auto lg:px-6"
               >
                 <Pencil className="h-4 w-4 mr-2" />
                 {user.id === currentUser?.id ? 'Rediger profil' : 'Rediger'}
@@ -135,7 +139,7 @@ export const UserListTable = memo(({
           ))}
 
           {users.length === 0 && searchQuery && (
-            <div className="text-center py-8">
+            <div className="text-center py-8 lg:py-12">
               <p className="text-gray-500">Ingen brukere funnet som matcher søket "{searchQuery}"</p>
             </div>
           )}

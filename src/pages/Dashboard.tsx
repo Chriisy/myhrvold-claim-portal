@@ -9,7 +9,7 @@ import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary
 
 const DashboardContent = () => {
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 lg:space-y-12 animate-fade-in">
       <NotificationToasts />
       
       <DashboardHeader />

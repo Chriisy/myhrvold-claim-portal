@@ -5,16 +5,13 @@ import OptimizedStackedBarChart from '@/components/dashboard/OptimizedStackedBar
 import OptimizedDonutChart from '@/components/dashboard/OptimizedDonutChart';
 import SupplierDistributionChart from '@/components/dashboard/SupplierDistributionChart';
 import { EnhancedRecentClaimsTable } from '@/components/dashboard/EnhancedRecentClaimsTable';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { CHART_DEFINITIONS } from '@/config/dashboardConfig';
 
 export const DashboardChartsGrid = () => {
-  const isMobile = useIsMobile();
-
   return (
-    <div className="space-y-8">
-      {/* Main Charts Row */}
-      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-2 gap-8'}`}>
+    <div className="space-y-8 lg:space-y-12">
+      {/* Main Charts Row - Desktop First Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.stackedBar.title}
@@ -35,7 +32,7 @@ export const DashboardChartsGrid = () => {
       </div>
 
       {/* Secondary Charts Row */}
-      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-2 gap-8'}`}>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.rootCause.title}

@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 interface ResponsiveContainerProps {
   children: ReactNode;
   className?: string;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl' | '7xl' | 'full';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl' | '7xl' | 'screen-xl' | 'full';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   breakpoint?: 'mobile' | 'tablet' | 'desktop' | 'all';
 }
@@ -13,7 +13,7 @@ interface ResponsiveContainerProps {
 export function ResponsiveContainer({ 
   children, 
   className,
-  maxWidth = 'full',
+  maxWidth = 'screen-xl',
   padding = 'md',
   breakpoint = 'all'
 }: ResponsiveContainerProps) {
@@ -26,21 +26,22 @@ export function ResponsiveContainer({
     '4xl': 'max-w-4xl',
     '6xl': 'max-w-6xl',
     '7xl': 'max-w-7xl',
+    'screen-xl': 'max-w-screen-xl',
     full: 'max-w-full'
   };
 
   const paddingClasses = {
     none: '',
-    sm: 'p-2 sm:p-4',
-    md: 'p-4 sm:p-6 lg:p-8',
-    lg: 'p-6 sm:p-8 lg:p-12',
-    xl: 'p-8 sm:p-12 lg:p-16'
+    sm: 'p-3 lg:p-4',
+    md: 'p-4 lg:p-6 xl:p-8',
+    lg: 'p-6 lg:p-8 xl:p-12',
+    xl: 'p-8 lg:p-12 xl:p-16'
   };
 
   const breakpointClasses = {
-    mobile: 'block md:hidden',
-    tablet: 'hidden md:block lg:hidden',
-    desktop: 'hidden lg:block',
+    mobile: 'block lg:hidden',
+    tablet: 'hidden md:block xl:hidden',
+    desktop: 'hidden xl:block',
     all: 'block'
   };
 

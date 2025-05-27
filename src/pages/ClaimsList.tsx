@@ -50,17 +50,17 @@ const ClaimsList = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
         <div className="flex items-center gap-4">
-          <SidebarTrigger />
+          <SidebarTrigger className="lg:hidden" />
           <div>
-            <h1 className="text-3xl font-bold text-myhrvold-primary">Reklamasjoner</h1>
-            <p className="text-gray-600">Oversikt over alle reklamasjoner</p>
+            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-myhrvold-primary">Reklamasjoner</h1>
+            <p className="text-gray-600 text-sm lg:text-base">Oversikt over alle reklamasjoner</p>
           </div>
         </div>
-        <Link to="/claim/new">
-          <Button className="btn-primary">
+        <Link to="/claim/new" className="w-full lg:w-auto">
+          <Button className="btn-primary w-full lg:w-auto lg:px-8 lg:py-3">
             <Plus className="w-4 h-4 mr-2" />
             Ny Reklamasjon
           </Button>
@@ -80,7 +80,7 @@ const ClaimsList = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-lg lg:text-xl">
             Reklamasjoner ({totalCount} totalt, viser side {currentPage} av {totalPages})
           </CardTitle>
           <CardDescription>
@@ -88,12 +88,14 @@ const ClaimsList = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ClaimsListTable
-            claims={claims}
-            isLoading={isLoading}
-            error={!!error}
-            hasAnyClaims={totalCount > 0}
-          />
+          <div className="overflow-x-auto lg:overflow-visible">
+            <ClaimsListTable
+              claims={claims}
+              isLoading={isLoading}
+              error={!!error}
+              hasAnyClaims={totalCount > 0}
+            />
+          </div>
           
           {totalPages > 1 && (
             <ClaimsPagination
