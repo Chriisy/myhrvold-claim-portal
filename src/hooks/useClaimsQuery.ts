@@ -15,8 +15,8 @@ interface ClaimWithRelations {
   part_number?: string;
   warranty?: boolean;
   quantity?: number;
-  category?: ClaimCategory | null; // Use proper ClaimCategory type instead of string
-  status?: ClaimStatus; // Use proper ClaimStatus type instead of string
+  category?: ClaimCategory | null;
+  status?: ClaimStatus;
   created_at: string;
   created_by?: string;
   suppliers?: { name: string } | null;
@@ -30,12 +30,36 @@ interface ClaimWithRelations {
   } | null;
 }
 
-export const useClaimsQuery = () => {
+interface PaginatedResult {
+  data: ClaimWithRelations[];
+  count: number;
+  totalPages: number;
+}
+
+interface ClaimsQueryFilters {
+  searchTerm?: string;
+  statusFilter?: string;
+  categoryFilter?: string;
+  partNumberFilter?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export const useClaimsQuery = (filters: ClaimsQueryFilters = {}) => {
+  const {
+    searchTerm = '',
+    statusFilter = 'Alle',
+    categoryFilter = 'Alle',
+    partNumberFilter = '',
+    page = 1,
+    pageSize = 50
+  } = filters;
+
   return useQuery({
-    queryKey: ['claims'],
-    queryFn: async (): Promise<ClaimWithRelations[]> => {
+    queryKey: ['claims', { searchTerm, statusFilter, categoryFilter, partNumberFilter, page, pageSize }],
+    queryFn: async (): Promise<PaginatedResult> => {
       return ErrorService.withRetry(async () => {
-        const { data, error } = await supabase
+        let query = supabase
           .from('claims')
           .select(`
             *,
@@ -43,10 +67,33 @@ export const useClaimsQuery = () => {
             technician:users!claims_technician_id_fkey(name),
             salesperson:users!claims_salesperson_id_fkey(name),
             account_codes(konto_nr, type, seller_flag, comment)
-          `)
-          .is('deleted_at', null)
+          `, { count: 'exact' })
+          .is('deleted_at', null);
+
+        // Apply filters
+        if (searchTerm) {
+          query = query.or(`customer_name.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%,machine_model.ilike.%${searchTerm}%,customer_address.ilike.%${searchTerm}%`);
+        }
+
+        if (statusFilter !== 'Alle') {
+          query = query.eq('status', statusFilter);
+        }
+
+        if (categoryFilter !== 'Alle') {
+          query = query.eq('category', categoryFilter);
+        }
+
+        if (partNumberFilter) {
+          query = query.ilike('part_number', `%${partNumberFilter}%`);
+        }
+
+        // Add pagination
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data, error, count } = await query
           .order('created_at', { ascending: false })
-          .limit(100);
+          .range(from, to);
 
         if (error) {
           console.error('Supabase error in useClaimsQuery:', error);
@@ -54,13 +101,17 @@ export const useClaimsQuery = () => {
           throw new Error(`Failed to fetch claims: ${error.message}`);
         }
 
-        // Ensure we return a typed array with null safety
-        return (data || []) as ClaimWithRelations[];
+        const totalPages = Math.ceil((count || 0) / pageSize);
+
+        return {
+          data: (data || []) as ClaimWithRelations[],
+          count: count || 0,
+          totalPages
+        };
       });
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
-      // Only retry on network errors, not on permissions or other issues
       if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
         return false;
       }
@@ -80,7 +131,6 @@ export const useClaimQuery = (claimId: string) => {
       }
       
       return ErrorService.withRetry(async () => {
-        // Validate UUID format
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimId);
         
         if (!isUUID) {

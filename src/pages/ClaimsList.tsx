@@ -8,26 +8,46 @@ import { Link } from 'react-router-dom';
 import { useClaimsQuery } from '@/hooks/useClaimsQuery';
 import { ClaimsListFilters } from '@/components/claims/ClaimsListFilters';
 import { ClaimsListTable } from '@/components/claims/ClaimsListTable';
+import { ClaimsPagination } from '@/components/claims/ClaimsPagination';
 
 const ClaimsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Alle');
   const [categoryFilter, setCategoryFilter] = useState('Alle');
   const [partNumberFilter, setPartNumberFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
-  const { data: claims, isLoading, error } = useClaimsQuery();
+  const { data: result, isLoading, error } = useClaimsQuery({
+    searchTerm,
+    statusFilter,
+    categoryFilter,
+    partNumberFilter,
+    page: currentPage,
+    pageSize: 50
+  });
 
-  const filteredClaims = claims?.filter(claim => {
-    const matchesSearch = claim.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         claim.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         claim.machine_model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         claim.customer_address?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'Alle' || claim.status === statusFilter;
-    const matchesCategory = categoryFilter === 'Alle' || claim.category === categoryFilter;
-    const matchesPartNumber = !partNumberFilter || claim.part_number?.toLowerCase().includes(partNumberFilter.toLowerCase());
-    
-    return matchesSearch && matchesStatus && matchesCategory && matchesPartNumber;
-  }) || [];
+  const claims = result?.data || [];
+  const totalCount = result?.count || 0;
+  const totalPages = result?.totalPages || 1;
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (filterType: string, value: string) => {
+    setCurrentPage(1);
+    switch (filterType) {
+      case 'search':
+        setSearchTerm(value);
+        break;
+      case 'status':
+        setStatusFilter(value);
+        break;
+      case 'category':
+        setCategoryFilter(value);
+        break;
+      case 'partNumber':
+        setPartNumberFilter(value);
+        break;
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -49,29 +69,41 @@ const ClaimsList = () => {
 
       <ClaimsListFilters
         searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        setSearchTerm={(value) => handleFilterChange('search', value)}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        setStatusFilter={(value) => handleFilterChange('status', value)}
         categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
+        setCategoryFilter={(value) => handleFilterChange('category', value)}
         partNumberFilter={partNumberFilter}
-        setPartNumberFilter={setPartNumberFilter}
+        setPartNumberFilter={(value) => handleFilterChange('partNumber', value)}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Reklamasjoner ({filteredClaims.length})</CardTitle>
+          <CardTitle>
+            Reklamasjoner ({totalCount} totalt, viser side {currentPage} av {totalPages})
+          </CardTitle>
           <CardDescription>
             {isLoading ? 'Laster reklamasjoner...' : 'Klikk på en reklamasjon for å se detaljer'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <ClaimsListTable
-            claims={filteredClaims}
+            claims={claims}
             isLoading={isLoading}
             error={!!error}
-            hasAnyClaims={!!claims && claims.length > 0}
+            hasAnyClaims={totalCount > 0}
           />
+          
+          {totalPages > 1 && (
+            <ClaimsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalCount}
+              itemsPerPage={50}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

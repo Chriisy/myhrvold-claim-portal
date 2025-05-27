@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, FileX, Search, Plus } from 'lucide-react';
@@ -9,7 +10,7 @@ interface ClaimData {
   machine_model?: string;
   part_number?: string;
   status?: string;
-  category?: string | null; // Allow null to match ClaimWithRelations
+  category?: string | null;
   created_at: string;
   created_by?: string;
   suppliers?: { name: string } | null;
@@ -39,7 +40,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div key={i} className="animate-pulse border rounded-lg p-4">
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               {[...Array(6)].map((_, j) => (
@@ -85,7 +86,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
       <div className="text-center py-8">
         <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
         <p className="text-gray-500">Ingen reklamasjoner funnet med gjeldende filtre.</p>
-        <p className="text-sm text-gray-400 mt-2">Prøv å endre søkekriteriene.</p>
+        <p className="text-sm text-gray-400 mt-2">Prøv å endre søkekriteriene eller gå til neste side.</p>
       </div>
     );
   }

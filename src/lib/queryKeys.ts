@@ -1,11 +1,20 @@
 
 import { DashboardFilters } from '@/types/dashboard';
 
+interface ClaimsQueryFilters {
+  searchTerm?: string;
+  statusFilter?: string;
+  categoryFilter?: string;
+  partNumberFilter?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export const queryKeys = {
   // Claims queries
   claims: {
     all: ['claims'] as const,
-    list: (filters?: any) => [...queryKeys.claims.all, 'list', filters] as const,
+    list: (filters?: ClaimsQueryFilters) => [...queryKeys.claims.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.claims.all, 'detail', id] as const,
   },
   
