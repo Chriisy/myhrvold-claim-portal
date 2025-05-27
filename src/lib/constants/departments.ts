@@ -7,8 +7,8 @@ export const departmentOptions: Array<{ value: Department; label: string }> = [
   { value: 'oslo', label: 'Oslo' },
   { value: 'bergen', label: 'Bergen' },
   { value: 'trondheim', label: 'Trondheim' },
-  // Adding support for additional departments
-  { value: 'innlandet', label: 'Innlandet' },
+  { value: 'kristiansand', label: 'Kristiansand' },
+  { value: 'sornorge', label: 'Sørnorge' },
   { value: 'nord', label: 'Nord' },
 ];
 

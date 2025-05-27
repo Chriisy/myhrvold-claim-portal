@@ -21,6 +21,7 @@ export const useTechnicians = () => {
 };
 
 // New hook specifically for getting all users that can be assigned as salespersons
+// Using only valid user_role enum values
 export const useSalespersons = () => {
   return useQuery({
     queryKey: ['salespersons'],
@@ -28,7 +29,7 @@ export const useSalespersons = () => {
       const { data, error } = await supabase
         .from('users')
         .select('id, name, user_role, department, seller_no')
-        .in('user_role', ['selger', 'saksbehandler', 'avdelingsleder', 'admin'])
+        .in('user_role', ['saksbehandler', 'avdelingsleder', 'admin'])
         .order('name');
 
       if (error) throw error;
