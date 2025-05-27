@@ -28,13 +28,16 @@ export const useSelgere = () => {
         });
       }
 
-      // Include all users that could potentially be salespersons
+      // More inclusive filtering - allow more users to be selectable as salespersons
       const filtered = (data || []).filter(user => 
         user.seller_no || // Anyone with a seller number
         user.role === 'salesperson' || 
         user.user_role === 'saksbehandler' || 
         user.user_role === 'avdelingsleder' ||
-        user.user_role === 'admin'
+        user.user_role === 'admin' ||
+        user.role === 'admin' ||
+        user.user_role === 'tekniker' || // Allow technicians to also be selectable as salespersons
+        user.role === 'technician'
       );
       
       console.log('useSelgere - Filtered selgere:', filtered);
