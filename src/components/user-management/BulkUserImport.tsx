@@ -49,11 +49,18 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
       if (parts.length !== 4) {
         throw new Error(`Linje ${index + 1}: Ugyldig format. Forventet: "Navn - epost - rolle - avdeling"`);
       }
+
+      // Map old department names to new ones
+      let department = parts[3].trim();
+      if (department === 'stavanger') {
+        department = 'kristiansand'; // Map stavanger to kristiansand
+      }
+
       return {
         name: parts[0].trim(),
         email: parts[1].trim(),
         user_role: parts[2].trim() as 'tekniker' | 'saksbehandler' | 'admin' | 'avdelingsleder',
-        department: parts[3].trim() as 'oslo' | 'bergen' | 'stavanger' | 'trondheim',
+        department: department as 'oslo' | 'bergen' | 'trondheim' | 'kristiansand' | 'sornorge' | 'nord',
         role: parts[2].trim() === 'tekniker' ? 'technician' : 
               parts[2].trim() === 'saksbehandler' ? 'case_handler' :
               parts[2].trim() === 'admin' ? 'admin' : 'department_manager'
@@ -166,7 +173,7 @@ export function BulkUserImport({ onImportComplete }: BulkUserImportProps) {
             className="mt-2"
           />
           <p className="text-xs text-gray-500 mt-1">
-            En bruker per linje. Roller: tekniker, saksbehandler, admin, avdelingsleder
+            En bruker per linje. Roller: tekniker, saksbehandler, admin, avdelingsleder. Avdelinger: oslo, bergen, trondheim, kristiansand, sornorge, nord
           </p>
         </div>
 
