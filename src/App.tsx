@@ -104,6 +104,12 @@ function App() {
                                   </ProtectedRoute>
                                 } />
                                 
+                                <Route path="/claim/new" element={
+                                  <ProtectedRoute>
+                                    <ClaimWizard />
+                                  </ProtectedRoute>
+                                } />
+                                
                                 <Route path="/admin/users" element={
                                   <ProtectedRoute requiredPermission="manage_users">
                                     <Suspense fallback={<TableSkeleton />}>

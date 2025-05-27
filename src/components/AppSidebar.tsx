@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 const menuItems = [
   {
     title: 'Dashboard',
-    url: '/',
+    url: '/dashboard',
     icon: Home,
   },
   {
@@ -31,7 +31,7 @@ const menuItems = [
   },
   {
     title: 'Ny Reklamasjon',
-    url: '/claim/new',
+    url: '/new-claim',
     icon: Plus,
   },
   {

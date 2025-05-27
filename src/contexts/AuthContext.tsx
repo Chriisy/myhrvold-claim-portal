@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const loadingUserRef = useRef<string | null>(null);
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listeners');
@@ -54,6 +55,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       
       if (session?.user) {
+        // Prevent multiple simultaneous user profile loads for the same user
+        if (loadingUserRef.current === session.user.id) {
+          console.log('Already loading user profile for:', session.user.id);
+          return;
+        }
+        
+        loadingUserRef.current = session.user.id;
+        
         setTimeout(async () => {
           try {
             await loadUserProfile(session.user);
@@ -61,10 +70,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('Error loading user profile:', error);
             setUser(null);
           } finally {
+            loadingUserRef.current = null;
             setIsLoading(false);
           }
         }, 0);
       } else {
+        loadingUserRef.current = null;
         setUser(null);
         setIsLoading(false);
       }
@@ -82,6 +93,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       
       if (session?.user) {
+        // Prevent multiple simultaneous user profile loads for the same user
+        if (loadingUserRef.current === session.user.id) {
+          console.log('Already loading user profile for:', session.user.id);
+          return;
+        }
+        
+        loadingUserRef.current = session.user.id;
+        
         setTimeout(async () => {
           try {
             await loadUserProfile(session.user);
@@ -89,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('Error loading user profile on init:', error);
             setUser(null);
           } finally {
+            loadingUserRef.current = null;
             setIsLoading(false);
           }
         }, 0);
@@ -241,6 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('Logout initiated');
     try {
       cleanupAuthState();
+      loadingUserRef.current = null;
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
