@@ -67,10 +67,21 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+  }
+  html {
+    @apply h-full;
+    font-size: 16px;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full;
     font-family: "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  #root {
+    @apply h-full;
   }
 }
 
@@ -93,6 +104,41 @@
 
   .animate-bounce-in {
     animation: bounceIn 0.6s ease-out;
+  }
+
+  /* Responsive container improvements */
+  .container {
+    @apply w-full px-4 mx-auto;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      @apply max-w-640px px-6;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      @apply max-w-768px px-8;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      @apply max-w-1024px px-8;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      @apply max-w-1280px px-8;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container {
+      @apply max-w-1536px px-8;
+    }
   }
 }
 
@@ -169,16 +215,43 @@
   .mobile-p-4 {
     @apply p-4;
   }
+
+  .container {
+    @apply px-4;
+  }
+}
+
+/* Desktop specific improvements */
+@media (min-width: 1024px) {
+  .container {
+    @apply max-w-7xl;
+  }
+  
+  /* Better spacing for desktop */
+  .space-y-6 > * + * {
+    @apply mt-6;
+  }
+  
+  .space-y-8 > * + * {
+    @apply mt-8;
+  }
 }
 
 /* Chart responsivity */
 .recharts-responsive-container {
   min-height: 300px !important;
+  width: 100% !important;
 }
 
 @media (max-width: 640px) {
   .recharts-responsive-container {
     min-height: 250px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .recharts-responsive-container {
+    min-height: 400px !important;
   }
 }
 
@@ -190,6 +263,7 @@
 /* Better scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -204,4 +278,24 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Layout fixes */
+.sidebar-layout {
+  @apply flex min-h-screen w-full;
+}
+
+.main-content {
+  @apply flex-1 flex flex-col overflow-hidden;
+}
+
+.content-area {
+  @apply flex-1 overflow-auto;
+}
+
+/* Sidebar responsive fixes */
+@media (max-width: 768px) {
+  .sidebar-layout {
+    @apply flex-col;
+  }
 }

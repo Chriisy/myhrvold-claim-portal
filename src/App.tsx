@@ -72,7 +72,7 @@ function App() {
                                 
                                 <Route path="/" element={
                                   <ProtectedRoute>
-                                    <Index />
+                                    <Dashboard />
                                   </ProtectedRoute>
                                 } />
                                 
