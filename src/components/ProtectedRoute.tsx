@@ -44,7 +44,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (process.env.NODE_ENV === 'development') {
       console.log('ProtectedRoute: Access denied - missing permission:', requiredPermission);
     }
-    return <Navigate to="/" replace />;
+    // Redirect to dashboard instead of "/" to avoid redirect loop
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
