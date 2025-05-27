@@ -7,13 +7,15 @@ interface ResponsiveContainerProps {
   className?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl' | '7xl' | 'full';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  breakpoint?: 'mobile' | 'tablet' | 'desktop' | 'all';
 }
 
 export function ResponsiveContainer({ 
   children, 
   className,
   maxWidth = 'full',
-  padding = 'md'
+  padding = 'md',
+  breakpoint = 'all'
 }: ResponsiveContainerProps) {
   const maxWidthClasses = {
     sm: 'max-w-sm',
@@ -35,11 +37,19 @@ export function ResponsiveContainer({
     xl: 'p-8 sm:p-12 lg:p-16'
   };
 
+  const breakpointClasses = {
+    mobile: 'block md:hidden',
+    tablet: 'hidden md:block lg:hidden',
+    desktop: 'hidden lg:block',
+    all: 'block'
+  };
+
   return (
     <div className={cn(
       'w-full mx-auto',
       maxWidthClasses[maxWidth],
       paddingClasses[padding],
+      breakpointClasses[breakpoint],
       className
     )}>
       {children}
