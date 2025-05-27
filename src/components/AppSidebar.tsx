@@ -17,37 +17,44 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const menuItems = [
   {
     title: 'Dashboard',
     url: '/',
     icon: Home,
+    badge: null,
   },
   {
     title: 'Alle Reklamasjoner',
     url: '/claims',
     icon: FileText,
+    badge: '9', // This would come from API in real app
   },
   {
     title: 'Ny Reklamasjon',
     url: '/claim/new',
     icon: Plus,
+    badge: null,
   },
   {
     title: 'Leverandører',
     url: '/suppliers',
     icon: Users,
+    badge: null,
   },
   {
     title: 'Importer faktura',
     url: '/import',
     icon: Upload,
+    badge: null,
   },
   {
     title: 'Rapporter',
     url: '/reports',
     icon: BarChart3,
+    badge: null,
   },
 ];
 
@@ -56,24 +63,18 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
   const { isAdmin, canManageUsers } = usePermissions();
 
-  console.log('AppSidebar - User role:', user?.user_role, 'isAdmin:', isAdmin(), 'canManageUsers:', canManageUsers());
-
-  // Check if user should see admin menu
   const showAdminMenu = user?.user_role === 'admin' || canManageUsers();
   
-  // Combine regular menu items with admin items
   const allMenuItems = [...menuItems];
   
   if (showAdminMenu) {
-    console.log('Adding admin menu items');
     allMenuItems.push({
       title: 'Brukere',
       url: '/admin/users',
       icon: Shield,
+      badge: null,
     });
   }
-
-  console.log('All menu items:', allMenuItems.map(item => item.title));
 
   return (
     <Sidebar className="border-r border-myhrvold-border">
@@ -98,8 +99,13 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <Link to={item.url} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors">
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="w-5 h-5" strokeWidth={2} />
+                      <span className="flex-1">{item.title}</span>
+                      {item.badge && (
+                        <Badge variant="secondary" className="ml-auto">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,16 +123,6 @@ export function AppSidebar() {
             <p className="text-xs text-gray-500 capitalize">
               {user?.user_role} {user?.user_role === 'admin' && '(Administrator)'}
             </p>
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
-                <p>Debug info:</p>
-                <p>Role: {user?.user_role}</p>
-                <p>Is Admin: {isAdmin() ? 'Yes' : 'No'}</p>
-                <p>Can Manage Users: {canManageUsers() ? 'Yes' : 'No'}</p>
-                <p>Show Admin Menu: {showAdminMenu ? 'Yes' : 'No'}</p>
-                <p>Permissions: {user?.permissions?.join(', ') || 'None'}</p>
-              </div>
-            )}
           </div>
           <Button 
             variant="outline" 
@@ -134,7 +130,7 @@ export function AppSidebar() {
             className="w-full justify-start"
             size="sm"
           >
-            <LogOut className="w-4 h-4 mr-2" />
+            <LogOut className="w-4 h-4 mr-2" strokeWidth={2} />
             Logg ut
           </Button>
         </div>
