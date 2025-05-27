@@ -41,7 +41,9 @@ export const createOptimizedLazyComponent = <P extends object>(
     </ImprovedErrorBoundary>
   ));
 
-  WrappedComponent.displayName = `OptimizedLazy(${LazyComponent.displayName || 'Component'})`;
+  // Fix: Get displayName from the lazy component's _payload if available
+  const componentName = (LazyComponent as any)._payload?.displayName || 'Component';
+  WrappedComponent.displayName = `OptimizedLazy(${componentName})`;
   
   // Add preload method to component
   (WrappedComponent as any).preload = importFn;

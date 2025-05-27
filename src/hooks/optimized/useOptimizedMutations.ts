@@ -10,11 +10,18 @@ export const useOptimizedCreateClaim = () => {
 
   return useMutation({
     mutationFn: async (data: ClaimFormData & { files?: File[] }) => {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Separate files from claim data
+      const { files, ...claimData } = data;
+
       const { data: claim, error } = await supabase
         .from('claims')
         .insert([{
-          ...data,
-          files: undefined // Remove files from claim data
+          ...claimData,
+          created_by: user.id
         }])
         .select()
         .single();
@@ -22,9 +29,9 @@ export const useOptimizedCreateClaim = () => {
       if (error) throw error;
 
       // Handle file uploads if any
-      if (data.files && data.files.length > 0) {
+      if (files && files.length > 0) {
         await Promise.all(
-          data.files.map(async (file) => {
+          files.map(async (file) => {
             const fileExt = file.name.split('.').pop();
             const fileName = `${claim.id}/${Date.now()}.${fileExt}`;
             
