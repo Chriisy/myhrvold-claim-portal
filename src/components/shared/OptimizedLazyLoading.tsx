@@ -41,8 +41,8 @@ export const createOptimizedLazyComponent = <P extends object>(
     </ImprovedErrorBoundary>
   ));
 
-  // Fix: Get displayName from the lazy component's _payload if available
-  const componentName = (LazyComponent as any)._payload?.displayName || 'Component';
+  // Fix: Handle displayName safely for lazy components
+  const componentName = 'Component';
   WrappedComponent.displayName = `OptimizedLazy(${componentName})`;
   
   // Add preload method to component
