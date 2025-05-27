@@ -45,6 +45,18 @@ interface ClaimsQueryFilters {
   pageSize?: number;
 }
 
+// Helper function to check if a string is a valid ClaimStatus
+const isValidClaimStatus = (status: string): status is ClaimStatus => {
+  const validStatuses: ClaimStatus[] = ['Ny', 'Avventer', 'Godkjent', 'Avslått', 'Bokført', 'Lukket', 'Venter på svar'];
+  return validStatuses.includes(status as ClaimStatus);
+};
+
+// Helper function to check if a string is a valid ClaimCategory
+const isValidClaimCategory = (category: string): category is ClaimCategory => {
+  const validCategories: ClaimCategory[] = ['Service', 'Installasjon', 'Produkt', 'Del'];
+  return validCategories.includes(category as ClaimCategory);
+};
+
 export const useClaimsQuery = (filters: ClaimsQueryFilters = {}) => {
   const {
     searchTerm = '',
@@ -75,11 +87,11 @@ export const useClaimsQuery = (filters: ClaimsQueryFilters = {}) => {
           query = query.or(`customer_name.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%,machine_model.ilike.%${searchTerm}%,customer_address.ilike.%${searchTerm}%`);
         }
 
-        if (statusFilter !== 'Alle') {
+        if (statusFilter !== 'Alle' && isValidClaimStatus(statusFilter)) {
           query = query.eq('status', statusFilter);
         }
 
-        if (categoryFilter !== 'Alle') {
+        if (categoryFilter !== 'Alle' && isValidClaimCategory(categoryFilter)) {
           query = query.eq('category', categoryFilter);
         }
 
