@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ClaimFormData } from '@/lib/validations/claim';
 import { useSuppliers } from '@/hooks/useSuppliers';
-import { useTechnicians } from '@/hooks/useTechnicians';
+import { useTechnicians, useAllUsers } from '@/hooks/useTechnicians';
 import { useSelgere } from '@/hooks/useSelgere';
 import { NewSupplierModal } from './NewSupplierModal';
 
@@ -29,7 +29,13 @@ export function CategorySupplierStep() {
   const { data: suppliers = [] } = useSuppliers();
   const { data: technicians = [] } = useTechnicians();
   const { data: selgere = [] } = useSelgere();
+  const { data: allUsers = [] } = useAllUsers();
   const [isNewSupplierModalOpen, setIsNewSupplierModalOpen] = useState(false);
+
+  // Debug logging
+  console.log('CategorySupplierStep - All users:', allUsers);
+  console.log('CategorySupplierStep - Technicians:', technicians);
+  console.log('CategorySupplierStep - Selgere:', selgere);
 
   const handleSupplierCreated = (supplierId: string) => {
     form.setValue('supplier_id', supplierId);
@@ -113,7 +119,7 @@ export function CategorySupplierStep() {
           name="technician_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tekniker</FormLabel>
+              <FormLabel>Tekniker ({technicians.length} available)</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -124,9 +130,14 @@ export function CategorySupplierStep() {
                   <SelectItem value="none">Ingen valgt</SelectItem>
                   {technicians.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
+                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''} - {user.user_role || user.role}
                     </SelectItem>
                   ))}
+                  {technicians.length === 0 && (
+                    <SelectItem value="no-technicians" disabled>
+                      Ingen teknikere funnet
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -139,7 +150,7 @@ export function CategorySupplierStep() {
           name="salesperson_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Selger</FormLabel>
+              <FormLabel>Selger ({selgere.length} available)</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -150,9 +161,14 @@ export function CategorySupplierStep() {
                   <SelectItem value="none">Ingen valgt</SelectItem>
                   {selgere.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
+                      {user.name} {user.seller_no ? `(${user.seller_no})` : ''} - {user.user_role || user.role}
                     </SelectItem>
                   ))}
+                  {selgere.length === 0 && (
+                    <SelectItem value="no-salesperson" disabled>
+                      Ingen selgere funnet
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />

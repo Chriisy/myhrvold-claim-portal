@@ -10,14 +10,13 @@ export const useSelgere = () => {
       const { data, error } = await supabase
         .from('users')
         .select('id, name, user_role, department, seller_no, role')
-        .in('role', ['salesperson', 'technician']) // Include both since some can do both roles
         .order('name');
 
       if (error) throw error;
 
-      // Filter to only show users that have seller numbers or are marked as salespersons
+      // Include all users that could potentially be salespersons
       return (data || []).filter(user => 
-        user.seller_no || 
+        user.seller_no || // Anyone with a seller number
         user.role === 'salesperson' || 
         user.user_role === 'saksbehandler' || 
         user.user_role === 'avdelingsleder' ||

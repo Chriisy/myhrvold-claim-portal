@@ -9,13 +9,17 @@ export const useTechnicians = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('id, name, user_role, department, seller_no')
-        .eq('user_role', 'tekniker')
+        .select('id, name, user_role, department, seller_no, role')
         .order('name');
 
       if (error) throw error;
 
-      return data || [];
+      // Filter for users that could be technicians
+      return (data || []).filter(user => 
+        user.user_role === 'tekniker' || 
+        user.role === 'technician' ||
+        user.role === 'salesperson' // Some users can do both roles
+      );
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -28,13 +32,19 @@ export const useSalespersons = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('id, name, user_role, department, seller_no')
-        .in('user_role', ['saksbehandler', 'avdelingsleder', 'admin'])
+        .select('id, name, user_role, department, seller_no, role')
         .order('name');
 
       if (error) throw error;
 
-      return data || [];
+      // Filter for users that could be salespersons
+      return (data || []).filter(user => 
+        user.user_role === 'saksbehandler' || 
+        user.user_role === 'avdelingsleder' || 
+        user.user_role === 'admin' ||
+        user.role === 'salesperson' ||
+        user.seller_no // Anyone with a seller number
+      );
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -47,7 +57,7 @@ export const useAllUsers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('users')
-        .select('id, name, user_role, department, seller_no')
+        .select('id, name, user_role, department, seller_no, role')
         .order('name');
 
       if (error) throw error;
