@@ -20,6 +20,8 @@ export interface ClaimFormData {
   // Step 2: Category & Supplier
   category?: ClaimCategory;
   supplier_id?: string;
+  technician_id?: string;
+  salesperson_id?: string;
   
   // Step 3: Description & References
   description: string;

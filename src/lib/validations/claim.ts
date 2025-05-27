@@ -16,6 +16,8 @@ export const claimFormSchema = z.object({
   // Step 2: Category & Supplier
   category: z.enum(['Service', 'Installasjon', 'Produkt', 'Del']).optional(),
   supplier_id: z.string().uuid().optional(),
+  technician_id: z.string().uuid().optional(),
+  salesperson_id: z.string().uuid().optional(),
   
   // Step 3: Description & References
   description: z.string().min(1, 'Beskrivelse er påkrevd'),

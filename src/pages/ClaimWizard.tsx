@@ -52,6 +52,8 @@ const ClaimWizard = () => {
       quantity: undefined,
       category: undefined,
       supplier_id: undefined,
+      technician_id: undefined,
+      salesperson_id: undefined,
       description: '',
       visma_order_no: '',
       customer_po: '',

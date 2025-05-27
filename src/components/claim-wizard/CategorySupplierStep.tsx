@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   FormControl,
@@ -8,17 +7,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClaimFormData } from '@/lib/validations/claim';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { useTechnicians } from '@/hooks/useTechnicians';
 import { NewSupplierModal } from './NewSupplierModal';
 
 const categoryOptions = [
@@ -26,16 +18,12 @@ const categoryOptions = [
   { value: 'Installasjon', label: 'Installasjon' },
   { value: 'Produkt', label: 'Produkt' },
   { value: 'Del', label: 'Del' },
-] as const;
+];
 
 export function CategorySupplierStep() {
   const form = useFormContext<ClaimFormData>();
-  const { data: suppliers, isLoading } = useSuppliers();
-  const [newSupplierModalOpen, setNewSupplierModalOpen] = useState(false);
-
-  const handleSupplierCreated = (supplierId: string) => {
-    form.setValue('supplier_id', supplierId);
-  };
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: technicians = [] } = useTechnicians();
 
   return (
     <div className="space-y-6">
@@ -44,7 +32,7 @@ export function CategorySupplierStep() {
           Kategori og leverandør
         </h3>
         <p className="text-gray-600 mb-6">
-          Velg type reklamasjon og relevant leverandør.
+          Velg kategori, leverandør og ansvarlige personer for reklamasjonen.
         </p>
       </div>
 
@@ -88,39 +76,73 @@ export function CategorySupplierStep() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>
-                        Laster...
+                    <SelectItem value="none">Ingen valgt</SelectItem>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
                       </SelectItem>
-                    ) : (
-                      suppliers?.map((supplier) => (
-                        <SelectItem key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setNewSupplierModalOpen(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                <NewSupplierModal />
               </div>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
 
-      <NewSupplierModal
-        open={newSupplierModalOpen}
-        onOpenChange={setNewSupplierModalOpen}
-        onSupplierCreated={handleSupplierCreated}
-      />
+        <FormField
+          control={form.control}
+          name="technician_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tekniker</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg tekniker" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Ingen valgt</SelectItem>
+                  {technicians.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="salesperson_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Selger</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg selger" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Ingen valgt</SelectItem>
+                  {technicians.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }
