@@ -13,34 +13,34 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { createOptimizedLazyComponent } from '@/components/shared/OptimizedLazyLoading';
 import './App.css';
 
-// Lazy load all pages for better performance
-const Index = lazy(() => import('./pages/Index'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Login = lazy(() => import('./pages/Login'));
-const ClaimsList = lazy(() => import('./pages/ClaimsList'));
-const ClaimDetail = lazy(() => import('./pages/ClaimDetail'));
-const ClaimWizard = lazy(() => import('./pages/ClaimWizard'));
-const UserManagement = lazy(() => import('./pages/UserManagement'));
-const Suppliers = lazy(() => import('./pages/Suppliers'));
-const Reports = lazy(() => import('./pages/Reports'));
-const InvoiceImport = lazy(() => import('./pages/InvoiceImport'));
-const UserProfile = lazy(() => import('./pages/UserProfile'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
-const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+// Optimized lazy loading with preloading for critical routes
+const Index = createOptimizedLazyComponent(() => import('./pages/Index'), { preload: true });
+const Dashboard = createOptimizedLazyComponent(() => import('./pages/Dashboard'), { preload: true });
+const Login = createOptimizedLazyComponent(() => import('./pages/Login'), { preload: true });
+const ClaimsList = createOptimizedLazyComponent(() => import('./pages/ClaimsList'));
+const ClaimDetail = createOptimizedLazyComponent(() => import('./pages/ClaimDetail'));
+const ClaimWizard = createOptimizedLazyComponent(() => import('./pages/ClaimWizard'));
+const UserManagement = createOptimizedLazyComponent(() => import('./pages/UserManagement'));
+const Suppliers = createOptimizedLazyComponent(() => import('./pages/Suppliers'));
+const Reports = createOptimizedLazyComponent(() => import('./pages/Reports'));
+const InvoiceImport = createOptimizedLazyComponent(() => import('./pages/InvoiceImport'));
+const UserProfile = createOptimizedLazyComponent(() => import('./pages/UserProfile'));
+const NotFound = createOptimizedLazyComponent(() => import('./pages/NotFound'));
+const PrivacyPolicy = createOptimizedLazyComponent(() => import('./pages/PrivacyPolicy'));
+const CookiePolicy = createOptimizedLazyComponent(() => import('./pages/CookiePolicy'));
+const TermsOfService = createOptimizedLazyComponent(() => import('./pages/TermsOfService'));
 
-// Optimized query client with better caching and performance settings
+// Highly optimized query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
-      gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache for 30 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
       retry: (failureCount, error) => {
         if (error && typeof error === 'object' && 'status' in error) {
-          // Don't retry on 4xx errors (client errors)
           if ((error as any).status >= 400 && (error as any).status < 500) {
             return false;
           }
@@ -48,13 +48,16 @@ const queryClient = new QueryClient({
         }
         return failureCount < 2;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
-      refetchOnWindowFocus: false, // Prevent unnecessary refetches on window focus
-      refetchOnMount: 'always', // Always refetch when component mounts
-      refetchOnReconnect: 'always', // Refetch when reconnecting to network
+      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 10000),
+      refetchOnWindowFocus: false,
+      refetchOnMount: 'always',
+      refetchOnReconnect: 'always',
+      // Enable query deduplication
+      notifyOnChangeProps: ['data', 'error', 'isLoading'],
     },
     mutations: {
-      retry: 1, // Retry mutations once on failure
+      retry: 1,
+      retryDelay: 1000,
     },
   },
 });

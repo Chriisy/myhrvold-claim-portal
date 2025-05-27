@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { Form } from '@/components/ui/form';
 import { Progress } from '@/components/ui/progress';
 import { claimFormSchema, type ClaimFormData } from '@/lib/validations/claim';
-import { useCreateClaim } from '@/hooks/useClaims';
+import { useOptimizedCreateClaim } from '@/hooks/optimized/useOptimizedMutations';
 import { CustomerEquipmentStep } from '@/components/claim-wizard/CustomerEquipmentStep';
 import { CategorySupplierStep } from '@/components/claim-wizard/CategorySupplierStep';
 import { DescriptionStep } from '@/components/claim-wizard/DescriptionStep';
@@ -21,24 +21,18 @@ interface FileWithPreview extends File {
   preview?: string;
 }
 
-type Step = {
-  id: number;
-  title: string;
-  component: React.ComponentType<any>;
-};
-
-const steps: Step[] = [
+const steps = [
   { id: 1, title: 'Kunde og utstyr', component: CustomerEquipmentStep },
   { id: 2, title: 'Kategori og leverandør', component: CategorySupplierStep },
   { id: 3, title: 'Beskrivelse', component: DescriptionStep },
   { id: 4, title: 'Vedlegg', component: FileUploadStep },
   { id: 5, title: 'Oppsummering', component: ReviewStep },
-];
+] as const;
 
-const ClaimWizard = () => {
+const ClaimWizard = React.memo(() => {
   const [currentStep, setCurrentStep] = useState(1);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const createClaim = useCreateClaim();
+  const createClaim = useOptimizedCreateClaim();
 
   const form = useForm<ClaimFormData>({
     resolver: zodResolver(claimFormSchema),
@@ -65,72 +59,59 @@ const ClaimWizard = () => {
     },
   });
 
-  // Memoize the current step data
-  const currentStepData = useMemo(() => 
-    steps.find(step => step.id === currentStep), 
-    [currentStep]
-  );
-  
-  const CurrentStepComponent = currentStepData?.component as React.ComponentType<any>;
+  // Memoized validation and navigation
+  const { validateCurrentStep, handleNext, handlePrevious } = useMemo(() => {
+    const getFieldsForStep = (step: number): (keyof ClaimFormData)[] => {
+      switch (step) {
+        case 1: return ['customer_name'];
+        case 2: return [];
+        case 3: return ['description'];
+        case 4:
+        case 5: return [];
+        default: return [];
+      }
+    };
 
-  // Memoize field validation function
-  const getFieldsForStep = useCallback((step: number): (keyof ClaimFormData)[] => {
-    switch (step) {
-      case 1:
-        return ['customer_name'];
-      case 2:
-        return [];
-      case 3:
-        return ['description'];
-      case 4:
-        return [];
-      case 5:
-        return [];
-      default:
-        return [];
-    }
-  }, []);
+    const validateCurrentStep = async () => {
+      const fieldsToValidate = getFieldsForStep(currentStep);
+      return await form.trigger(fieldsToValidate);
+    };
 
-  // Memoize validation function
-  const validateCurrentStep = useCallback(async () => {
-    const fieldsToValidate = getFieldsForStep(currentStep);
-    const isValid = await form.trigger(fieldsToValidate);
-    return isValid;
-  }, [currentStep, form, getFieldsForStep]);
+    const handleNext = async () => {
+      const isValid = await validateCurrentStep();
+      if (isValid && currentStep < steps.length) {
+        setCurrentStep(prev => prev + 1);
+      }
+    };
 
-  // Memoize navigation handlers
-  const handleNext = useCallback(async () => {
-    const isValid = await validateCurrentStep();
-    if (isValid && currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  }, [currentStep, validateCurrentStep]);
+    const handlePrevious = () => {
+      if (currentStep > 1) {
+        setCurrentStep(prev => prev - 1);
+      }
+    };
 
-  const handlePrevious = useCallback(() => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  }, [currentStep]);
+    return { validateCurrentStep, handleNext, handlePrevious };
+  }, [currentStep, form]);
 
-  // Memoize submit handler
   const handleSubmit = useCallback(async (data: ClaimFormData) => {
-    try {
-      await createClaim.mutateAsync({
-        ...data,
-        files: files // Include files in the submission
-      });
-    } catch (error) {
-      // Error is handled in the mutation
-    }
+    await createClaim.mutateAsync({
+      ...data,
+      files
+    });
   }, [createClaim, files]);
 
-  // Memoize progress calculation
-  const progress = useMemo(() => (currentStep / steps.length) * 100, [currentStep]);
-
-  // Memoize files change handler
   const handleFilesChange = useCallback((newFiles: FileWithPreview[]) => {
     setFiles(newFiles);
   }, []);
+
+  // Memoized current step data
+  const { currentStepData, progress } = useMemo(() => {
+    const currentStepData = steps.find(step => step.id === currentStep);
+    const progress = (currentStep / steps.length) * 100;
+    return { currentStepData, progress };
+  }, [currentStep]);
+
+  const CurrentStepComponent = currentStepData?.component;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -211,6 +192,8 @@ const ClaimWizard = () => {
       </Card>
     </div>
   );
-};
+});
+
+ClaimWizard.displayName = 'ClaimWizard';
 
 export default ClaimWizard;
