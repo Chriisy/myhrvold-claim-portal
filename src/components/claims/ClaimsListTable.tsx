@@ -39,10 +39,10 @@ const getStatusColor = (status: string) => {
 export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: ClaimsListTableProps) => {
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3 lg:space-y-4">
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="animate-pulse border rounded-lg p-4 lg:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+          <div key={i} className="animate-pulse border rounded-lg p-3 lg:p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-3 lg:gap-4">
               {[...Array(6)].map((_, j) => (
                 <div key={j} className="space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -94,8 +94,8 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
   return (
     <div className="space-y-3 lg:space-y-4">
       {claims.map((claim) => (
-        <div key={claim.id} className="border rounded-lg p-4 lg:p-6 hover:bg-gray-50 transition-colors">
-          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 lg:gap-6 items-start lg:items-center">
+        <div key={claim.id} className="border rounded-lg p-3 lg:p-4 hover:bg-gray-50 transition-colors">
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-3 lg:gap-4 items-start lg:items-center">
             <div>
               <p className="font-semibold text-myhrvold-primary text-sm lg:text-base">{claim.id}</p>
               <p className="text-xs lg:text-sm text-gray-600">
@@ -128,12 +128,12 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
                 <p className="text-xs text-gray-600">Opprettet</p>
                 <p className="font-semibold text-sm">{claim.created_by || 'Ukjent'}</p>
               </div>
-              <div className="hidden lg:block text-right mr-4">
+              <div className="hidden lg:block text-right mr-3">
                 <p className="text-sm text-gray-600">Opprettet</p>
                 <p className="font-semibold">{claim.created_by || 'Ukjent'}</p>
               </div>
               <Link to={`/claim/${claim.id}`}>
-                <Button variant="outline" size="sm" className="lg:px-6">
+                <Button variant="outline" size="sm" className="lg:px-4">
                   <Eye className="w-4 h-4 mr-2" />
                   Se
                 </Button>
