@@ -113,31 +113,31 @@
 
   @media (min-width: 640px) {
     .container {
-      @apply max-w-640px px-6;
+      @apply max-w-2xl px-6;
     }
   }
 
   @media (min-width: 768px) {
     .container {
-      @apply max-w-768px px-8;
+      @apply max-w-4xl px-8;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      @apply max-w-1024px px-8;
+      @apply max-w-6xl px-8;
     }
   }
 
   @media (min-width: 1280px) {
     .container {
-      @apply max-w-1280px px-8;
+      @apply max-w-7xl px-8;
     }
   }
 
   @media (min-width: 1536px) {
     .container {
-      @apply max-w-1536px px-8;
+      @apply max-w-7xl px-8;
     }
   }
 }

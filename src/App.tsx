@@ -98,7 +98,19 @@ function App() {
                                   </ProtectedRoute>
                                 } />
                                 
+                                <Route path="/claim/:id" element={
+                                  <ProtectedRoute>
+                                    <ClaimDetail />
+                                  </ProtectedRoute>
+                                } />
+                                
                                 <Route path="/new-claim" element={
+                                  <ProtectedRoute>
+                                    <ClaimWizard />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/claim/new" element={
                                   <ProtectedRoute>
                                     <ClaimWizard />
                                   </ProtectedRoute>
