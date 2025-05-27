@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, X } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useTechnicians, useSalespersons } from '@/hooks/useTechnicians';
+import { useTechnicians } from '@/hooks/useTechnicians';
+import { useSelgere } from '@/hooks/useSelgere';
 import { AccountCodeSelector } from './AccountCodeSelector';
 import { Database } from '@/integrations/supabase/types';
 import { departmentOptions, getDepartmentLabel } from '@/lib/constants/departments';
@@ -71,13 +72,10 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const editClaim = useEditClaim();
   const { canEditAllClaims, canEditOwnClaims, user } = usePermissions();
   const { data: technicians } = useTechnicians();
-  const { data: salespersons } = useSalespersons();
+  const { data: selgere } = useSelgere();
 
   // Check if user can edit this claim
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
-
-  // Filter technicians to include both technicians and salespersons
-  const allUsers = technicians || [];
 
   const handleSave = async () => {
     // Only send the database columns, not the joined relationship data
@@ -301,7 +299,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Ingen valgt</SelectItem>
-                    {salespersons?.map((user) => (
+                    {selgere?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name} {user.seller_no ? `(${user.seller_no})` : ''}
                       </SelectItem>

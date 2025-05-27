@@ -10,6 +10,7 @@ export const useTechnicians = () => {
       const { data, error } = await supabase
         .from('users')
         .select('id, name, user_role, department, seller_no')
+        .in('user_role', ['tekniker', 'montør'])
         .order('name');
 
       if (error) throw error;
@@ -20,8 +21,7 @@ export const useTechnicians = () => {
   });
 };
 
-// New hook specifically for getting all users that can be assigned as salespersons
-// Using only valid user_role enum values
+// Hook for getting all users that can be assigned as salespersons
 export const useSalespersons = () => {
   return useQuery({
     queryKey: ['salespersons'],
@@ -30,6 +30,24 @@ export const useSalespersons = () => {
         .from('users')
         .select('id, name, user_role, department, seller_no')
         .in('user_role', ['saksbehandler', 'avdelingsleder', 'admin'])
+        .order('name');
+
+      if (error) throw error;
+
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Hook for getting ALL users (both technicians and salespersons) - useful for general user selection
+export const useAllUsers = () => {
+  return useQuery({
+    queryKey: ['all-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, user_role, department, seller_no')
         .order('name');
 
       if (error) throw error;
