@@ -13,8 +13,8 @@ interface ResponsiveContainerProps {
 export function ResponsiveContainer({ 
   children, 
   className,
-  maxWidth = 'screen-xl',
-  padding = 'md',
+  maxWidth = '7xl',
+  padding = 'lg',
   breakpoint = 'all'
 }: ResponsiveContainerProps) {
   const maxWidthClasses = {
@@ -32,10 +32,10 @@ export function ResponsiveContainer({
 
   const paddingClasses = {
     none: '',
-    sm: 'p-3 lg:p-4',
-    md: 'p-4 lg:p-6 xl:p-8',
-    lg: 'p-6 lg:p-8 xl:p-12',
-    xl: 'p-8 lg:p-12 xl:p-16'
+    sm: 'p-4 lg:p-6',
+    md: 'p-6 lg:p-8 xl:p-10',
+    lg: 'p-6 lg:p-10 xl:p-12 2xl:p-16',
+    xl: 'p-8 lg:p-12 xl:p-16 2xl:p-20'
   };
 
   const breakpointClasses = {

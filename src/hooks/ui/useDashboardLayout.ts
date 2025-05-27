@@ -24,19 +24,19 @@ export const useDashboardLayout = () => {
   };
 
   const getContainerPadding = () => {
-    return 'px-4 lg:px-6 xl:px-8';
+    return 'px-6 lg:px-10 xl:px-12 2xl:px-16';
   };
 
   const getSpacing = (size: 'sm' | 'md' | 'lg' = 'md') => {
     switch (size) {
       case 'sm':
-        return 'gap-4 lg:gap-6';
+        return 'gap-6 lg:gap-8';
       case 'md':
-        return 'gap-6 lg:gap-8';
+        return 'gap-8 lg:gap-10 xl:gap-12';
       case 'lg':
-        return 'gap-8 lg:gap-12';
+        return 'gap-10 lg:gap-12 xl:gap-16';
       default:
-        return 'gap-6 lg:gap-8';
+        return 'gap-8 lg:gap-10 xl:gap-12';
     }
   };
 

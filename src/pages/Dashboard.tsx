@@ -6,23 +6,26 @@ import { DashboardChartsGrid } from '@/components/dashboard/DashboardChartsGrid'
 import { MobileOptimizedFilters } from '@/components/dashboard/MobileOptimizedFilters';
 import { NotificationToasts } from '@/components/dashboard/NotificationToasts';
 import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { ResponsiveContainer } from '@/components/shared/ResponsiveContainer';
 
 const DashboardContent = () => {
   return (
-    <div className="space-y-8 lg:space-y-12 animate-fade-in">
-      <NotificationToasts />
-      
-      <DashboardHeader />
+    <ResponsiveContainer maxWidth="7xl" padding="lg">
+      <div className="space-y-8 lg:space-y-12 xl:space-y-16 animate-fade-in">
+        <NotificationToasts />
+        
+        <DashboardHeader />
 
-      <DashboardKpiSection />
+        <DashboardKpiSection />
 
-      {/* Mobile Optimized Filters */}
-      <ImprovedErrorBoundary title="Feil ved lasting av filtre">
-        <MobileOptimizedFilters />
-      </ImprovedErrorBoundary>
+        {/* Mobile Optimized Filters */}
+        <ImprovedErrorBoundary title="Feil ved lasting av filtre">
+          <MobileOptimizedFilters />
+        </ImprovedErrorBoundary>
 
-      <DashboardChartsGrid />
-    </div>
+        <DashboardChartsGrid />
+      </div>
+    </ResponsiveContainer>
   );
 };
 

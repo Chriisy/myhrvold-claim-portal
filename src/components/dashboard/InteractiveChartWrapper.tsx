@@ -33,36 +33,37 @@ export const InteractiveChartWrapper = ({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg ${
+    <Card className={`transition-all duration-300 hover:shadow-xl shadow-lg ${
       isExpanded ? 'fixed inset-4 z-50 bg-white' : ''
     }`}>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
+      <CardHeader className="flex flex-row items-center justify-between pb-6">
         <div className="flex-1">
-          <CardTitle className="text-lg lg:text-xl">{title}</CardTitle>
+          <CardTitle className="text-xl lg:text-2xl xl:text-3xl">{title}</CardTitle>
           {description && (
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
+            <p className="text-sm lg:text-base xl:text-lg text-gray-600 mt-2">{description}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {onExport && (
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="w-4 h-4" />
+            <Button variant="outline" size="default" onClick={handleExport} className="lg:px-4 lg:py-2">
+              <Download className="w-4 h-4 lg:w-5 lg:h-5" />
             </Button>
           )}
           <Button 
             variant="outline" 
-            size="sm" 
+            size="default" 
             onClick={() => setIsExpanded(!isExpanded)}
+            className="lg:px-4 lg:py-2"
           >
             {isExpanded ? (
-              <Minimize2 className="w-4 h-4" />
+              <Minimize2 className="w-4 h-4 lg:w-5 lg:h-5" />
             ) : (
-              <Maximize2 className="w-4 h-4" />
+              <Maximize2 className="w-4 h-4 lg:w-5 lg:h-5" />
             )}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : 'min-h-[400px] lg:min-h-[500px]'}>
+      <CardContent className={isExpanded ? 'h-[calc(100vh-200px)] overflow-auto' : 'min-h-[450px] lg:min-h-[550px] xl:min-h-[650px]'}>
         {children}
       </CardContent>
     </Card>
