@@ -43,3 +43,48 @@ export const ChartLoadingSkeleton = () => (
     </CardContent>
   </Card>
 );
+
+// Add the missing exports that App.tsx is trying to import
+export const DashboardSkeleton = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i} className="animate-pulse">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-12 h-12 rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="w-24 h-4" />
+                <Skeleton className="w-16 h-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ChartLoadingSkeleton />
+      <ChartLoadingSkeleton />
+    </div>
+  </div>
+);
+
+export const TableSkeleton = ({ rows = 10 }: { rows?: number }) => (
+  <Card>
+    <CardHeader>
+      <Skeleton className="w-48 h-6" />
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {[...Array(rows)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="w-12 h-12 rounded" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="w-full h-4" />
+            <Skeleton className="w-3/4 h-3" />
+          </div>
+          <Skeleton className="w-20 h-4" />
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+);
