@@ -62,7 +62,7 @@ function App() {
                       <AppSidebar />
                       <main className="flex-1 flex flex-col overflow-hidden">
                         <div className="flex-1 overflow-auto">
-                          <div className="w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-6 mx-auto max-w-7xl">
+                          <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6 lg:py-8 mx-auto max-w-screen-2xl">
                             <Suspense fallback={<DashboardSkeleton />}>
                               <Routes>
                                 <Route path="/login" element={<Login />} />

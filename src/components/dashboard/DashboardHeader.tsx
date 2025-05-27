@@ -9,16 +9,16 @@ export const DashboardHeader = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={`responsive-flex items-center justify-between gap-4 mb-6 ${isMobile ? 'space-y-4' : ''}`}>
+    <div className="flex items-center justify-between gap-4 mb-8">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="md:hidden" />
-        <div className="text-center md:text-left">
-          <h1 className="responsive-text-xl font-bold text-myhrvold-primary">Dashboard</h1>
-          <p className="text-gray-600 text-sm md:text-base">Oversikt over reklamasjoner og nøkkeltall</p>
+        <SidebarTrigger className="lg:hidden" />
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-bold text-myhrvold-primary">Dashboard</h1>
+          <p className="text-gray-600 text-base lg:text-lg mt-1">Oversikt over reklamasjoner og nøkkeltall</p>
         </div>
       </div>
-      <Link to="/claim/new" className="w-full md:w-auto">
-        <Button className="btn-primary w-full md:w-auto">
+      <Link to="/claim/new" className={isMobile ? "w-full" : ""}>
+        <Button className={`btn-primary ${isMobile ? "w-full" : "px-6 py-3"}`}>
           <Plus className="w-4 h-4 mr-2" />
           Ny Reklamasjon
         </Button>

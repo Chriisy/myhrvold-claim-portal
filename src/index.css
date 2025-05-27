@@ -106,94 +106,176 @@
     animation: bounceIn 0.6s ease-out;
   }
 
-  /* Responsive container with proper breakpoints */
+  /* Desktop-first responsive containers */
   .container {
-    @apply w-full px-4 mx-auto;
-    max-width: 100%;
+    @apply w-full mx-auto px-4;
+    max-width: 1400px;
   }
 
-  /* Mobile first approach */
-  @media (min-width: 640px) {
-    .container {
-      @apply px-6;
-      max-width: 640px;
-    }
-  }
-
-  @media (min-width: 768px) {
+  @media (min-width: 1536px) {
     .container {
       @apply px-8;
-      max-width: 768px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container {
-      @apply px-8;
-      max-width: 1024px;
+      max-width: 1536px;
     }
   }
 
   @media (min-width: 1280px) {
     .container {
-      @apply px-8;
+      @apply px-6;
       max-width: 1280px;
     }
   }
 
-  @media (min-width: 1536px) {
+  @media (min-width: 1024px) {
     .container {
-      @apply px-12;
-      max-width: 1536px;
+      @apply px-6;
+      max-width: 1024px;
     }
   }
 
-  /* Responsive grid layouts */
+  @media (min-width: 768px) {
+    .container {
+      @apply px-4;
+      max-width: 768px;
+    }
+  }
+
+  /* Responsive grid layouts - Desktop first */
   .responsive-grid-1 {
     @apply grid grid-cols-1;
   }
 
   .responsive-grid-2 {
-    @apply grid grid-cols-1 md:grid-cols-2;
+    @apply grid grid-cols-2 gap-6;
   }
 
   .responsive-grid-3 {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+    @apply grid grid-cols-3 gap-6;
   }
 
   .responsive-grid-4 {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    @apply grid grid-cols-4 gap-6;
   }
 
-  /* Responsive spacing */
+  /* Mobile adjustments */
+  @media (max-width: 1023px) {
+    .responsive-grid-4 {
+      @apply grid-cols-2 gap-4;
+    }
+    .responsive-grid-3 {
+      @apply grid-cols-2 gap-4;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-grid-4,
+    .responsive-grid-3,
+    .responsive-grid-2 {
+      @apply grid-cols-1 gap-4;
+    }
+  }
+
+  /* Responsive spacing - Desktop first */
   .responsive-gap {
-    @apply gap-4 md:gap-6 lg:gap-8;
+    @apply gap-6;
+  }
+
+  @media (max-width: 1023px) {
+    .responsive-gap {
+      @apply gap-4;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-gap {
+      @apply gap-3;
+    }
   }
 
   .responsive-padding {
-    @apply p-4 md:p-6 lg:p-8;
+    @apply p-6;
+  }
+
+  @media (max-width: 1023px) {
+    .responsive-padding {
+      @apply p-4;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-padding {
+      @apply p-3;
+    }
   }
 
   .responsive-margin {
-    @apply m-4 md:m-6 lg:m-8;
+    @apply m-6;
   }
 
-  /* Typography responsive */
+  @media (max-width: 1023px) {
+    .responsive-margin {
+      @apply m-4;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-margin {
+      @apply m-3;
+    }
+  }
+
+  /* Typography responsive - Desktop first */
   .responsive-text-lg {
-    @apply text-lg md:text-xl lg:text-2xl;
+    @apply text-2xl;
+  }
+
+  @media (max-width: 1023px) {
+    .responsive-text-lg {
+      @apply text-xl;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-text-lg {
+      @apply text-lg;
+    }
   }
 
   .responsive-text-xl {
-    @apply text-xl md:text-2xl lg:text-3xl;
+    @apply text-3xl;
   }
 
-  /* Responsive flexbox */
+  @media (max-width: 1023px) {
+    .responsive-text-xl {
+      @apply text-2xl;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .responsive-text-xl {
+      @apply text-xl;
+    }
+  }
+
+  /* Responsive flexbox - Desktop first */
   .responsive-flex {
-    @apply flex flex-col md:flex-row;
+    @apply flex flex-row gap-6;
+  }
+
+  @media (max-width: 767px) {
+    .responsive-flex {
+      @apply flex-col gap-4;
+    }
   }
 
   .responsive-flex-reverse {
-    @apply flex flex-col-reverse md:flex-row;
+    @apply flex flex-row gap-6;
+  }
+
+  @media (max-width: 767px) {
+    .responsive-flex-reverse {
+      @apply flex-col-reverse gap-4;
+    }
   }
 }
 
@@ -253,6 +335,56 @@
   animation: shimmer 1.5s infinite;
 }
 
+/* Desktop specific styles */
+@media (min-width: 1024px) {
+  .desktop-only {
+    @apply block;
+  }
+  
+  .mobile-only {
+    @apply hidden;
+  }
+  
+  .container {
+    @apply max-w-7xl;
+  }
+  
+  .desktop-space-y-6 > * + * {
+    @apply mt-6;
+  }
+  
+  .desktop-space-y-8 > * + * {
+    @apply mt-8;
+  }
+
+  .desktop-grid-3 {
+    @apply grid-cols-3;
+  }
+
+  .desktop-grid-4 {
+    @apply grid-cols-4;
+  }
+
+  .sidebar-desktop {
+    @apply relative z-auto transform-none;
+  }
+}
+
+/* Tablet specific styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tablet-only {
+    @apply block;
+  }
+  
+  .tablet-grid-2 {
+    @apply grid-cols-2;
+  }
+  
+  .tablet-flex {
+    @apply flex-row;
+  }
+}
+
 /* Mobile specific styles */
 @media (max-width: 767px) {
   .mobile-only {
@@ -283,62 +415,8 @@
     @apply px-4;
   }
 
-  /* Mobile sidebar adjustments */
   .sidebar-mobile {
     @apply fixed inset-0 z-50 transform transition-transform;
-  }
-}
-
-/* Tablet specific styles */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .tablet-only {
-    @apply block;
-  }
-  
-  .tablet-grid-2 {
-    @apply grid-cols-2;
-  }
-  
-  .tablet-flex {
-    @apply flex-row;
-  }
-}
-
-/* Desktop specific styles */
-@media (min-width: 1024px) {
-  .desktop-only {
-    @apply block;
-  }
-  
-  .mobile-only {
-    @apply hidden;
-  }
-  
-  .container {
-    @apply max-w-7xl;
-  }
-  
-  /* Better spacing for desktop */
-  .desktop-space-y-6 > * + * {
-    @apply mt-6;
-  }
-  
-  .desktop-space-y-8 > * + * {
-    @apply mt-8;
-  }
-
-  /* Desktop grid layouts */
-  .desktop-grid-3 {
-    @apply grid-cols-3;
-  }
-
-  .desktop-grid-4 {
-    @apply grid-cols-4;
-  }
-
-  /* Desktop sidebar */
-  .sidebar-desktop {
-    @apply relative z-auto transform-none;
   }
 }
 
@@ -355,19 +433,19 @@
 
 /* Chart responsivity */
 .recharts-responsive-container {
-  min-height: 250px !important;
+  min-height: 400px !important;
   width: 100% !important;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 1023px) {
   .recharts-responsive-container {
     min-height: 300px !important;
   }
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 767px) {
   .recharts-responsive-container {
-    min-height: 400px !important;
+    min-height: 250px !important;
   }
 }
 

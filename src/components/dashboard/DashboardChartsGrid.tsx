@@ -12,9 +12,9 @@ export const DashboardChartsGrid = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Main Charts Row */}
-      <div className={`responsive-grid-2 responsive-gap`}>
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-2 gap-8'}`}>
         <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.stackedBar.title}
@@ -35,7 +35,7 @@ export const DashboardChartsGrid = () => {
       </div>
 
       {/* Secondary Charts Row */}
-      <div className={`responsive-grid-2 responsive-gap`}>
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-2 gap-8'}`}>
         <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.rootCause.title}

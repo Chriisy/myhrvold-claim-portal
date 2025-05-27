@@ -33,13 +33,17 @@ export const DashboardFilters = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
           <Filter className="w-5 h-5" />
           Filtre
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`grid responsive-gap ${isMobile ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'}`}>
+        <div className={`grid gap-4 ${
+          isMobile 
+            ? 'grid-cols-1' 
+            : 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
+        }`}>
           {/* Supplier Filter */}
           <Select 
             value={filters.supplier_id || "all"} 
@@ -111,7 +115,7 @@ export const DashboardFilters = () => {
           </Popover>
 
           {/* Reset Filters */}
-          <Button variant="outline" onClick={resetFilters} className="w-full lg:col-span-1">
+          <Button variant="outline" onClick={resetFilters} className="w-full">
             <RotateCcw className="w-4 h-4 mr-2" />
             Tilbakestill
           </Button>
