@@ -83,7 +83,6 @@ const SupplierDistributionChart = memo(() => {
     <EnhancedErrorBoundary 
       title="Feil i leverandørfordeling"
       level="error"
-      component="SupplierDistributionChart"
     >
       <Card className="card-hover">
         <CardHeader>
