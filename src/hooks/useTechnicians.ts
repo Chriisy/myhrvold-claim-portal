@@ -28,14 +28,8 @@ export const useTechnicians = () => {
         });
       }
 
-      // More inclusive filter - include more user types that can act as technicians
-      const filtered = (data || []).filter(user => 
-        user.user_role === 'tekniker' || 
-        user.role === 'technician' ||
-        user.user_role === 'admin' || // Admins can also be technicians
-        user.role === 'admin' ||
-        user.role === 'salesperson' // Some users can do both roles
-      );
+      // Allow ALL users to be selectable as technicians - remove restrictive filtering
+      const filtered = (data || []);
       
       console.log('useTechnicians - Filtered technicians:', filtered);
       console.log('useTechnicians - Filtered count:', filtered.length);
@@ -72,17 +66,8 @@ export const useSalespersons = () => {
         });
       }
 
-      // More inclusive filter - include more user types that can act as salespersons
-      const filtered = (data || []).filter(user => 
-        user.user_role === 'saksbehandler' || 
-        user.user_role === 'avdelingsleder' || 
-        user.user_role === 'admin' || // Admins can also be salespersons
-        user.role === 'admin' ||
-        user.role === 'salesperson' ||
-        user.user_role === 'tekniker' || // Technicians can also be salespersons
-        user.role === 'technician' ||
-        user.seller_no // Anyone with a seller number
-      );
+      // Allow ALL users to be selectable as salespersons - remove restrictive filtering
+      const filtered = (data || []);
       
       console.log('useSalespersons - Filtered salespersons:', filtered);
       console.log('useSalespersons - Filtered count:', filtered.length);

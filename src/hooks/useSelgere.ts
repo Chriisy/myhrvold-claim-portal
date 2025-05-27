@@ -28,17 +28,8 @@ export const useSelgere = () => {
         });
       }
 
-      // More inclusive filtering - allow more users to be selectable as salespersons
-      const filtered = (data || []).filter(user => 
-        user.seller_no || // Anyone with a seller number
-        user.role === 'salesperson' || 
-        user.user_role === 'saksbehandler' || 
-        user.user_role === 'avdelingsleder' ||
-        user.user_role === 'admin' ||
-        user.role === 'admin' ||
-        user.user_role === 'tekniker' || // Allow technicians to also be selectable as salespersons
-        user.role === 'technician'
-      );
+      // Allow ALL users to be selectable as salespersons - remove restrictive filtering
+      const filtered = (data || []);
       
       console.log('useSelgere - Filtered selgere:', filtered);
       console.log('useSelgere - Filtered count:', filtered.length);
