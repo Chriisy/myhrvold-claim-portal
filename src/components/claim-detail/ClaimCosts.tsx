@@ -29,7 +29,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
     amount: '',
     date: new Date().toISOString().split('T')[0],
     voucher_no: '',
-    konto_nr: '',
+    konto_nr: 'none',
   });
 
   const resetForm = () => {
@@ -38,7 +38,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
       amount: '',
       date: new Date().toISOString().split('T')[0],
       voucher_no: '',
-      konto_nr: '',
+      konto_nr: 'none',
     });
     setEditingCost(null);
   };
@@ -52,7 +52,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
       amount: parseFloat(formData.amount),
       date: formData.date,
       voucher_no: formData.voucher_no || null,
-      konto_nr: formData.konto_nr ? parseInt(formData.konto_nr) : null,
+      konto_nr: formData.konto_nr === 'none' ? null : parseInt(formData.konto_nr),
       source: 'manual' as const,
     };
 
@@ -76,7 +76,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
       amount: cost.amount.toString(),
       date: cost.date,
       voucher_no: cost.voucher_no || '',
-      konto_nr: cost.konto_nr?.toString() || '',
+      konto_nr: cost.konto_nr?.toString() || 'none',
     });
     setOpen(true);
   };
@@ -159,7 +159,7 @@ const ClaimCosts = ({ claimId }: ClaimCostsProps) => {
                     <SelectValue placeholder="Velg konto" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ingen konto</SelectItem>
+                    <SelectItem value="none">Ingen konto</SelectItem>
                     {accountCodes?.map((account) => (
                       <SelectItem key={account.konto_nr} value={account.konto_nr.toString()}>
                         {account.konto_nr} - {account.comment}
