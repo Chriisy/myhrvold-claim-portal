@@ -9,9 +9,9 @@ import { CHART_DEFINITIONS } from '@/config/dashboardConfig';
 
 export const DashboardChartsGrid = () => {
   return (
-    <div className="card-content-spacing">
+    <div className="desktop-spacing">
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 desktop-grid-gap">
+      <div className="charts-grid">
         <ImprovedErrorBoundary title="Feil ved lasting av kostnadsdiagram">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.stackedBar.title}
@@ -32,7 +32,7 @@ export const DashboardChartsGrid = () => {
       </div>
 
       {/* Secondary Charts Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 desktop-grid-gap">
+      <div className="charts-grid">
         <ImprovedErrorBoundary title="Feil ved lasting av årsaksanalyse">
           <InteractiveChartWrapper 
             title={CHART_DEFINITIONS.rootCause.title}
@@ -47,7 +47,9 @@ export const DashboardChartsGrid = () => {
             title={CHART_DEFINITIONS.recentClaims.title}
             description={CHART_DEFINITIONS.recentClaims.description}
           >
-            <EnhancedRecentClaimsTable />
+            <div className="recent-claims-list">
+              <EnhancedRecentClaimsTable />
+            </div>
           </InteractiveChartWrapper>
         </ImprovedErrorBoundary>
       </div>

@@ -10,7 +10,7 @@ import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary
 const DashboardContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-screen-xl mx-auto px-4 lg:px-8 xl:px-12 py-6 lg:py-8 xl:py-10">
+      <div className="container-responsive py-6 lg:py-8 xl:py-10">
         <div className="card-content-spacing animate-fade-in">
           <NotificationToasts />
           

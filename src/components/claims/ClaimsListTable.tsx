@@ -59,7 +59,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
   if (error) {
     return (
       <div className="text-center py-8 lg:py-12">
-        <FileX className="w-12 h-12 mx-auto mb-4 text-red-300" />
+        <FileX className="w-12 h-12 mx-auto mb-4 text-red-300" strokeWidth={2} />
         <p className="text-body text-red-600">Feil ved lasting av reklamasjoner.</p>
         <p className="text-body-small text-muted-foreground mt-2">Prøv å laste siden på nytt.</p>
       </div>
@@ -70,11 +70,11 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
     if (!hasAnyClaims) {
       return (
         <div className="text-center py-8 lg:py-12">
-          <FileX className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+          <FileX className="w-12 h-12 mx-auto mb-4 text-gray-300" strokeWidth={2} />
           <p className="text-body text-muted-foreground mb-4">Ingen reklamasjoner er opprettet ennå.</p>
           <Link to="/claim/new">
             <Button className="btn-icon-md">
-              <Plus />
+              <Plus strokeWidth={2} />
               Opprett første reklamasjon
             </Button>
           </Link>
@@ -84,7 +84,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
 
     return (
       <div className="text-center py-8 lg:py-12">
-        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" strokeWidth={2} />
         <p className="text-body text-muted-foreground">Ingen reklamasjoner funnet med gjeldende filtre.</p>
         <p className="text-body-small text-muted-foreground mt-2">Prøv å endre søkekriteriene eller gå til neste side.</p>
       </div>
@@ -134,7 +134,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
               </div>
               <Link to={`/claim/${claim.id}`}>
                 <Button variant="outline" className="btn-icon-sm lg:btn-icon-md">
-                  <Eye />
+                  <Eye strokeWidth={2} />
                   Se
                 </Button>
               </Link>

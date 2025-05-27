@@ -50,7 +50,7 @@ const ClaimsList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-screen-xl mx-auto px-4 lg:px-8 xl:px-12 py-6 lg:py-8 xl:py-10">
+      <div className="container-responsive py-6 lg:py-8 xl:py-10">
         <div className="card-content-spacing">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
             <div className="flex items-center gap-3 lg:gap-4">
@@ -62,7 +62,7 @@ const ClaimsList = () => {
             </div>
             <Link to="/claim/new" className="w-full lg:w-auto">
               <Button className="btn-primary btn-icon-md w-full lg:w-auto lg:px-6 lg:py-3">
-                <Plus />
+                <Plus strokeWidth={2} />
                 Ny Reklamasjon
               </Button>
             </Link>
@@ -80,7 +80,7 @@ const ClaimsList = () => {
           />
 
           <Card className="shadow-lg">
-            <CardHeader className="card-header-spacing">
+            <CardHeader className="card-header-spacing card-padding">
               <CardTitle className="text-heading-3">
                 Reklamasjoner ({totalCount} totalt, viser side {currentPage} av {totalPages})
               </CardTitle>

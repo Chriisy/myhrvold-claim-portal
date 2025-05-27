@@ -97,7 +97,7 @@ export const EnhancedRecentClaimsTable = () => {
             <div className="flex justify-end">
               <Link to={`/claim/${claim.id}`}>
                 <Button variant="outline" className="btn-icon-sm">
-                  <Eye />
+                  <Eye strokeWidth={2} />
                   Se
                 </Button>
               </Link>
