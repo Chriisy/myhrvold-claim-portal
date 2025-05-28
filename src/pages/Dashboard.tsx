@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { OptimizedDashboardKpiSection } from '@/components/dashboard/OptimizedDashboardKpiSection';
@@ -19,34 +20,41 @@ const DashboardContent = () => {
   useQueryOptimization();
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <LazyLoadedComponent fallback={<div />}>
-        <NotificationToasts />
-      </LazyLoadedComponent>
-      
-      <DashboardHeader />
-
-      <OptimizedDashboardKpiSection />
-
-      {/* Mobile Optimized Filters */}
-      <UnifiedErrorBoundary title="Feil ved lasting av filtre">
-        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
-          <MobileOptimizedFilters />
+    <SidebarInset className="p-6">
+      <div className="space-y-6 animate-fade-in">
+        <LazyLoadedComponent fallback={<div />}>
+          <NotificationToasts />
         </LazyLoadedComponent>
-      </UnifiedErrorBoundary>
+        
+        <DashboardHeader />
 
-      <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
-        <DashboardChartsGrid />
-      </LazyLoadedComponent>
-    </div>
+        <OptimizedDashboardKpiSection />
+
+        {/* Mobile Optimized Filters */}
+        <UnifiedErrorBoundary title="Feil ved lasting av filtre">
+          <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+            <MobileOptimizedFilters />
+          </LazyLoadedComponent>
+        </UnifiedErrorBoundary>
+
+        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+          <DashboardChartsGrid />
+        </LazyLoadedComponent>
+      </div>
+    </SidebarInset>
   );
 };
 
 const Dashboard = () => {
   return (
-    <DashboardFiltersProvider>
-      <DashboardContent />
-    </DashboardFiltersProvider>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <DashboardFiltersProvider>
+          <DashboardContent />
+        </DashboardFiltersProvider>
+      </div>
+    </SidebarProvider>
   );
 };
 
