@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle, AlertTriangle, Plus } from 'lucide-react';
 import { useSubmitChecklist } from '@/hooks/useInternalControl';
-import { ChecklistItem } from '@/services/internalControlService';
+import { ChecklistItem, internalControlService, ChecklistTemplate } from '@/services/internalControlService';
 
 interface Checklist {
   id: string;
@@ -16,139 +16,44 @@ interface Checklist {
   items: ChecklistItem[];
 }
 
-const SAMPLE_CHECKLISTS: Checklist[] = [
-  {
-    id: '1',
-    type: 'lekkasjekontroll',
-    title: 'Lekkasjekontroll',
-    items: [
-      {
-        id: '1-1',
-        title: 'Visuell kontroll av rørføringer',
-        description: 'Sjekk alle synlige rørføringer for tegn til lekkasje',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '1-2',
-        title: 'Kontroll av ventiler og koblinger',
-        description: 'Inspiser alle ventiler og koblinger for lekkasje',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '1-3',
-        title: 'Måling med lekkasjetektor',
-        description: 'Bruk elektronisk lekkasjedetektor på kritiske områder',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '1-4',
-        title: 'Kontroll av kuldemediummengde',
-        description: 'Verifiser at kuldemediummengden er innenfor normale verdier',
-        completed: false,
-        deviation: false
-      }
-    ]
-  },
-  {
-    id: '2',
-    type: 'tomming_gjenvinning',
-    title: 'Tømming og gjenvinning',
-    items: [
-      {
-        id: '2-1',
-        title: 'Kontroll av gjenvinningsutstyr',
-        description: 'Verifiser at alt gjenvinningsutstyr fungerer korrekt',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '2-2',
-        title: 'Dokumentasjon av kuldemediummengde',
-        description: 'Registrer mengde kuldemedium som tas ut av anlegget',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '2-3',
-        title: 'Merking av beholdere',
-        description: 'Påse at alle beholdere er korrekt merket og datert',
-        completed: false,
-        deviation: false
-      }
-    ]
-  },
-  {
-    id: '3',
-    type: 'pafylling',
-    title: 'Påfylling av kuldemedium',
-    items: [
-      {
-        id: '3-1',
-        title: 'Kontroll av kuldemediumtype',
-        description: 'Verifiser at riktig type kuldemedium brukes',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '3-2',
-        title: 'Lekkasjekontroll før påfylling',
-        description: 'Utfør lekkasjekontroll før påfylling av nytt kuldemedium',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '3-3',
-        title: 'Dokumentasjon av påfylt mengde',
-        description: 'Registrer mengde kuldemedium som fylles på anlegget',
-        completed: false,
-        deviation: false
-      }
-    ]
-  },
-  {
-    id: '4',
-    type: 'egenkontroll',
-    title: 'Egenkontroll',
-    items: [
-      {
-        id: '4-1',
-        title: 'Kontroll av loggføring',
-        description: 'Verifiser at alle aktiviteter er korrekt dokumentert',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '4-2',
-        title: 'Sertifikatgyldighetskontroll',
-        description: 'Sjekk at alle relevante sertifikater er gyldige',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '4-3',
-        title: 'Kompetansevurdering',
-        description: 'Vurder om personale har nødvendig kompetanse',
-        completed: false,
-        deviation: false
-      },
-      {
-        id: '4-4',
-        title: 'Rutinekontroll av utstyr',
-        description: 'Kontroller at alt utstyr er i forskriftsmessig stand',
-        completed: false,
-        deviation: false
-      }
-    ]
-  }
-];
-
 export const DigitalChecklists = () => {
-  const [checklists, setChecklists] = useState<Checklist[]>(SAMPLE_CHECKLISTS);
+  const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
+  const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [activeChecklist, setActiveChecklist] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const submitMutation = useSubmitChecklist();
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const templateData = await internalControlService.getChecklistTemplates();
+      setTemplates(templateData);
+      
+      // Convert templates to working checklists
+      const workingChecklists = templateData.map(template => ({
+        id: template.id,
+        type: template.document_type,
+        title: template.title,
+        items: template.checklist_items.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          completed: false,
+          deviation: false,
+          comment: ''
+        }))
+      }));
+      
+      setChecklists(workingChecklists);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleItemToggle = (checklistId: string, itemId: string) => {
     setChecklists(prev => prev.map(checklist => {
@@ -251,6 +156,20 @@ export const DigitalChecklists = () => {
     return { status: 'in_progress', color: 'bg-yellow-100 text-yellow-800' };
   };
 
+  const getTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'lekkasjekontroll': 'Lekkasjekontroll',
+      'egenkontroll': 'Egenkontroll',
+      'tomming_gjenvinning': 'Tømming og gjenvinning',
+      'pafylling': 'Påfylling'
+    };
+    return types[type] || type;
+  };
+
+  if (loading) {
+    return <div className="text-center py-4">Laster sjekklister...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -261,47 +180,54 @@ export const DigitalChecklists = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {checklists.map((checklist) => {
-          const status = getChecklistStatus(checklist);
-          const progress = getChecklistProgress(checklist);
-          
-          return (
-            <Card key={checklist.id} className="relative">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{checklist.title}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge className={status.color}>
-                      {status.status === 'completed' && 'Fullført'}
-                      {status.status === 'in_progress' && 'Pågår'}
-                      {status.status === 'deviation' && 'Avvik'}
-                    </Badge>
-                    <span className="text-sm text-gray-600">{progress}</span>
+      {checklists.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Ingen sjekklister tilgjengelig</p>
+          <p className="text-sm text-gray-400">Kontakt administrator for å legge til sjekklister</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {checklists.map((checklist) => {
+            const status = getChecklistStatus(checklist);
+            const progress = getChecklistProgress(checklist);
+            
+            return (
+              <Card key={checklist.id} className="relative">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{getTypeLabel(checklist.type)}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge className={status.color}>
+                        {status.status === 'completed' && 'Fullført'}
+                        {status.status === 'in_progress' && 'Pågår'}
+                        {status.status === 'deviation' && 'Avvik'}
+                      </Badge>
+                      <span className="text-sm text-gray-600">{progress}</span>
+                    </div>
                   </div>
-                </div>
-                <CardDescription>
-                  Klikk "Start kontroll" for å utføre denne sjekklisten
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full"
-                  onClick={() => setActiveChecklist(activeChecklist === checklist.id ? null : checklist.id)}
-                >
-                  {activeChecklist === checklist.id ? 'Lukk sjekkliste' : 'Start kontroll'}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  <CardDescription>
+                    Klikk "Start kontroll" for å utføre denne sjekklisten
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    className="w-full"
+                    onClick={() => setActiveChecklist(activeChecklist === checklist.id ? null : checklist.id)}
+                  >
+                    {activeChecklist === checklist.id ? 'Lukk sjekkliste' : 'Start kontroll'}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {activeChecklist && (
         <Card>
           <CardHeader>
             <CardTitle>
-              {checklists.find(c => c.id === activeChecklist)?.title} - Utførelse
+              {getTypeLabel(checklists.find(c => c.id === activeChecklist)?.type || '')} - Utførelse
             </CardTitle>
             <CardDescription>
               Kryss av hver kontrollpunkt og noter eventuelle avvik

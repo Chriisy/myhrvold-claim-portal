@@ -674,6 +674,123 @@ export type Database = {
           },
         ]
       }
+      internal_control_checklists: {
+        Row: {
+          checklist_items: Json
+          created_at: string
+          created_by: string
+          description: string | null
+          document_type: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          checklist_items?: Json
+          created_at?: string
+          created_by: string
+          description?: string | null
+          document_type: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          checklist_items?: Json
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          document_type?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      internal_control_checks: {
+        Row: {
+          checklist_data: Json
+          comments: string | null
+          created_at: string
+          date_performed: string
+          deviations_count: number
+          document_type: string
+          id: string
+          performed_by: string
+          status: string
+          title: string
+        }
+        Insert: {
+          checklist_data?: Json
+          comments?: string | null
+          created_at?: string
+          date_performed: string
+          deviations_count?: number
+          document_type: string
+          id?: string
+          performed_by: string
+          status: string
+          title: string
+        }
+        Update: {
+          checklist_data?: Json
+          comments?: string | null
+          created_at?: string
+          date_performed?: string
+          deviations_count?: number
+          document_type?: string
+          id?: string
+          performed_by?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      internal_control_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string | null
+          file_size: number
+          file_url: string
+          id: string
+          title: string
+          uploaded_at: string
+          uploaded_by: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path?: string | null
+          file_size: number
+          file_url: string
+          id?: string
+          title: string
+          uploaded_at?: string
+          uploaded_by: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string | null
+          file_size?: number
+          file_url?: string
+          id?: string
+          title?: string
+          uploaded_at?: string
+          uploaded_by?: string
+          version?: string
+        }
+        Relationships: []
+      }
       invoice_import: {
         Row: {
           created_at: string

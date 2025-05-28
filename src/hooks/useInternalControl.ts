@@ -17,6 +17,13 @@ export const useInternalControlHistory = () => {
   });
 };
 
+export const useChecklistTemplates = (documentType?: string) => {
+  return useQuery({
+    queryKey: ['checklist-templates', documentType],
+    queryFn: () => internalControlService.getChecklistTemplates(documentType),
+  });
+};
+
 export const useUploadDocument = () => {
   const queryClient = useQueryClient();
 
