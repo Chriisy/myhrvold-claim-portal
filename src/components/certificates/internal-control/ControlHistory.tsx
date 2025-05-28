@@ -36,7 +36,6 @@ export const ControlHistory = () => {
   };
 
   const exportReport = () => {
-    // Implementation for exporting report
     console.log('Eksporterer rapport...');
   };
 
