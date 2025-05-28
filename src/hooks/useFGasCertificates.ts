@@ -58,8 +58,8 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
       const transformedData = data?.map(cert => {
         const userObj = cert.users;
         
-        // Check if userObj exists and has the required properties
-        if (userObj && typeof userObj === 'object' && 'name' in userObj && 'email' in userObj) {
+        // Proper null checking with explicit null comparison
+        if (userObj !== null && userObj !== undefined && typeof userObj === 'object' && 'name' in userObj && 'email' in userObj) {
           return {
             ...cert,
             users: {
