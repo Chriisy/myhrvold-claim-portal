@@ -59,7 +59,7 @@ const ClaimsList = () => {
             <p className="text-gray-600">Oversikt over alle reklamasjoner</p>
           </div>
         </div>
-        <Link to="/claim/new">
+        <Link to="/new-claim">
           <Button className="btn-primary">
             <Plus className="w-4 h-4 mr-2" />
             Ny Reklamasjon

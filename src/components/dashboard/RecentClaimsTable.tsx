@@ -88,7 +88,7 @@ const RecentClaimsTable = memo(() => {
                   <p className="text-sm text-gray-600">Kostnad</p>
                   <p className="font-semibold">{claim.totalCost.toLocaleString('nb-NO')} kr</p>
                 </div>
-                <Link to={`/claim/${claim.id}`}>
+                <Link to={`/claims/${claim.id}`}>
                   <Button variant="outline" size="sm">
                     <Eye className="w-4 h-4 mr-2" />
                     Se

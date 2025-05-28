@@ -78,7 +78,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
         <div className="text-center py-8">
           <FileX className="w-12 h-12 mx-auto mb-4 text-gray-300" />
           <p className="text-gray-500 mb-4">Ingen reklamasjoner er opprettet ennå.</p>
-          <Link to="/claim/new">
+          <Link to="/new-claim">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Opprett første reklamasjon
@@ -110,7 +110,7 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
                   {claim.status || 'Ny'}
                 </Badge>
               </div>
-              <Link to={`/claim/${claim.id}`}>
+              <Link to={`/claims/${claim.id}`}>
                 <Button variant="outline" size="sm" className="shrink-0">
                   <Eye className="w-4 h-4 mr-1" />
                   <span className="hidden sm:inline">Se</span>

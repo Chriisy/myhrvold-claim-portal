@@ -93,7 +93,7 @@ export const useCreateClaim = () => {
       
       // Only navigate for manual wizard creation
       if (source === 'wizard') {
-        navigate(`/claim/${claim.id}`);
+        navigate(`/claims/${claim.id}`);
       }
     },
     onError: (error) => {
