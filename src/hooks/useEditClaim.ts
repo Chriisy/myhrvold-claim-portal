@@ -19,6 +19,8 @@ export function useEditClaim() {
       customer_name?: string | null;
       customer_no?: string | null;
       customer_address?: string | null;
+      customer_postal_code?: string | null;
+      customer_city?: string | null;
       department?: string | null;
       machine_model?: string | null;
       machine_serial?: string | null;
@@ -33,6 +35,8 @@ export function useEditClaim() {
       internal_note?: string | null;
       status?: ClaimStatus | null;
       account_code_id?: number | null;
+      technician_id?: string | null;
+      salesperson_id?: string | null;
       root_cause?: string | null;
       corrective_action?: string | null;
       preventive_action?: string | null;

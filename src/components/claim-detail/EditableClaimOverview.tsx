@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,9 @@ interface ClaimData {
   id: string;
   customer_name?: string;
   customer_no?: string;
+  customer_address?: string;
+  customer_postal_code?: string;
+  customer_city?: string;
   department?: string;
   machine_model?: string;
   machine_serial?: string;
@@ -81,6 +85,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       id: formData.id,
       customer_name: formData.customer_name || null,
       customer_no: formData.customer_no || null,
+      customer_address: formData.customer_address || null,
+      customer_postal_code: formData.customer_postal_code || null,
+      customer_city: formData.customer_city || null,
       department: formData.department || null,
       machine_model: formData.machine_model || null,
       machine_serial: formData.machine_serial || null,
@@ -151,6 +158,23 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <div>
                   <span className="font-medium text-gray-600">Kundenummer:</span>
                   <p className="mt-1">{claim.customer_no || 'Ikke angitt'}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium text-gray-600">Adresse:</span>
+                  <div className="mt-1 space-y-1">
+                    {claim.customer_address && (
+                      <p>{claim.customer_address}</p>
+                    )}
+                    {(claim.customer_postal_code || claim.customer_city) && (
+                      <p>
+                        {claim.customer_postal_code && claim.customer_postal_code + ' '}
+                        {claim.customer_city || ''}
+                      </p>
+                    )}
+                    {!claim.customer_address && !claim.customer_postal_code && !claim.customer_city && (
+                      <p className="text-gray-500">Ikke angitt</p>
+                    )}
+                  </div>
                 </div>
                 <div className="col-span-2">
                   <span className="font-medium text-gray-600">Avdeling:</span>
@@ -323,6 +347,34 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   id="customer_no"
                   value={formData.customer_no || ''}
                   onChange={(e) => setFormData({ ...formData, customer_no: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="customer_address">Kundens adresse</Label>
+                <Input
+                  id="customer_address"
+                  placeholder="Gateadresse"
+                  value={formData.customer_address || ''}
+                  onChange={(e) => setFormData({ ...formData, customer_address: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="customer_postal_code">Postnummer</Label>
+                <Input
+                  id="customer_postal_code"
+                  placeholder="0000"
+                  maxLength={4}
+                  value={formData.customer_postal_code || ''}
+                  onChange={(e) => setFormData({ ...formData, customer_postal_code: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="customer_city">Poststed</Label>
+                <Input
+                  id="customer_city"
+                  placeholder="Poststed"
+                  value={formData.customer_city || ''}
+                  onChange={(e) => setFormData({ ...formData, customer_city: e.target.value })}
                 />
               </div>
               <div>
