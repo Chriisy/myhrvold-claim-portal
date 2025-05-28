@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -58,17 +57,23 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
       // Transform the data to handle the users join properly
       const transformedData = data?.map(cert => {
         const userObj = cert.users;
-        const isValidUser = userObj && 
-                           typeof userObj === 'object' && 
-                           userObj !== null &&
-                           'name' in userObj && 
-                           'email' in userObj &&
-                           typeof userObj.name === 'string' &&
-                           typeof userObj.email === 'string';
+        
+        // Check if userObj is valid and has the required properties
+        if (userObj && 
+            typeof userObj === 'object' && 
+            'name' in userObj && 
+            'email' in userObj &&
+            typeof userObj.name === 'string' &&
+            typeof userObj.email === 'string') {
+          return {
+            ...cert,
+            users: userObj as { name: string; email: string }
+          };
+        }
 
         return {
           ...cert,
-          users: isValidUser ? userObj as { name: string; email: string } : null
+          users: null
         };
       }) || [];
 
