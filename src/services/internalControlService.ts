@@ -139,7 +139,11 @@ export const internalControlService = {
 
       if (error) throw error;
 
-      return data || [];
+      // Convert Json type to proper array for checklist_items
+      return (data || []).map(item => ({
+        ...item,
+        checklist_items: Array.isArray(item.checklist_items) ? item.checklist_items : []
+      }));
     } catch (error) {
       console.error('Error fetching checklist templates:', error);
       return [];
@@ -170,7 +174,7 @@ export const internalControlService = {
           performed_by: (await supabase.auth.getUser()).data.user?.id,
           status,
           deviations_count: deviationsCount,
-          checklist_data: checklistItems,
+          checklist_data: checklistItems as any, // Cast to any to match Json type
           comments: comments || null
         })
         .select()
@@ -184,9 +188,9 @@ export const internalControlService = {
         title: data.title,
         date_performed: data.date_performed,
         performed_by: data.performed_by,
-        status: data.status,
+        status: data.status as 'completed' | 'completed_with_deviation',
         deviations_count: data.deviations_count,
-        checklist_data: data.checklist_data,
+        checklist_data: Array.isArray(data.checklist_data) ? data.checklist_data : [],
         comments: data.comments
       };
     } catch (error) {
@@ -216,7 +220,12 @@ export const internalControlService = {
 
       if (error) throw error;
 
-      return data || [];
+      // Convert database response to proper types
+      return (data || []).map(item => ({
+        ...item,
+        status: item.status as 'completed' | 'completed_with_deviation',
+        checklist_data: Array.isArray(item.checklist_data) ? item.checklist_data : []
+      }));
     } catch (error) {
       console.error('Error fetching check history:', error);
       return [];
