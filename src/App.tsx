@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider } from "./contexts/AuthContext";
 import { DashboardFiltersProvider } from "./contexts/DashboardFiltersContext";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";

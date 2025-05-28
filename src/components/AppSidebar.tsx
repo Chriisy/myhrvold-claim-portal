@@ -62,12 +62,12 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { user, signOut, hasPermission } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleSignOut = async () => {
-    await signOut();
+    await logout();
     navigate('/login');
   };
 

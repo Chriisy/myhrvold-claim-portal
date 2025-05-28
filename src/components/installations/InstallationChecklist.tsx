@@ -75,7 +75,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
     mutationFn: async ({ checklistData }: { checklistData: ChecklistItem[] }) => {
       const { error } = await supabase
         .from('installation_checklists')
-        .update({ checklist_data: checklistData })
+        .update({ checklist_data: checklistData as any })
         .eq('project_id', projectId);
 
       if (error) throw error;
@@ -88,7 +88,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
   const handleItemToggle = (itemId: string) => {
     if (!checklist) return;
 
-    const items = checklist.checklist_data as ChecklistItem[];
+    const items = checklist.checklist_data as unknown as ChecklistItem[];
     const updatedItems = items.map(item =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     );
@@ -104,7 +104,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
   const handleCommentChange = (itemId: string, comments: string) => {
     if (!checklist) return;
 
-    const items = checklist.checklist_data as ChecklistItem[];
+    const items = checklist.checklist_data as unknown as ChecklistItem[];
     const updatedItems = items.map(item =>
       item.id === itemId ? { ...item, comments } : item
     );
@@ -142,7 +142,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
     );
   }
 
-  const items = checklist.checklist_data as ChecklistItem[];
+  const items = checklist.checklist_data as unknown as ChecklistItem[];
   const completedCount = items.filter(item => item.completed).length;
   const requiredCount = items.filter(item => item.required).length;
   const completedRequired = items.filter(item => item.required && item.completed).length;
