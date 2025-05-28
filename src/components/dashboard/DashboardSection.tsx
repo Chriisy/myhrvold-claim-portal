@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReactNode } from 'react';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 
 interface DashboardSectionProps {
   title?: string;
@@ -29,13 +29,12 @@ const DashboardSection = ({
 }: DashboardSectionProps) => {
   if (isError) {
     return (
-      <ImprovedErrorBoundary
+      <UnifiedErrorBoundary
         title={title || "Feil ved lasting av data"}
-        description={error?.message || 'En uventet feil oppstod'}
-        onReset={onRetry}
+        onError={() => {}}
       >
         <div>This content is handled by the error boundary</div>
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
     );
   }
 

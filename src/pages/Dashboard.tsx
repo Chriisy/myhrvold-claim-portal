@@ -2,26 +2,50 @@
 import React from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
-import { DashboardContainer } from '@/components/dashboard/core/DashboardContainer';
-import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { OptimizedDashboardKpiSection } from '@/components/dashboard/OptimizedDashboardKpiSection';
+import { LazyLoadedComponent } from '@/components/shared/LazyLoadedComponent';
+import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
+import { useQueryOptimization } from '@/hooks/performance/useQueryOptimization';
 
-const Dashboard: React.FC = () => {
+// Lazy load heavy components
+const DashboardChartsGrid = React.lazy(() => import('@/components/dashboard/DashboardChartsGrid').then(module => ({ default: module.DashboardChartsGrid })));
+const MobileOptimizedFilters = React.lazy(() => import('@/components/dashboard/MobileOptimizedFilters').then(module => ({ default: module.MobileOptimizedFilters })));
+const NotificationToasts = React.lazy(() => import('@/components/dashboard/NotificationToasts').then(module => ({ default: module.NotificationToasts })));
+
+const DashboardContent = () => {
+  // Initialize query optimizations
+  useQueryOptimization();
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <LazyLoadedComponent fallback={<div />}>
+        <NotificationToasts />
+      </LazyLoadedComponent>
+      
+      <DashboardHeader />
+
+      <OptimizedDashboardKpiSection />
+
+      {/* Mobile Optimized Filters */}
+      <UnifiedErrorBoundary title="Feil ved lasting av filtre">
+        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+          <MobileOptimizedFilters />
+        </LazyLoadedComponent>
+      </UnifiedErrorBoundary>
+
+      <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+        <DashboardChartsGrid />
+      </LazyLoadedComponent>
+    </div>
+  );
+};
+
+const Dashboard = () => {
   return (
     <DashboardFiltersProvider>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger />
-            <div>
-              <h1 className="text-3xl font-bold text-myhrvold-primary">Dashboard</h1>
-              <p className="text-gray-600">Oversikt over reklamasjoner og nøkkeltall</p>
-            </div>
-          </div>
-        </div>
-        
-        <DashboardFilters />
-        <DashboardContainer />
-      </div>
+      <DashboardContent />
     </DashboardFiltersProvider>
   );
 };

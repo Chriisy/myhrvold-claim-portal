@@ -1,6 +1,6 @@
 
 import { ReactNode } from 'react';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 
 interface Props {
   children: ReactNode;
@@ -10,5 +10,5 @@ interface Props {
 }
 
 export const ErrorBoundaryWrapper = (props: Props) => {
-  return <ImprovedErrorBoundary {...props} />;
+  return <UnifiedErrorBoundary {...props} onError={() => {}} />;
 };
