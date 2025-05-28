@@ -18,20 +18,20 @@ export const createOptimizedLazyComponent = <P extends object>(
     importFn();
   }
   
-  return React.forwardRef<any, P>((props, ref) => (
+  return (props: P) => (
     <Suspense fallback={options.fallback || <OptimizedLoadingStates />}>
-      <LazyComponent {...props} ref={ref} />
+      <LazyComponent {...props} />
     </Suspense>
-  ));
+  );
 };
 
 export const withOptimizedLoading = <P extends object>(
   Component: ComponentType<P>,
   fallback?: React.ReactNode
 ) => {
-  return React.forwardRef<any, P>((props, ref) => (
+  return (props: P) => (
     <Suspense fallback={fallback || <OptimizedLoadingStates />}>
-      <Component {...props} ref={ref} />
+      <Component {...props} />
     </Suspense>
-  ));
+  );
 };
