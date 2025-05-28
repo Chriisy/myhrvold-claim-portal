@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, X } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Edit, X, User, Building, FileText, Settings } from 'lucide-react';
 import { useEditClaim } from '@/hooks/useEditClaim';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useTechnicians } from '@/hooks/useTechnicians';
@@ -48,7 +49,6 @@ interface EditableClaimOverviewProps {
   claim: ClaimData;
 }
 
-// Category and status options remain here as they're specific to claim business logic
 const categoryOptions = [
   { value: 'Service', label: 'Service' },
   { value: 'Installasjon', label: 'Installasjon' },
@@ -74,11 +74,9 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
   const { data: technicians } = useTechnicians();
   const { data: selgere } = useSelgere();
 
-  // Check if user can edit this claim
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
 
   const handleSave = async () => {
-    // Only send the database columns, not the joined relationship data
     const updateData = {
       id: formData.id,
       customer_name: formData.customer_name || null,
@@ -111,80 +109,205 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setIsEditing(false);
   };
 
+  if (!isEditing) {
+    return (
+      <div className="space-y-6">
+        {/* Status and Actions Header */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="bg-orange-100 text-orange-800 px-3 py-1">
+                  {claim.status || 'Ny'}
+                </Badge>
+                <span className="text-sm text-gray-500">Reklamasjon ID: {claim.id}</span>
+              </div>
+              {canEdit && (
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Rediger
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Customer Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <User className="w-5 h-5 text-blue-600" />
+                Kundeinformasjon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Kunde:</span>
+                  <p className="mt-1">{claim.customer_name || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Kundenummer:</span>
+                  <p className="mt-1">{claim.customer_no || 'Ikke angitt'}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium text-gray-600">Avdeling:</span>
+                  <p className="mt-1">{getDepartmentLabel(claim.department as Department)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Equipment Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Settings className="w-5 h-5 text-green-600" />
+                Utstyrsinformasjon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Maskin:</span>
+                  <p className="mt-1">{claim.machine_model || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Serienummer:</span>
+                  <p className="mt-1">{claim.machine_serial || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Kategori:</span>
+                  <p className="mt-1">{claim.category || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Antall:</span>
+                  <p className="mt-1">{claim.quantity || 'Ikke angitt'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Team Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Building className="w-5 h-5 text-purple-600" />
+                Team & Leverandører
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Leverandør:</span>
+                  <p className="mt-1">{claim.suppliers?.name || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Tekniker:</span>
+                  <p className="mt-1">{claim.technician?.name || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Selger:</span>
+                  <p className="mt-1">{claim.salesperson?.name || 'Ikke angitt'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reference Information */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileText className="w-5 h-5 text-orange-600" />
+                Referanser
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Visma ordrenr:</span>
+                  <p className="mt-1">{claim.visma_order_no || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Kunde PO:</span>
+                  <p className="mt-1">{claim.customer_po || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Rapportert av:</span>
+                  <p className="mt-1">{claim.reported_by || 'Ikke angitt'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Account Code Section */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Kontokode</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AccountCodeSelector
+              selectedAccountCodeId={claim.account_code_id}
+              onAccountCodeChange={() => {}}
+              isEditing={false}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Description Section */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Beskrivelse</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {claim.description || 'Ingen beskrivelse angitt'}
+            </p>
+            {claim.internal_note && (
+              <>
+                <Separator className="my-4" />
+                <div>
+                  <h4 className="font-semibold mb-2 text-gray-800">Interne notater</h4>
+                  <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">
+                    {claim.internal_note}
+                  </p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Edit mode - keep existing edit form but with better spacing
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Reklamasjon Detaljer</CardTitle>
-          {!isEditing && canEdit ? (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Rediger
+          <CardTitle>Rediger Reklamasjon</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleCancel}>
+              <X className="w-4 h-4 mr-2" />
+              Avbryt
             </Button>
-          ) : isEditing ? (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleCancel}>
-                <X className="w-4 h-4 mr-2" />
-                Avbryt
-              </Button>
-              <Button onClick={handleSave} disabled={editClaim.isPending}>
-                {editClaim.isPending ? 'Lagrer...' : 'Lagre'}
-              </Button>
-            </div>
-          ) : null}
+            <Button onClick={handleSave} disabled={editClaim.isPending}>
+              {editClaim.isPending ? 'Lagrer...' : 'Lagre'}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        {!isEditing ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold mb-2">Grunnleggende informasjon</h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Status:</span> 
-                  <Badge className="bg-orange-100 text-orange-800">{claim.status || 'Ny'}</Badge>
-                </div>
-                <div><span className="font-medium">Kunde:</span> {claim.customer_name || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Kundenummer:</span> {claim.customer_no || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Avdeling:</span> {getDepartmentLabel(claim.department as Department)}</div>
-                <div><span className="font-medium">Maskin:</span> {claim.machine_model || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Serienummer:</span> {claim.machine_serial || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Leverandør:</span> {claim.suppliers?.name || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Tekniker:</span> {claim.technician?.name || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Selger:</span> {claim.salesperson?.name || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Kategori:</span> {claim.category || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Antall:</span> {claim.quantity || 'Ikke angitt'}</div>
-              </div>
-
-              <div className="mt-6">
-                <AccountCodeSelector
-                  selectedAccountCodeId={claim.account_code_id}
-                  onAccountCodeChange={() => {}} // Read-only in view mode
-                  isEditing={false}
-                />
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Referanser</h3>
-              <div className="space-y-2">
-                <div><span className="font-medium">Visma ordrenr:</span> {claim.visma_order_no || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Kunde PO:</span> {claim.customer_po || 'Ikke angitt'}</div>
-                <div><span className="font-medium">Rapportert av:</span> {claim.reported_by || 'Ikke angitt'}</div>
-              </div>
-            </div>
-            <div className="md:col-span-2">
-              <h3 className="font-semibold mb-2">Beskrivelse</h3>
-              <p className="text-gray-600">{claim.description || 'Ingen beskrivelse angitt'}</p>
-              {claim.internal_note && (
-                <div className="mt-4">
-                  <h3 className="font-semibold mb-2">Interne notater</h3>
-                  <p className="text-gray-600">{claim.internal_note}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Basic Information */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <User className="w-5 h-5 text-blue-600" />
+              Grunnleggende informasjon
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customer_name">Kundenavn</Label>
@@ -221,6 +344,36 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="status">Status</Label>
+                <Select 
+                  value={formData.status || 'Ny'} 
+                  onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Equipment Information */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-green-600" />
+              Utstyrsinformasjon
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
                 <Label htmlFor="machine_model">Maskin</Label>
                 <Input
                   id="machine_model"
@@ -252,23 +405,26 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={formData.status || 'Ny'} 
-                  onValueChange={(value: ClaimStatus) => setFormData({ ...formData, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Velg status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="quantity">Antall</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={formData.quantity || ''}
+                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || undefined })}
+                />
               </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Team Information */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Building className="w-5 h-5 text-purple-600" />
+              Team
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="technician_id">Tekniker</Label>
                 <Select 
@@ -307,15 +463,18 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="quantity">Antall</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={formData.quantity || ''}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || undefined })}
-                />
-              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* References */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-orange-600" />
+              Referanser
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="visma_order_no">Visma ordrenr</Label>
                 <Input
@@ -332,7 +491,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                   onChange={(e) => setFormData({ ...formData, customer_po: e.target.value })}
                 />
               </div>
-              <div>
+              <div className="md:col-span-2">
                 <Label htmlFor="reported_by">Rapportert av</Label>
                 <Input
                   id="reported_by"
@@ -341,32 +500,49 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 />
               </div>
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Account Code */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Kontokode</h3>
             <AccountCodeSelector
               selectedAccountCodeId={formData.account_code_id}
               onAccountCodeChange={(accountCodeId) => setFormData({ ...formData, account_code_id: accountCodeId })}
               isEditing={true}
             />
+          </div>
 
-            <div>
-              <Label htmlFor="description">Beskrivelse</Label>
-              <Textarea
-                id="description"
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-              />
-            </div>
-            <div>
-              <Label htmlFor="internal_note">Interne notater</Label>
-              <Textarea
-                id="internal_note"
-                value={formData.internal_note || ''}
-                onChange={(e) => setFormData({ ...formData, internal_note: e.target.value })}
-                rows={3}
-              />
+          <Separator />
+
+          {/* Description */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Beskrivelse og notater</h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="description">Beskrivelse</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="internal_note">Interne notater</Label>
+                <Textarea
+                  id="internal_note"
+                  value={formData.internal_note || ''}
+                  onChange={(e) => setFormData({ ...formData, internal_note: e.target.value })}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
             </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
