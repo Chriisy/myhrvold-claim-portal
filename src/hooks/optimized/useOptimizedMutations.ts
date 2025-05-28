@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
 import { toast } from '@/hooks/use-toast';
 import { ClaimFormData } from '@/lib/validations/claim';
+import { subDays } from 'date-fns';
 
 export const useOptimizedCreateClaim = () => {
   const queryClient = useQueryClient();
@@ -91,9 +92,16 @@ export const useOptimizedCreateClaim = () => {
       });
     },
     onSuccess: (data) => {
-      // Invalidate and refetch specific queries
+      // Invalidate and refetch specific queries with proper filter object
       queryClient.invalidateQueries({ queryKey: queryKeys.claims.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.kpis({}) });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.dashboard.kpis({
+          date_range: {
+            start: subDays(new Date(), 30),
+            end: new Date()
+          }
+        }) 
+      });
       
       toast({
         title: "Reklamasjon opprettet",
