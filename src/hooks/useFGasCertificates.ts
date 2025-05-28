@@ -18,7 +18,7 @@ interface FGasCertificate {
   created_at: string;
   updated_at: string;
   created_by: string;
-  users?: { name: string; email: string };
+  users?: { name: string; email: string } | null;
 }
 
 interface CreateCertificateData {
@@ -55,7 +55,15 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
         throw new Error(`Kunne ikke hente sertifikater: ${error.message}`);
       }
 
-      return data as FGasCertificate[];
+      // Transform the data to handle the users join properly
+      const transformedData = data?.map(cert => ({
+        ...cert,
+        users: cert.users && typeof cert.users === 'object' && 'name' in cert.users 
+          ? cert.users as { name: string; email: string }
+          : null
+      })) || [];
+
+      return transformedData as FGasCertificate[];
     },
   });
 };
