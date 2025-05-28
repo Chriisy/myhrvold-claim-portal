@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -39,7 +40,7 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
         .from('f_gas_certificates')
         .select(`
           *,
-          users:holder_user_id(name, email)
+          users!holder_user_id(name, email)
         `)
         .order('expiry_date', { ascending: true });
 
