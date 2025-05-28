@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Activity, Clock, Database, Users } from 'lucide-react';
 import { useSystemHealth } from '@/hooks/useSystemHealth';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 
 export const PerformanceMonitor = () => {
   const { data: metrics, isLoading, error, refetch } = useSystemHealth();
@@ -21,13 +21,12 @@ export const PerformanceMonitor = () => {
 
   if (error) {
     return (
-      <ImprovedErrorBoundary
+      <UnifiedErrorBoundary
         title="Performance Monitor"
-        description={`Feil ved lasting av systemmetrikker: ${error}`}
-        onReset={() => refetch()}
+        onError={() => refetch()}
       >
-        <div>Error content is handled by the error boundary</div>
-      </ImprovedErrorBoundary>
+        <div>Feil ved lasting av systemmetrikker: {error}</div>
+      </UnifiedErrorBoundary>
     );
   }
 

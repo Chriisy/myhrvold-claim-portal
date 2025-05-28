@@ -5,7 +5,7 @@ import { BarChart as BarChartIcon } from 'lucide-react';
 import { useCostByAccount } from '@/hooks/api/dashboard/useCostByAccount';
 import { useDashboardFilters } from '@/contexts/DashboardFiltersContext';
 import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
-import ErrorBoundary from '@/components/ui/error-boundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import { memo } from 'react';
 
 const CostByAccountChart = memo(() => {
@@ -22,9 +22,9 @@ const CostByAccountChart = memo(() => {
   if (isError) {
     console.error('CostByAccount error:', error);
     return (
-      <ErrorBoundary title="Feil ved lasting av kostnader per konto">
+      <UnifiedErrorBoundary title="Feil ved lasting av kostnader per konto">
         <div>En feil oppstod ved lasting av data: {error?.message}</div>
-      </ErrorBoundary>
+      </UnifiedErrorBoundary>
     );
   }
 

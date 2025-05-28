@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity } from 'lucide-react';
 import { PerformanceMonitor } from '@/components/dashboard/PerformanceMonitor';
 import { SystemHealthCheck } from '@/components/dashboard/SystemHealthCheck';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import { useDashboardLayout } from '@/hooks/ui/useDashboardLayout';
 
 export const SystemHealthSection = () => {
@@ -19,13 +19,13 @@ export const SystemHealthSection = () => {
       </CardHeader>
       <CardContent>
         <div className={`grid gap-6 ${getGridClasses()}`}>
-          <ImprovedErrorBoundary title="Feil ved lasting av ytelsesmonitor">
+          <UnifiedErrorBoundary title="Feil ved lasting av ytelsesmonitor">
             <PerformanceMonitor />
-          </ImprovedErrorBoundary>
+          </UnifiedErrorBoundary>
           
-          <ImprovedErrorBoundary title="Feil ved lasting av systemhelse">
+          <UnifiedErrorBoundary title="Feil ved lasting av systemhelse">
             <SystemHealthCheck />
-          </ImprovedErrorBoundary>
+          </UnifiedErrorBoundary>
         </div>
       </CardContent>
     </Card>
