@@ -20,7 +20,7 @@ export const createOptimizedLazyComponent = <P extends object>(
   
   return (props: P) => (
     <Suspense fallback={options.fallback || <OptimizedLoadingStates />}>
-      <LazyComponent {...props} />
+      <LazyComponent {...(props as any)} />
     </Suspense>
   );
 };
@@ -31,7 +31,7 @@ export const withOptimizedLoading = <P extends object>(
 ) => {
   return (props: P) => (
     <Suspense fallback={fallback || <OptimizedLoadingStates />}>
-      <Component {...props} />
+      <Component {...(props as any)} />
     </Suspense>
   );
 };
