@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
@@ -108,7 +107,7 @@ export const useOptimizedCreateClaim = () => {
         description: "Reklamasjonen ble opprettet og du blir videresendt.",
       });
       
-      // Navigate to the new claim
+      // Navigate to the new claim with correct route
       setTimeout(() => {
         window.location.href = `/claims/${data.id}`;
       }, 1000);
