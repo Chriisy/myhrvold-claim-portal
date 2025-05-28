@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,7 @@ interface ClaimData {
   department?: string;
   machine_model?: string;
   machine_serial?: string;
+  part_number?: string;
   warranty?: boolean;
   quantity?: number;
   category?: ClaimCategory;
@@ -91,6 +93,7 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
       department: formData.department || null,
       machine_model: formData.machine_model || null,
       machine_serial: formData.machine_serial || null,
+      part_number: formData.part_number || null,
       warranty: formData.warranty || false,
       quantity: formData.quantity || null,
       category: formData.category || null,
@@ -201,6 +204,10 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <div>
                   <span className="font-medium text-gray-600">Serienummer:</span>
                   <p className="mt-1">{claim.machine_serial || 'Ikke angitt'}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Delenummer:</span>
+                  <p className="mt-1">{claim.part_number || 'Ikke angitt'}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-600">Kategori:</span>
@@ -442,6 +449,14 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 />
               </div>
               <div>
+                <Label htmlFor="part_number">Delenummer</Label>
+                <Input
+                  id="part_number"
+                  value={formData.part_number || ''}
+                  onChange={(e) => setFormData({ ...formData, part_number: e.target.value })}
+                />
+              </div>
+              <div>
                 <Label htmlFor="category">Kategori</Label>
                 <Select value={formData.category || ''} onValueChange={(value: ClaimCategory) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger>
@@ -599,3 +614,4 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     </Card>
   );
 }
+
