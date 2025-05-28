@@ -1,6 +1,6 @@
 
 import React, { memo, useMemo } from 'react';
-import { Home, FileText, Plus, Users, BarChart3, Upload, Settings, LogOut, Shield } from 'lucide-react';
+import { Home, FileText, Plus, Users, BarChart3, Upload, Settings, LogOut, Shield, Award } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -34,6 +34,11 @@ const baseMenuItems = [
     title: 'Ny Reklamasjon',
     url: '/new-claim',
     icon: Plus,
+  },
+  {
+    title: 'F-gass Sertifikater',
+    url: '/f-gas-certificates',
+    icon: Award,
   },
   {
     title: 'Leverandører',

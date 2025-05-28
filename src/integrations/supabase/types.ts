@@ -104,6 +104,207 @@ export type Database = {
           },
         ]
       }
+      certificate_audit_log: {
+        Row: {
+          action: string
+          certificate_id: string | null
+          id: string
+          new_values: Json | null
+          notes: string | null
+          old_values: Json | null
+          performed_at: string
+          performed_by: string
+        }
+        Insert: {
+          action: string
+          certificate_id?: string | null
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by: string
+        }
+        Update: {
+          action?: string
+          certificate_id?: string | null
+          id?: string
+          new_values?: Json | null
+          notes?: string | null
+          old_values?: Json | null
+          performed_at?: string
+          performed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_audit_log_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "f_gas_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificate_documents: {
+        Row: {
+          certificate_id: string | null
+          document_type: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          certificate_id?: string | null
+          document_type?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          certificate_id?: string | null
+          document_type?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_documents_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "f_gas_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificate_notifications: {
+        Row: {
+          certificate_id: string | null
+          days_before_expiry: number | null
+          id: string
+          message: string | null
+          notification_type: string
+          recipient_email: string | null
+          recipient_user_id: string | null
+          sent_at: string
+        }
+        Insert: {
+          certificate_id?: string | null
+          days_before_expiry?: number | null
+          id?: string
+          message?: string | null
+          notification_type: string
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string
+        }
+        Update: {
+          certificate_id?: string | null
+          days_before_expiry?: number | null
+          id?: string
+          message?: string | null
+          notification_type?: string
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_notifications_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "f_gas_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_notifications_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificate_renewal_checklists: {
+        Row: {
+          certificate_id: string | null
+          checklist_item: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          is_completed: boolean
+          notes: string | null
+        }
+        Insert: {
+          certificate_id?: string | null
+          checklist_item: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+        }
+        Update: {
+          certificate_id?: string | null
+          checklist_item?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_renewal_checklists_certificate_id_fkey"
+            columns: ["certificate_id"]
+            isOneToOne: false
+            referencedRelation: "f_gas_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_renewal_checklists_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       claim_files: {
         Row: {
           claim_id: string | null
@@ -410,6 +611,69 @@ export type Database = {
           },
         ]
       }
+      f_gas_certificates: {
+        Row: {
+          certificate_number: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at: string
+          created_by: string
+          expiry_date: string
+          holder_name: string | null
+          holder_user_id: string | null
+          id: string
+          issue_date: string
+          issuing_authority: string | null
+          notes: string | null
+          status: Database["public"]["Enums"]["certificate_status"]
+          updated_at: string
+        }
+        Insert: {
+          certificate_number: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          created_by: string
+          expiry_date: string
+          holder_name?: string | null
+          holder_user_id?: string | null
+          id?: string
+          issue_date: string
+          issuing_authority?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["certificate_status"]
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string
+          certificate_type?: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          created_by?: string
+          expiry_date?: string
+          holder_name?: string | null
+          holder_user_id?: string | null
+          id?: string
+          issue_date?: string
+          issuing_authority?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["certificate_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "f_gas_certificates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "f_gas_certificates_holder_user_id_fkey"
+            columns: ["holder_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_import: {
         Row: {
           created_at: string
@@ -581,6 +845,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_expiring_certificates: {
+        Args: { days_ahead?: number }
+        Returns: {
+          certificate_id: string
+          certificate_number: string
+          holder_name: string
+          holder_email: string
+          expiry_date: string
+          days_until_expiry: number
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+        }[]
+      }
       has_permission: {
         Args: {
           _user_id: string
@@ -594,9 +870,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      update_certificate_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       action_status: "Planlagt" | "Pågår" | "Ferdig"
+      certificate_status:
+        | "active"
+        | "expiring_soon"
+        | "expired"
+        | "pending_renewal"
+      certificate_type: "personal" | "company"
       claim_category: "Service" | "Installasjon" | "Produkt" | "Del"
       claim_status:
         | "Ny"
@@ -754,6 +1040,13 @@ export const Constants = {
   public: {
     Enums: {
       action_status: ["Planlagt", "Pågår", "Ferdig"],
+      certificate_status: [
+        "active",
+        "expiring_soon",
+        "expired",
+        "pending_renewal",
+      ],
+      certificate_type: ["personal", "company"],
       claim_category: ["Service", "Installasjon", "Produkt", "Del"],
       claim_status: [
         "Ny",

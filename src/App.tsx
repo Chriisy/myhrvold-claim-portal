@@ -28,6 +28,7 @@ const Suppliers = createOptimizedLazyComponent(() => import('./pages/Suppliers')
 const Reports = createOptimizedLazyComponent(() => import('./pages/Reports'));
 const InvoiceImport = createOptimizedLazyComponent(() => import('./pages/InvoiceImport'));
 const UserProfile = createOptimizedLazyComponent(() => import('./pages/UserProfile'));
+const FGasCertificates = createOptimizedLazyComponent(() => import('./pages/FGasCertificates'));
 const NotFound = createOptimizedLazyComponent(() => import('./pages/NotFound'));
 const PrivacyPolicy = createOptimizedLazyComponent(() => import('./pages/PrivacyPolicy'));
 const CookiePolicy = createOptimizedLazyComponent(() => import('./pages/CookiePolicy'));
@@ -121,6 +122,14 @@ function App() {
                                 <Route path="/claim/new" element={
                                   <ProtectedRoute>
                                     <ClaimWizard />
+                                  </ProtectedRoute>
+                                } />
+                                
+                                <Route path="/f-gas-certificates" element={
+                                  <ProtectedRoute>
+                                    <Suspense fallback={<TableSkeleton />}>
+                                      <FGasCertificates />
+                                    </Suspense>
                                   </ProtectedRoute>
                                 } />
                                 
