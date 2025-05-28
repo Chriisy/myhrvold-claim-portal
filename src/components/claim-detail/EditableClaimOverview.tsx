@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -117,6 +118,16 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
     setIsEditing(false);
   };
 
+  const formatAddress = () => {
+    const parts = [];
+    if (claim.customer_address) parts.push(claim.customer_address);
+    if (claim.customer_postal_code || claim.customer_city) {
+      const cityLine = [claim.customer_postal_code, claim.customer_city].filter(Boolean).join(' ');
+      if (cityLine) parts.push(cityLine);
+    }
+    return parts.length > 0 ? parts : ['Ikke angitt'];
+  };
+
   if (!isEditing) {
     return (
       <div className="space-y-6">
@@ -163,18 +174,11 @@ export function EditableClaimOverview({ claim }: EditableClaimOverviewProps) {
                 <div className="col-span-2">
                   <span className="font-medium text-gray-600">Adresse:</span>
                   <div className="mt-1 space-y-1">
-                    {claim.customer_address && (
-                      <p>{claim.customer_address}</p>
-                    )}
-                    {(claim.customer_postal_code || claim.customer_city) && (
-                      <p>
-                        {claim.customer_postal_code && claim.customer_postal_code + ' '}
-                        {claim.customer_city || ''}
+                    {formatAddress().map((line, index) => (
+                      <p key={index} className={line === 'Ikke angitt' ? 'text-gray-500' : ''}>
+                        {line}
                       </p>
-                    )}
-                    {!claim.customer_address && !claim.customer_postal_code && !claim.customer_city && (
-                      <p className="text-gray-500">Ikke angitt</p>
-                    )}
+                    ))}
                   </div>
                 </div>
                 <div className="col-span-2">
