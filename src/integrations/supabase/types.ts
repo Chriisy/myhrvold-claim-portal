@@ -305,6 +305,44 @@ export type Database = {
           },
         ]
       }
+      checklist_templates: {
+        Row: {
+          checklist_items: Json
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          checklist_items?: Json
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          checklist_items?: Json
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       claim_files: {
         Row: {
           claim_id: string | null
@@ -668,6 +706,172 @@ export type Database = {
           {
             foreignKeyName: "f_gas_certificates_holder_user_id_fkey"
             columns: ["holder_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      installation_checklists: {
+        Row: {
+          checklist_data: Json
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          project_id: string
+          status: string
+          template_id: string | null
+        }
+        Insert: {
+          checklist_data?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          project_id: string
+          status?: string
+          template_id?: string | null
+        }
+        Update: {
+          checklist_data?: Json
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          project_id?: string
+          status?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installation_checklists_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installation_checklists_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "installation_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installation_checklists_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      installation_photos: {
+        Row: {
+          caption: string | null
+          checklist_item_id: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_url: string
+          id: string
+          project_id: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          caption?: string | null
+          checklist_item_id?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_url: string
+          id?: string
+          project_id: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          caption?: string | null
+          checklist_item_id?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_url?: string
+          id?: string
+          project_id?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installation_photos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "installation_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installation_photos_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      installation_projects: {
+        Row: {
+          assigned_technician_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          customer_name: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          project_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_technician_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          customer_name?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          project_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_technician_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          customer_name?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          project_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installation_projects_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installation_projects_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
