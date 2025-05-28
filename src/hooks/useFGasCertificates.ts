@@ -54,28 +54,20 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
         throw new Error(`Kunne ikke hente sertifikater: ${error.message}`);
       }
 
-      // Transform the data to handle the users join properly
-      const transformedData = data?.map(cert => {
-        const userObj = cert.users;
-        
-        // Proper null checking with explicit null comparison
-        if (userObj !== null && userObj !== undefined && typeof userObj === 'object' && 'name' in userObj && 'email' in userObj) {
-          return {
-            ...cert,
-            users: {
-              name: userObj.name as string,
-              email: userObj.email as string
-            }
-          };
-        }
-
+      // Transform the data with clean conditional checking
+      const transformedData: FGasCertificate[] = (data ?? []).map((cert) => {
         return {
           ...cert,
-          users: null
+          users: cert.users 
+            ? { 
+                name: cert.users.name, 
+                email: cert.users.email 
+              } 
+            : null
         };
-      }) || [];
+      });
 
-      return transformedData as FGasCertificate[];
+      return transformedData;
     },
   });
 };
