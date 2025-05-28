@@ -56,18 +56,21 @@ export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' =
       }
 
       // Transform the data to handle the users join properly
-      const transformedData = data?.map(cert => ({
-        ...cert,
-        users: cert.users && 
-                typeof cert.users === 'object' && 
-                cert.users !== null &&
-                'name' in cert.users && 
-                'email' in cert.users &&
-                typeof cert.users.name === 'string' &&
-                typeof cert.users.email === 'string'
-          ? cert.users as { name: string; email: string }
-          : null
-      })) || [];
+      const transformedData = data?.map(cert => {
+        const userObj = cert.users;
+        const isValidUser = userObj && 
+                           typeof userObj === 'object' && 
+                           userObj !== null &&
+                           'name' in userObj && 
+                           'email' in userObj &&
+                           typeof userObj.name === 'string' &&
+                           typeof userObj.email === 'string';
+
+        return {
+          ...cert,
+          users: isValidUser ? userObj as { name: string; email: string } : null
+        };
+      }) || [];
 
       return transformedData as FGasCertificate[];
     },
