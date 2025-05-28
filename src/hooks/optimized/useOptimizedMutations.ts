@@ -100,7 +100,7 @@ export const useOptimizedCreateClaim = () => {
         description: "Reklamasjonen ble opprettet og du blir videresendt.",
       });
       
-      // Navigate to the new claim - Fixed: added missing parameter
+      // Navigate to the new claim - Fixed: added data parameter
       setTimeout(() => {
         window.location.href = `/claims/${data.id}`;
       }, 1000);
