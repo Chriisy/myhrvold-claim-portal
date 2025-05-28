@@ -5,25 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle, Clock, AlertTriangle, Plus } from 'lucide-react';
-import { format } from 'date-fns';
-import { nb } from 'date-fns/locale';
-
-interface ChecklistItem {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  deviation: boolean;
-  comment?: string;
-}
+import { CheckCircle, AlertTriangle, Plus } from 'lucide-react';
+import { useSubmitChecklist } from '@/hooks/useInternalControl';
+import { ChecklistItem } from '@/services/internalControlService';
 
 interface Checklist {
   id: string;
   type: string;
   title: string;
-  last_completed?: string;
-  completed_by?: string;
   items: ChecklistItem[];
 }
 
@@ -53,25 +42,102 @@ const SAMPLE_CHECKLISTS: Checklist[] = [
         description: 'Bruk elektronisk lekkasjedetektor på kritiske områder',
         completed: false,
         deviation: false
+      },
+      {
+        id: '1-4',
+        title: 'Kontroll av kuldemediummengde',
+        description: 'Verifiser at kuldemediummengden er innenfor normale verdier',
+        completed: false,
+        deviation: false
       }
     ]
   },
   {
     id: '2',
+    type: 'tomming_gjenvinning',
+    title: 'Tømming og gjenvinning',
+    items: [
+      {
+        id: '2-1',
+        title: 'Kontroll av gjenvinningsutstyr',
+        description: 'Verifiser at alt gjenvinningsutstyr fungerer korrekt',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '2-2',
+        title: 'Dokumentasjon av kuldemediummengde',
+        description: 'Registrer mengde kuldemedium som tas ut av anlegget',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '2-3',
+        title: 'Merking av beholdere',
+        description: 'Påse at alle beholdere er korrekt merket og datert',
+        completed: false,
+        deviation: false
+      }
+    ]
+  },
+  {
+    id: '3',
+    type: 'pafylling',
+    title: 'Påfylling av kuldemedium',
+    items: [
+      {
+        id: '3-1',
+        title: 'Kontroll av kuldemediumtype',
+        description: 'Verifiser at riktig type kuldemedium brukes',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '3-2',
+        title: 'Lekkasjekontroll før påfylling',
+        description: 'Utfør lekkasjekontroll før påfylling av nytt kuldemedium',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '3-3',
+        title: 'Dokumentasjon av påfylt mengde',
+        description: 'Registrer mengde kuldemedium som fylles på anlegget',
+        completed: false,
+        deviation: false
+      }
+    ]
+  },
+  {
+    id: '4',
     type: 'egenkontroll',
     title: 'Egenkontroll',
     items: [
       {
-        id: '2-1',
+        id: '4-1',
         title: 'Kontroll av loggføring',
         description: 'Verifiser at alle aktiviteter er korrekt dokumentert',
         completed: false,
         deviation: false
       },
       {
-        id: '2-2',
+        id: '4-2',
         title: 'Sertifikatgyldighetskontroll',
         description: 'Sjekk at alle relevante sertifikater er gyldige',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '4-3',
+        title: 'Kompetansevurdering',
+        description: 'Vurder om personale har nødvendig kompetanse',
+        completed: false,
+        deviation: false
+      },
+      {
+        id: '4-4',
+        title: 'Rutinekontroll av utstyr',
+        description: 'Kontroller at alt utstyr er i forskriftsmessig stand',
         completed: false,
         deviation: false
       }
@@ -82,6 +148,7 @@ const SAMPLE_CHECKLISTS: Checklist[] = [
 export const DigitalChecklists = () => {
   const [checklists, setChecklists] = useState<Checklist[]>(SAMPLE_CHECKLISTS);
   const [activeChecklist, setActiveChecklist] = useState<string | null>(null);
+  const submitMutation = useSubmitChecklist();
 
   const handleItemToggle = (checklistId: string, itemId: string) => {
     setChecklists(prev => prev.map(checklist => {
@@ -134,6 +201,42 @@ export const DigitalChecklists = () => {
     }));
   };
 
+  const handleSubmitChecklist = (checklistId: string) => {
+    const checklist = checklists.find(c => c.id === checklistId);
+    if (!checklist) return;
+
+    const allCompleted = checklist.items.every(item => item.completed);
+    if (!allCompleted) {
+      alert('Alle punkter må være fullført før innlevering');
+      return;
+    }
+
+    submitMutation.mutate({
+      documentType: checklist.type,
+      title: checklist.title,
+      checklistItems: checklist.items
+    }, {
+      onSuccess: () => {
+        setActiveChecklist(null);
+        // Reset checklist
+        setChecklists(prev => prev.map(c => {
+          if (c.id === checklistId) {
+            return {
+              ...c,
+              items: c.items.map(item => ({
+                ...item,
+                completed: false,
+                deviation: false,
+                comment: ''
+              }))
+            };
+          }
+          return c;
+        }));
+      }
+    });
+  };
+
   const getChecklistProgress = (checklist: Checklist) => {
     const completed = checklist.items.filter(item => item.completed).length;
     return `${completed}/${checklist.items.length}`;
@@ -178,10 +281,7 @@ export const DigitalChecklists = () => {
                   </div>
                 </div>
                 <CardDescription>
-                  {checklist.last_completed 
-                    ? `Sist fullført ${format(new Date(checklist.last_completed), 'dd.MM.yyyy', { locale: nb })}`
-                    : 'Ikke fullført tidligere'
-                  }
+                  Klikk "Start kontroll" for å utføre denne sjekklisten
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -208,47 +308,53 @@ export const DigitalChecklists = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {checklists.find(c => c.id === activeChecklist)?.items.map((item) => (
-              <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <Checkbox 
-                    id={item.id}
-                    checked={item.completed}
-                    onCheckedChange={() => handleItemToggle(activeChecklist, item.id)}
-                  />
-                  <div className="flex-1">
-                    <label htmlFor={item.id} className="font-medium cursor-pointer">
-                      {item.title}
-                    </label>
-                    <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+            <div className="space-y-4">
+              {checklists.find(c => c.id === activeChecklist)?.items.map((item) => (
+                <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox 
+                      id={item.id}
+                      checked={item.completed}
+                      onCheckedChange={() => handleItemToggle(activeChecklist, item.id)}
+                    />
+                    <div className="flex-1">
+                      <label htmlFor={item.id} className="font-medium cursor-pointer">
+                        {item.title}
+                      </label>
+                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={item.deviation ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() => handleDeviationToggle(activeChecklist, item.id)}
+                      >
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        Avvik
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={item.deviation ? "destructive" : "outline"}
-                      size="sm"
-                      onClick={() => handleDeviationToggle(activeChecklist, item.id)}
-                    >
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      Avvik
-                    </Button>
-                  </div>
+                  
+                  {(item.deviation || item.comment) && (
+                    <Textarea
+                      placeholder="Kommentar eller beskrivelse av avvik..."
+                      value={item.comment || ''}
+                      onChange={(e) => handleCommentChange(activeChecklist, item.id, e.target.value)}
+                      className="mt-2"
+                    />
+                  )}
                 </div>
-                
-                {(item.deviation || item.comment) && (
-                  <Textarea
-                    placeholder="Kommentar eller beskrivelse av avvik..."
-                    value={item.comment || ''}
-                    onChange={(e) => handleCommentChange(activeChecklist, item.id, e.target.value)}
-                    className="mt-2"
-                  />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
             
             <div className="flex gap-2 pt-4">
-              <Button className="flex-1">
+              <Button 
+                className="flex-1"
+                onClick={() => handleSubmitChecklist(activeChecklist)}
+                disabled={submitMutation.isPending}
+              >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Fullfør kontroll
+                {submitMutation.isPending ? 'Lagrer...' : 'Fullfør kontroll'}
               </Button>
               <Button variant="outline" onClick={() => setActiveChecklist(null)}>
                 Avbryt
