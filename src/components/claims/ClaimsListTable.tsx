@@ -42,13 +42,19 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
       <div className="space-y-4">
         {[...Array(10)].map((_, i) => (
           <div key={i} className="animate-pulse border rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              {[...Array(6)].map((_, j) => (
-                <div key={j} className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ))}
+            <div className="flex flex-col space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-6 bg-gray-200 rounded w-16"></div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-full"></div>
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ))}
@@ -92,49 +98,59 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full">
       <div className="space-y-3">
         {claims.map((claim) => (
-          <div key={claim.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-              <div>
-                <p className="font-semibold text-myhrvold-primary">{claim.id}</p>
-                <p className="text-sm text-gray-600">
-                  {new Date(claim.created_at).toLocaleDateString('nb-NO')}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">{claim.customer_name || 'Ukjent kunde'}</p>
-                <p className="text-sm text-gray-600">{claim.machine_model || 'Ingen maskin'}</p>
-                {claim.part_number && (
-                  <p className="text-xs text-blue-600 font-mono">Del: {claim.part_number}</p>
-                )}
-              </div>
-              <div>
-                <Badge className={getStatusColor(claim.status || 'Ny')}>
+          <div key={claim.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors w-full">
+            {/* Header with ID, Status and Action Button */}
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="font-semibold text-myhrvold-primary text-sm">{claim.id}</p>
+                <Badge className={`${getStatusColor(claim.status || 'Ny')} text-xs w-fit`}>
                   {claim.status || 'Ny'}
                 </Badge>
-                <p className="text-sm text-gray-600 mt-1">{claim.category || 'Ingen kategori'}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Leverandør</p>
-                <p className="font-medium">{claim.suppliers?.name || 'Ingen leverandør'}</p>
+              <Link to={`/claim/${claim.id}`}>
+                <Button variant="outline" size="sm" className="shrink-0">
+                  <Eye className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Se</span>
+                </Button>
+              </Link>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              {/* Customer Info */}
+              <div className="space-y-1">
+                <p className="text-gray-600 font-medium">Kunde</p>
+                <p className="font-medium break-words">{claim.customer_name || 'Ukjent kunde'}</p>
+                <p className="text-gray-600 text-xs break-words">{claim.machine_model || 'Ingen maskin'}</p>
+                {claim.part_number && (
+                  <p className="text-blue-600 font-mono text-xs break-all">Del: {claim.part_number}</p>
+                )}
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Tekniker</p>
-                <p className="font-medium">{claim.technician?.name || 'Ingen tekniker'}</p>
+
+              {/* Supplier/Category Info */}
+              <div className="space-y-1">
+                <p className="text-gray-600 font-medium">Leverandør</p>
+                <p className="font-medium break-words">{claim.suppliers?.name || 'Ingen leverandør'}</p>
+                <p className="text-gray-600 text-xs">{claim.category || 'Ingen kategori'}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Opprettet</p>
-                  <p className="font-semibold">{claim.created_by || 'Ukjent'}</p>
-                </div>
-                <Link to={`/claim/${claim.id}`}>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    Se
-                  </Button>
-                </Link>
+
+              {/* Date/Technician Info */}
+              <div className="space-y-1">
+                <p className="text-gray-600 font-medium">Detaljer</p>
+                <p className="text-xs text-gray-600">
+                  Opprettet: {new Date(claim.created_at).toLocaleDateString('nb-NO')}
+                </p>
+                <p className="text-xs">
+                  <span className="text-gray-600">Tekniker: </span>
+                  <span className="font-medium">{claim.technician?.name || 'Ingen tekniker'}</span>
+                </p>
+                <p className="text-xs">
+                  <span className="text-gray-600">Av: </span>
+                  <span className="font-medium">{claim.created_by || 'Ukjent'}</span>
+                </p>
               </div>
             </div>
           </div>

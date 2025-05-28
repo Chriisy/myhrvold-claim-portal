@@ -93,14 +93,14 @@ export const useOptimizedCreateClaim = () => {
     onSuccess: (data) => {
       // Invalidate and refetch specific queries
       queryClient.invalidateQueries({ queryKey: queryKeys.claims.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.kpis() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.kpis });
       
       toast({
         title: "Reklamasjon opprettet",
         description: "Reklamasjonen ble opprettet og du blir videresendt.",
       });
       
-      // Navigate to the new claim - Fixed: added data parameter
+      // Navigate to the new claim
       setTimeout(() => {
         window.location.href = `/claims/${data.id}`;
       }, 1000);

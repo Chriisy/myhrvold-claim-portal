@@ -35,7 +35,7 @@ const KpiCard = memo(({
 }: KpiCardProps) => {
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="animate-pulse border border-gray-200">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
@@ -50,14 +50,14 @@ const KpiCard = memo(({
   }
 
   const CardComponent = () => (
-    <Card className={`card-hover ${link ? 'cursor-pointer' : ''}`}>
+    <Card className={`hover:shadow-md transition-shadow duration-200 border border-gray-200 ${link ? 'cursor-pointer hover:border-gray-300' : ''}`}>
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-lg ${bgColor}`}>
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${bgColor}`}>
             <Icon className={`w-6 h-6 ${color}`} />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
             <div className="flex items-center gap-2">
               <p className="text-2xl font-bold text-myhrvold-primary">{value}</p>
               {trend && (

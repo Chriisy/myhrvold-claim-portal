@@ -95,12 +95,14 @@ export function QuickStatsCards() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-md transition-shadow border border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
             Nye i dag
           </CardTitle>
-          <Plus className="h-4 w-4 text-green-600" />
+          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <Plus className="h-4 w-4 text-green-600" />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
@@ -112,12 +114,14 @@ export function QuickStatsCards() {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-md transition-shadow border border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
             Venter på svar
           </CardTitle>
-          <Clock className="h-4 w-4 text-orange-600" />
+          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+            <Clock className="h-4 w-4 text-orange-600" />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-orange-600">
@@ -129,12 +133,14 @@ export function QuickStatsCards() {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-md transition-shadow border border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
             Overdue
           </CardTitle>
-          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
