@@ -111,7 +111,9 @@ const ClaimWizard = React.memo(() => {
     return { currentStepData, progress };
   }, [currentStep]);
 
-  const CurrentStepComponent = currentStepData?.component;
+  // Fix for TypeScript - handle the FileUploadStep props correctly
+  const StepComponent = currentStepData?.component as React.ComponentType<any>;
+  const stepProps = currentStep === 4 ? { files, onFilesChange: handleFilesChange } : {};
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -145,13 +147,7 @@ const ClaimWizard = React.memo(() => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              {currentStep === 4 ? (
-                <FileUploadStep files={files} onFilesChange={handleFilesChange} />
-              ) : currentStep === 5 ? (
-                <ReviewStep />
-              ) : (
-                CurrentStepComponent && <CurrentStepComponent />
-              )}
+              {StepComponent && <StepComponent {...stepProps} />}
 
               <div className="flex justify-between pt-6 border-t">
                 <Button

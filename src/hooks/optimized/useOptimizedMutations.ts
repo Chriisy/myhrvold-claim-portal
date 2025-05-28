@@ -93,7 +93,7 @@ export const useOptimizedCreateClaim = () => {
     onSuccess: (data) => {
       // Invalidate and refetch specific queries
       queryClient.invalidateQueries({ queryKey: queryKeys.claims.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.kpis });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.kpis({}) });
       
       toast({
         title: "Reklamasjon opprettet",
