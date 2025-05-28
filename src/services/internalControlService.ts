@@ -36,51 +36,57 @@ export interface ChecklistItem {
 
 export const internalControlService = {
   async uploadDocument(file: File, documentType: string, title: string, version: string) {
-    // In a real implementation, this would upload to Supabase Storage
-    // For now, we'll simulate the upload
-    const mockFileUrl = `https://example.com/documents/${file.name}`;
+    // Simulation since the table doesn't exist yet
+    console.log('Uploading document:', { file: file.name, documentType, title, version });
     
-    const { data, error } = await supabase
-      .from('internal_control_documents')
-      .insert({
-        document_type: documentType,
-        title,
-        version,
-        file_url: mockFileUrl,
-        file_name: file.name,
-        file_size: file.size,
-        uploaded_by: (await supabase.auth.getUser()).data.user?.id
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Kunne ikke laste opp dokument: ${error.message}`);
-    }
-
-    return data;
+    // Return simulated data
+    return {
+      id: crypto.randomUUID(),
+      document_type: documentType,
+      title,
+      version,
+      file_url: `https://example.com/documents/${file.name}`,
+      file_name: file.name,
+      file_size: file.size,
+      uploaded_by: 'current-user-id',
+      uploaded_at: new Date().toISOString()
+    };
   },
 
   async getDocuments(documentType?: string): Promise<InternalControlDocument[]> {
-    let query = supabase
-      .from('internal_control_documents')
-      .select(`
-        *,
-        users!uploaded_by(name)
-      `)
-      .order('uploaded_at', { ascending: false });
+    console.log('Getting documents for type:', documentType);
+    
+    // Return simulated data until the real table is created
+    const mockDocuments: InternalControlDocument[] = [
+      {
+        id: '1',
+        document_type: 'lekkasjekontroll',
+        title: 'Rutine for lekkasjekontroll 2025',
+        version: '1.0',
+        file_url: 'https://example.com/documents/lekkasjekontroll.pdf',
+        file_name: 'lekkasjekontroll.pdf',
+        file_size: 1024000,
+        uploaded_by: 'admin',
+        uploaded_at: '2025-01-28T10:00:00Z'
+      },
+      {
+        id: '2',
+        document_type: 'tomming_gjenvinning',
+        title: 'Rutine for tømming og gjenvinning',
+        version: '1.1',
+        file_url: 'https://example.com/documents/tomming.pdf',
+        file_name: 'tomming.pdf',
+        file_size: 856000,
+        uploaded_by: 'admin',
+        uploaded_at: '2025-01-20T14:30:00Z'
+      }
+    ];
 
     if (documentType) {
-      query = query.eq('document_type', documentType);
+      return mockDocuments.filter(doc => doc.document_type === documentType);
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Kunne ikke hente dokumenter: ${error.message}`);
-    }
-
-    return data || [];
+    
+    return mockDocuments;
   },
 
   async submitChecklist(
@@ -88,47 +94,55 @@ export const internalControlService = {
     title: string,
     checklistItems: ChecklistItem[]
   ) {
+    console.log('Submitting checklist:', { documentType, title, checklistItems });
+    
     const deviationsCount = checklistItems.filter(item => item.deviation).length;
     const status = deviationsCount > 0 ? 'completed_with_deviation' : 'completed';
 
-    const { data, error } = await supabase
-      .from('internal_control_checks')
-      .insert({
-        document_type: documentType,
-        title,
-        date_performed: new Date().toISOString().split('T')[0],
-        performed_by: (await supabase.auth.getUser()).data.user?.id,
-        status,
-        deviations_count: deviationsCount,
-        checklist_data: checklistItems,
-        comments: checklistItems
-          .filter(item => item.comment)
-          .map(item => `${item.title}: ${item.comment}`)
-          .join('; ')
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Kunne ikke lagre sjekkliste: ${error.message}`);
-    }
-
-    return data;
+    // Return simulated data
+    return {
+      id: crypto.randomUUID(),
+      document_type: documentType,
+      title,
+      date_performed: new Date().toISOString().split('T')[0],
+      performed_by: 'current-user-id',
+      status,
+      deviations_count: deviationsCount,
+      checklist_data: checklistItems,
+      comments: checklistItems
+        .filter(item => item.comment)
+        .map(item => `${item.title}: ${item.comment}`)
+        .join('; ')
+    };
   },
 
   async getCheckHistory(): Promise<InternalControlCheck[]> {
-    const { data, error } = await supabase
-      .from('internal_control_checks')
-      .select(`
-        *,
-        users!performed_by(name)
-      `)
-      .order('date_performed', { ascending: false });
-
-    if (error) {
-      throw new Error(`Kunne ikke hente historikk: ${error.message}`);
-    }
-
-    return data || [];
+    console.log('Getting check history');
+    
+    // Return simulated data
+    return [
+      {
+        id: '1',
+        document_type: 'lekkasjekontroll',
+        title: 'Lekkasjekontroll - Anlegg A',
+        date_performed: '2025-01-25',
+        performed_by: 'Ola Hansen',
+        status: 'completed',
+        deviations_count: 0,
+        comments: 'Alle kontroller OK',
+        checklist_data: []
+      },
+      {
+        id: '2',
+        document_type: 'tomming_gjenvinning',
+        title: 'Tømming og gjenvinning - Anlegg B',
+        date_performed: '2025-01-20',
+        performed_by: 'Kari Normann',
+        status: 'completed_with_deviation',
+        deviations_count: 1,
+        comments: 'Ventil defekt - utskiftet',
+        checklist_data: []
+      }
+    ];
   }
 };
