@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
@@ -75,7 +75,7 @@ function App() {
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full bg-background">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col overflow-hidden">
+                      <SidebarInset className="flex-1 flex flex-col overflow-hidden">
                         <div className="flex-1 overflow-auto">
                           <div className="container mx-auto p-4 max-w-7xl">
                             <Suspense fallback={<DashboardSkeleton />}>
@@ -150,7 +150,7 @@ function App() {
                                 } />
                                 
                                 <Route path="/reports" element={
-                                  <ProtectedRoute requiredPermission="view_reports">
+                                  <ProtectedRoute>
                                     <Reports />
                                   </ProtectedRoute>
                                 } />
@@ -172,7 +172,7 @@ function App() {
                             </Suspense>
                           </div>
                         </div>
-                      </main>
+                      </SidebarInset>
                     </div>
                   </SidebarProvider>
                   <Toaster />

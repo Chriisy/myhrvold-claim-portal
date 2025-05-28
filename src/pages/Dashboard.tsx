@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardFiltersProvider } from '@/contexts/DashboardFiltersContext';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { OptimizedDashboardKpiSection } from '@/components/dashboard/OptimizedDashboardKpiSection';
@@ -15,46 +13,31 @@ const DashboardChartsGrid = React.lazy(() => import('@/components/dashboard/Dash
 const MobileOptimizedFilters = React.lazy(() => import('@/components/dashboard/MobileOptimizedFilters').then(module => ({ default: module.MobileOptimizedFilters })));
 const NotificationToasts = React.lazy(() => import('@/components/dashboard/NotificationToasts').then(module => ({ default: module.NotificationToasts })));
 
-const DashboardContent = () => {
+const Dashboard = () => {
   // Initialize query optimizations
   useQueryOptimization();
 
   return (
-    <SidebarInset className="p-6">
-      <div className="space-y-6 animate-fade-in">
-        <LazyLoadedComponent fallback={<div />}>
-          <NotificationToasts />
-        </LazyLoadedComponent>
-        
-        <DashboardHeader />
+    <div className="space-y-6 animate-fade-in">
+      <LazyLoadedComponent fallback={<div />}>
+        <NotificationToasts />
+      </LazyLoadedComponent>
+      
+      <DashboardHeader />
 
-        <OptimizedDashboardKpiSection />
+      <OptimizedDashboardKpiSection />
 
-        {/* Mobile Optimized Filters */}
-        <UnifiedErrorBoundary title="Feil ved lasting av filtre">
-          <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
-            <MobileOptimizedFilters />
-          </LazyLoadedComponent>
-        </UnifiedErrorBoundary>
-
+      {/* Mobile Optimized Filters */}
+      <UnifiedErrorBoundary title="Feil ved lasting av filtre">
         <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
-          <DashboardChartsGrid />
+          <MobileOptimizedFilters />
         </LazyLoadedComponent>
-      </div>
-    </SidebarInset>
-  );
-};
+      </UnifiedErrorBoundary>
 
-const Dashboard = () => {
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <DashboardFiltersProvider>
-          <DashboardContent />
-        </DashboardFiltersProvider>
-      </div>
-    </SidebarProvider>
+      <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+        <DashboardChartsGrid />
+      </LazyLoadedComponent>
+    </div>
   );
 };
 
