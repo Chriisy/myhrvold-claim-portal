@@ -41,6 +41,8 @@ export const useAddClaimCost = () => {
 
   return useMutation({
     mutationFn: async (cost: Omit<ClaimCost, 'id' | 'created_at'>) => {
+      console.log('Adding cost:', cost);
+      
       // First add the cost
       const { data: costData, error: costError } = await supabase
         .from('cost_line')
@@ -53,6 +55,8 @@ export const useAddClaimCost = () => {
         throw new Error(`Failed to add cost: ${costError.message}`);
       }
 
+      console.log('Cost added successfully:', costData);
+
       // Automatically create a corresponding credit note
       const creditData = {
         claim_id: cost.claim_id,
@@ -64,18 +68,24 @@ export const useAddClaimCost = () => {
         source: 'auto_from_cost' as const,
       };
 
-      const { error: creditError } = await supabase
+      console.log('Creating automatic credit note:', creditData);
+
+      const { data: creditResult, error: creditError } = await supabase
         .from('credit_note')
-        .insert(creditData);
+        .insert(creditData)
+        .select()
+        .single();
 
       if (creditError) {
         console.error('Error adding automatic credit note:', creditError);
         // Don't throw error here, as the cost was successfully added
         toast({
-          title: 'Advarsel',
+          title: 'Delvis vellykket',
           description: 'Kostnad lagt til, men automatisk kreditnota kunne ikke opprettes.',
           variant: 'destructive',
         });
+      } else {
+        console.log('Automatic credit note created successfully:', creditResult);
       }
 
       return costData;
