@@ -10,7 +10,7 @@ import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import { DashboardSkeleton, TableSkeleton } from '@/components/shared/OptimizedLoadingStates';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { createOptimizedLazyComponent } from '@/components/shared/OptimizedLazyLoading';
@@ -64,7 +64,7 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <OptimizedErrorBoundary>
+    <UnifiedErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <CookieConsentProvider>
@@ -174,7 +174,7 @@ function App() {
           </CookieConsentProvider>
         </TooltipProvider>
       </QueryClientProvider>
-    </OptimizedErrorBoundary>
+    </UnifiedErrorBoundary>
   );
 }
 

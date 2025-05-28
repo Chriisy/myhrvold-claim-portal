@@ -11,7 +11,7 @@ import ClaimCredits from '@/components/claim-detail/ClaimCredits';
 import { ClaimFiles } from '@/components/claim-detail/ClaimFiles';
 import { EditableClaimOverview } from '@/components/claim-detail/EditableClaimOverview';
 import { ImprovementTab } from '@/components/claim-detail/ImprovementTab';
-import { useClaimQuery } from '@/hooks/useClaimsQuery';
+import { useClaimQuery } from '@/hooks/queries/useClaimsQuery';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const ClaimDetail = () => {

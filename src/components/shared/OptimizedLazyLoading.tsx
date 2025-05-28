@@ -1,0 +1,37 @@
+
+import React, { Suspense, ComponentType } from 'react';
+import { OptimizedLoadingStates } from './OptimizedLoadingStates';
+
+interface OptimizedLazyLoadingOptions {
+  preload?: boolean;
+  fallback?: React.ReactNode;
+}
+
+export const createOptimizedLazyComponent = <P extends object>(
+  importFn: () => Promise<{ default: ComponentType<P> }>,
+  options: OptimizedLazyLoadingOptions = {}
+) => {
+  const LazyComponent = React.lazy(importFn);
+  
+  // Preload if specified
+  if (options.preload) {
+    importFn();
+  }
+  
+  return React.forwardRef<any, P>((props, ref) => (
+    <Suspense fallback={options.fallback || <OptimizedLoadingStates />}>
+      <LazyComponent {...props} ref={ref} />
+    </Suspense>
+  ));
+};
+
+export const withOptimizedLoading = <P extends object>(
+  Component: ComponentType<P>,
+  fallback?: React.ReactNode
+) => {
+  return React.forwardRef<any, P>((props, ref) => (
+    <Suspense fallback={fallback || <OptimizedLoadingStates />}>
+      <Component {...props} ref={ref} />
+    </Suspense>
+  ));
+};

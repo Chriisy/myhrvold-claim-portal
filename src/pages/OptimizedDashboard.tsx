@@ -5,7 +5,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { OptimizedDashboardKpiSection } from '@/components/dashboard/OptimizedDashboardKpiSection';
 import { LazyLoadedComponent } from '@/components/shared/LazyLoadedComponent';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 import { useQueryOptimization } from '@/hooks/performance/useQueryOptimization';
 
 // Lazy load heavy components
@@ -28,11 +28,11 @@ const DashboardContent = () => {
       <OptimizedDashboardKpiSection />
 
       {/* Mobile Optimized Filters */}
-      <ImprovedErrorBoundary title="Feil ved lasting av filtre">
+      <UnifiedErrorBoundary title="Feil ved lasting av filtre">
         <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
           <MobileOptimizedFilters />
         </LazyLoadedComponent>
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
 
       <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
         <DashboardChartsGrid />

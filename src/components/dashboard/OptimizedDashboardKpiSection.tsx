@@ -2,7 +2,7 @@
 import React from 'react';
 import { LazyLoadedComponent } from '@/components/shared/LazyLoadedComponent';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
-import { ImprovedErrorBoundary } from '@/components/shared/ImprovedErrorBoundary';
+import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
 
 // Lazy load heavy components
 const KpiCardsGrid = React.lazy(() => import('./KpiCardsGrid'));
@@ -13,25 +13,25 @@ export const OptimizedDashboardKpiSection = () => {
   return (
     <div className="space-y-6">
       {/* Quick Stats Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
+      <UnifiedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
         <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
           <QuickStatsCards />
         </LazyLoadedComponent>
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
 
       {/* Main KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av nøkkeltall">
+      <UnifiedErrorBoundary title="Feil ved lasting av nøkkeltall">
         <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
           <KpiCardsGrid />
         </LazyLoadedComponent>
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
 
       {/* Additional KPI Cards */}
-      <ImprovedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
+      <UnifiedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
         <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
           <AdditionalKpiCards />
         </LazyLoadedComponent>
-      </ImprovedErrorBoundary>
+      </UnifiedErrorBoundary>
     </div>
   );
 };

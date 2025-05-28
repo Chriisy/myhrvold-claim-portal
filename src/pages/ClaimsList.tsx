@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useClaimsQuery } from '@/hooks/useClaimsQuery';
+import { useClaimsQuery } from '@/hooks/queries/useClaimsQuery';
 import { ClaimsListFilters } from '@/components/claims/ClaimsListFilters';
 import { ClaimsListTable } from '@/components/claims/ClaimsListTable';
 import { ClaimsPagination } from '@/components/claims/ClaimsPagination';
