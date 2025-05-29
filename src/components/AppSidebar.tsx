@@ -1,5 +1,6 @@
 
 import { Home, FileText, Users, BarChart3, UserCheck, Shield, Upload, Wrench } from "lucide-react"
+import React, { useTransition } from "react"
 
 import {
   Sidebar,
@@ -16,48 +17,68 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 
-// Menu items.
+// Preload imports for performance
+const preloadModules = {
+  dashboard: () => import("@/pages/Dashboard"),
+  claims: () => import("@/pages/ClaimsList"),
+  installations: () => import("@/pages/Installations"),
+  suppliers: () => import("@/pages/Suppliers"),
+  reports: () => import("@/pages/Reports"),
+  users: () => import("@/pages/UserManagement"),
+  certificates: () => import("@/pages/FGasCertificates"),
+  import: () => import("@/pages/InvoiceImport"),
+};
+
+// Menu items with preload functions
 const items = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
+    preload: preloadModules.dashboard,
   },
   {
     title: "Reklamasjoner",
     url: "/claims",
     icon: FileText,
+    preload: preloadModules.claims,
   },
   {
     title: "Installasjoner",
     url: "/installations",
     icon: Wrench,
+    preload: preloadModules.installations,
   },
   {
     title: "Leverandører",
     url: "/suppliers",
     icon: Users,
+    preload: preloadModules.suppliers,
   },
   {
     title: "Rapporter",
     url: "/reports",
     icon: BarChart3,
+    preload: preloadModules.reports,
   },
   {
     title: "Brukere",
     url: "/users",
     icon: UserCheck,
     adminOnly: true,
+    preload: preloadModules.users,
   },
   {
     title: "F-gass Sertifikater",
     url: "/certificates",
     icon: Shield,
+    preload: preloadModules.certificates,
   },
   {
     title: "Import",
     url: "/import",
     icon: Upload,
+    preload: preloadModules.import,
   },
 ]
 
@@ -65,10 +86,17 @@ export function AppSidebar() {
   const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isPending, startTransition] = useTransition();
 
   const handleSignOut = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleNavigation = (url: string) => {
+    startTransition(() => {
+      navigate(url);
+    });
   };
 
   const filteredItems = items.filter(item => {
@@ -91,7 +119,15 @@ export function AppSidebar() {
                     asChild
                     isActive={location.pathname === item.url || (item.url !== '/dashboard' && location.pathname.startsWith(item.url))}
                   >
-                    <a href={item.url}>
+                    <a 
+                      href={item.url}
+                      onMouseEnter={() => item.preload?.().catch(console.warn)}
+                      onFocus={() => item.preload?.().catch(console.warn)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(item.url);
+                      }}
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </a>

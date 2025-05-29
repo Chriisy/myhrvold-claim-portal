@@ -48,6 +48,7 @@ export const OptimizedSuspense: React.FC<OptimizedSuspenseProps> = ({
       animate="animate"
       exit="exit"
       transition={{ duration: 0.2 }}
+      layout="position"
     >
       {getFallback()}
     </motion.div>
@@ -61,6 +62,7 @@ export const OptimizedSuspense: React.FC<OptimizedSuspenseProps> = ({
         animate="animate"
         exit="exit"
         transition={{ duration: 0.25 }}
+        layout="position"
       >
         {children}
       </motion.div>

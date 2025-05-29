@@ -13,6 +13,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { OptimizedErrorBoundary } from "./components/shared/OptimizedErrorBoundary";
 import React, { Suspense } from "react";
 import { OptimizedLoadingStates } from "./components/shared/OptimizedLoadingStates";
+import { motion } from "framer-motion";
 import "./App.css";
 
 // Lazy load modules for better performance
@@ -101,7 +102,11 @@ function App() {
                           <ProtectedRoute>
                             <div className="flex w-full">
                               <AppSidebar />
-                              <main className="flex-1 overflow-auto">
+                              <motion.main 
+                                className="flex-1 overflow-auto"
+                                layout="position"
+                                transition={{ duration: 0.2 }}
+                              >
                                 <OptimizedErrorBoundary>
                                   <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
                                     <Routes>
@@ -121,7 +126,7 @@ function App() {
                                     </Routes>
                                   </Suspense>
                                 </OptimizedErrorBoundary>
-                              </main>
+                              </motion.main>
                             </div>
                           </ProtectedRoute>
                         } />

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,23 +25,36 @@ interface InstallationProject {
   };
 }
 
+const fetchInstallationProjects = async () => {
+  const { data, error } = await supabase
+    .from('installation_projects')
+    .select(`
+      *,
+      assigned_technician:users!assigned_technician_id(name)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data as InstallationProject[];
+};
+
 const Installations = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Prefetch data function
+  const prefetchInstallations = () => {
+    queryClient.prefetchQuery({
+      queryKey: ['installation-projects'],
+      queryFn: fetchInstallationProjects,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  };
 
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ['installation-projects'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('installation_projects')
-        .select(`
-          *,
-          assigned_technician:users!assigned_technician_id(name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as InstallationProject[];
-    }
+    queryFn: fetchInstallationProjects,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const getStatusColor = (status: string) => {
@@ -73,7 +86,13 @@ const Installations = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Installasjoner</h1>
+          <h1 
+            className="text-3xl font-bold"
+            onMouseEnter={prefetchInstallations}
+            onFocus={prefetchInstallations}
+          >
+            Installasjoner
+          </h1>
           <p className="text-gray-600">Administrer installasjonprosjekter og sjekklister</p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>

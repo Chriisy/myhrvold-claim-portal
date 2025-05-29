@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useDeferredValue } from 'react';
 import { subDays } from 'date-fns';
 import { DashboardFilters } from '@/types/dashboard';
 
@@ -23,6 +23,9 @@ const defaultFilters: DashboardFilters = {
 
 export const DashboardFiltersProvider = ({ children }: { children: ReactNode }) => {
   const [filters, setFilters] = useState<DashboardFilters>(defaultFilters);
+  
+  // Use deferred value to prevent unnecessary re-renders on rapid filter changes
+  const deferredFilters = useDeferredValue(filters);
 
   const updateFilter = <K extends keyof DashboardFilters>(
     key: K,
@@ -39,7 +42,11 @@ export const DashboardFiltersProvider = ({ children }: { children: ReactNode }) 
   };
 
   return (
-    <DashboardFiltersContext.Provider value={{ filters, updateFilter, resetFilters }}>
+    <DashboardFiltersContext.Provider value={{ 
+      filters: deferredFilters, 
+      updateFilter, 
+      resetFilters 
+    }}>
       {children}
     </DashboardFiltersContext.Provider>
   );
