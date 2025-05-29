@@ -31,7 +31,7 @@ export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
           .order('created_at', { ascending: false });
 
         if (filters.status && filters.status !== 'all') {
-          query = query.eq('status', filters.status);
+          query = query.eq('status', filters.status as "Ny" | "Avventer" | "Godkjent" | "Avslått" | "Bokført" | "Lukket" | "Venter på svar");
         }
 
         if (filters.supplier_id) {
