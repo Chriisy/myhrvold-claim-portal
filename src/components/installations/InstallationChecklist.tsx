@@ -1,19 +1,20 @@
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Clock, Plus, Camera, AlertTriangle, Eye, Lock, ImageIcon } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { CheckCircle, AlertTriangle, ImageIcon, Lock } from 'lucide-react';
+import { ChecklistItem } from './ChecklistItem';
+import { ChecklistLoading } from './ChecklistLoading';
 import { ImageUploadModal } from './ImageUploadModal';
 import { ImageGallery } from './ImageGallery';
 import { DeviationModal } from './DeviationModal';
+import { useInstallationChecklist } from '@/hooks/useInstallationChecklist';
+import { usePhotoCount } from '@/hooks/usePhotoCount';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDebounce } from '@/utils/performance/performanceUtils';
 
 interface ChecklistItem {
   id: string;
@@ -46,182 +47,101 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
   const [selectedItemForGallery, setSelectedItemForGallery] = useState<string | null>(null);
   const [internalNotes, setInternalNotes] = useState('');
   
-  const queryClient = useQueryClient();
   const { hasPermission } = useAuth();
   const canViewInternal = hasPermission('manage_users') || hasPermission('view_internal_notes');
 
-  const { data: checklist, isLoading } = useQuery({
-    queryKey: ['installation-checklist', projectId],
-    queryFn: async () => {
-      // First try to get existing checklist
-      const { data: existing } = await supabase
-        .from('installation_checklists')
-        .select('*')
-        .eq('project_id', projectId)
-        .single();
+  const {
+    checklist,
+    isLoading,
+    error,
+    toggleItem,
+    updateComment,
+    updateInternalNotes,
+    addDeviation,
+    removeDeviation,
+    isUpdating
+  } = useInstallationChecklist(projectId);
 
-      if (existing) {
-        setInternalNotes(existing.internal_notes || '');
-        return existing;
-      }
+  const { data: photoCount = {} } = usePhotoCount(checklist?.id);
 
-      const { data: template } = await supabase
-        .from('checklist_templates')
-        .select('*')
-        .eq('is_active', true)
-        .limit(1)
-        .single();
-
-      if (!template) {
-        throw new Error('Ingen aktiv sjekkliste-mal funnet');
-      }
-
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Ikke innlogget');
-
-      const { data: newChecklist, error } = await supabase
-        .from('installation_checklists')
-        .insert({
-          project_id: projectId,
-          template_id: template.id,
-          checklist_data: template.checklist_items
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return newChecklist;
+  // Set internal notes when checklist loads
+  React.useEffect(() => {
+    if (checklist?.internal_notes && internalNotes !== checklist.internal_notes) {
+      setInternalNotes(checklist.internal_notes);
     }
-  });
+  }, [checklist?.internal_notes]);
 
-  const { data: photoCount } = useQuery({
-    queryKey: ['checklist-photo-count', checklist?.id],
-    queryFn: async () => {
-      if (!checklist?.id) return {};
-      
-      const { data, error } = await supabase
-        .from('installation_checklist_photos')
-        .select('checklist_item_id')
-        .eq('checklist_id', checklist.id);
-      
-      if (error) throw error;
-      
-      const counts: Record<string, number> = {};
-      data.forEach(photo => {
-        counts[photo.checklist_item_id] = (counts[photo.checklist_item_id] || 0) + 1;
-      });
-      
-      return counts;
-    },
-    enabled: !!checklist?.id
-  });
+  const debouncedInternalNotesChange = useDebounce((notes: string) => {
+    updateInternalNotes(notes);
+  }, 1000);
 
-  const updateChecklistMutation = useMutation({
-    mutationFn: async ({ updates }: { updates: any }) => {
-      const { error } = await supabase
-        .from('installation_checklists')
-        .update(updates)
-        .eq('project_id', projectId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['installation-checklist', projectId] });
-    }
-  });
-
-  const handleItemToggle = (itemId: string) => {
-    if (!checklist) return;
-
-    const items = checklist.checklist_data as unknown as ChecklistItem[];
-    const updatedItems = items.map(item =>
-      item.id === itemId ? { ...item, completed: !item.completed } : item
-    );
-
-    updateChecklistMutation.mutate({ 
-      updates: { checklist_data: updatedItems as any }
-    });
-    
-    toast({
-      title: "Sjekkliste oppdatert",
-      description: "Endringen er lagret",
-    });
-  };
-
-  const handleCommentChange = (itemId: string, comments: string) => {
-    if (!checklist) return;
-
-    const items = checklist.checklist_data as unknown as ChecklistItem[];
-    const updatedItems = items.map(item =>
-      item.id === itemId ? { ...item, comments } : item
-    );
-
-    updateChecklistMutation.mutate({ 
-      updates: { checklist_data: updatedItems as any }
-    });
-  };
-
-  const handleInternalNotesChange = (notes: string) => {
+  const handleInternalNotesChange = useCallback((notes: string) => {
     setInternalNotes(notes);
-    updateChecklistMutation.mutate({ 
-      updates: { internal_notes: notes }
-    });
-  };
+    debouncedInternalNotesChange(notes);
+  }, [debouncedInternalNotesChange]);
 
-  const handleAddDeviation = (deviation: Omit<Deviation, 'id' | 'created_at'>) => {
-    if (!checklist) return;
+  const handleToggleExpanded = useCallback((itemId: string) => {
+    setExpandedItem(prev => prev === itemId ? null : itemId);
+  }, []);
 
-    const currentDeviations = (checklist.deviation_notes as unknown as Deviation[]) || [];
-    const newDeviation: Deviation = {
-      ...deviation,
-      id: Date.now().toString(),
-      created_at: new Date().toISOString()
-    };
-
-    const updatedDeviations = [...currentDeviations, newDeviation];
-    
-    updateChecklistMutation.mutate({ 
-      updates: { deviation_notes: updatedDeviations as any }
-    });
-
-    toast({
-      title: "Avvik registrert",
-      description: "Avviket er lagt til"
-    });
-  };
-
-  const handleRemoveDeviation = (deviationId: string) => {
-    if (!checklist) return;
-
-    const currentDeviations = (checklist.deviation_notes as unknown as Deviation[]) || [];
-    const updatedDeviations = currentDeviations.filter(d => d.id !== deviationId);
-    
-    updateChecklistMutation.mutate({ 
-      updates: { deviation_notes: updatedDeviations as any }
-    });
-  };
-
-  const openUploadModal = (itemId: string) => {
+  const handleUploadPhoto = useCallback((itemId: string) => {
     setSelectedItemForUpload(itemId);
     setUploadModalOpen(true);
-  };
+  }, []);
 
-  const openGallery = (itemId?: string) => {
+  const handleViewPhotos = useCallback((itemId?: string) => {
     setSelectedItemForGallery(itemId || null);
     setGalleryOpen(true);
-  };
+  }, []);
+
+  const handleUploadComplete = useCallback(() => {
+    // Photo count will be automatically updated via React Query
+  }, []);
+
+  // Memoized calculations
+  const stats = useMemo(() => {
+    if (!checklist) return { completedCount: 0, requiredCount: 0, completedRequired: 0 };
+    
+    const items = checklist.checklist_data as unknown as ChecklistItem[];
+    const completedCount = items.filter(item => item.completed).length;
+    const requiredCount = items.filter(item => item.required).length;
+    const completedRequired = items.filter(item => item.required && item.completed).length;
+    
+    return { completedCount, requiredCount, completedRequired, totalItems: items.length };
+  }, [checklist]);
+
+  const deviations = useMemo(() => {
+    return (checklist?.deviation_notes as unknown as Deviation[]) || [];
+  }, [checklist?.deviation_notes]);
+
+  const items = useMemo(() => {
+    return (checklist?.checklist_data as unknown as ChecklistItem[]) || [];
+  }, [checklist?.checklist_data]);
+
+  const allRequiredCompleted = stats.completedRequired === stats.requiredCount && stats.requiredCount > 0;
 
   if (isLoading) {
+    return <ChecklistLoading />;
+  }
+
+  if (error) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Sjekkliste</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+          <div className="text-center py-8">
+            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Kunne ikke laste sjekkliste
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Det oppstod en feil ved lasting av sjekklisten. Prøv å laste siden på nytt.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Last på nytt
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -235,17 +155,13 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
           <CardTitle>Sjekkliste</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>Kunne ikke laste sjekkliste</p>
+          <div className="text-center py-8">
+            <p className="text-gray-600">Ingen sjekkliste funnet for dette prosjektet</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
-
-  const items = checklist.checklist_data as unknown as ChecklistItem[];
-  const deviations = (checklist.deviation_notes as unknown as Deviation[]) || [];
-  const completedCount = items.filter(item => item.completed).length;
-  const requiredCount = items.filter(item => item.required).length;
-  const completedRequired = items.filter(item => item.required && item.completed).length;
 
   return (
     <>
@@ -255,10 +171,10 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
             <CardTitle>Installasjonsjekkliste</CardTitle>
             <div className="flex items-center space-x-2">
               <Badge variant="outline">
-                {completedCount}/{items.length} fullført
+                {stats.completedCount}/{stats.totalItems} fullført
               </Badge>
-              <Badge variant={completedRequired === requiredCount ? "default" : "secondary"}>
-                {completedRequired}/{requiredCount} påkrevd
+              <Badge variant={allRequiredCompleted ? "default" : "secondary"}>
+                {stats.completedRequired}/{stats.requiredCount} påkrevd
               </Badge>
               {deviations.length > 0 && (
                 <Badge variant="destructive">
@@ -269,11 +185,19 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
           </div>
           
           <div className="flex space-x-2 mt-4">
-            <Button variant="outline" onClick={() => setDeviationModalOpen(true)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeviationModalOpen(true)}
+              disabled={isUpdating}
+            >
               <AlertTriangle className="w-4 h-4 mr-2" />
               Avviksnotater ({deviations.length})
             </Button>
-            <Button variant="outline" onClick={() => openGallery()}>
+            <Button 
+              variant="outline" 
+              onClick={() => handleViewPhotos()}
+              disabled={isUpdating}
+            >
               <ImageIcon className="w-4 h-4 mr-2" />
               Bildegalleri
             </Button>
@@ -282,79 +206,17 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
         
         <CardContent className="space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  checked={item.completed}
-                  onCheckedChange={() => handleItemToggle(item.id)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className={`${item.completed ? 'line-through text-gray-500' : ''}`}>
-                      {item.text}
-                    </span>
-                    {item.required && (
-                      <Badge variant="destructive" className="text-xs">
-                        Påkrevd
-                      </Badge>
-                    )}
-                    {photoCount?.[item.id] && (
-                      <Badge variant="outline" className="text-xs">
-                        {photoCount[item.id]} bilde{photoCount[item.id] !== 1 ? 'r' : ''}
-                      </Badge>
-                    )}
-                    {item.completed ? (
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <Clock className="w-4 h-4 text-gray-400" />
-                    )}
-                  </div>
-                  
-                  <div className="flex space-x-2 mt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
-                      className="p-0 h-auto text-blue-600"
-                    >
-                      {expandedItem === item.id ? 'Skjul detaljer' : 'Legg til kommentar'}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openUploadModal(item.id)}
-                      className="p-0 h-auto text-blue-600"
-                    >
-                      <Camera className="w-4 h-4 mr-1" />
-                      Last opp bilde
-                    </Button>
-                    {photoCount?.[item.id] && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openGallery(item.id)}
-                        className="p-0 h-auto text-blue-600"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        Se bilder ({photoCount[item.id]})
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {expandedItem === item.id && (
-                <div className="ml-7 space-y-3">
-                  <Textarea
-                    placeholder="Legg til kommentar eller notater..."
-                    value={item.comments || ''}
-                    onChange={(e) => handleCommentChange(item.id, e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              )}
-            </div>
+            <ChecklistItem
+              key={item.id}
+              item={item}
+              onToggle={toggleItem}
+              onCommentChange={updateComment}
+              onUploadPhoto={handleUploadPhoto}
+              onViewPhotos={handleViewPhotos}
+              photoCount={photoCount[item.id]}
+              isExpanded={expandedItem === item.id}
+              onToggleExpanded={() => handleToggleExpanded(item.id)}
+            />
           ))}
 
           {canViewInternal && (
@@ -374,12 +236,14 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
                   onChange={(e) => handleInternalNotesChange(e.target.value)}
                   rows={4}
                   className="bg-gray-50"
+                  disabled={isUpdating}
+                  aria-label="Interne notater"
                 />
               </div>
             </>
           )}
 
-          {completedRequired === requiredCount && (
+          {allRequiredCompleted && (
             <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center space-x-2 text-green-800">
                 <CheckCircle className="w-5 h-5" />
@@ -399,9 +263,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
         onOpenChange={setUploadModalOpen}
         checklistId={checklist?.id || ''}
         checklistItemId={selectedItemForUpload || ''}
-        onUploadComplete={() => {
-          queryClient.invalidateQueries({ queryKey: ['checklist-photo-count'] });
-        }}
+        onUploadComplete={handleUploadComplete}
       />
 
       <ImageGallery
@@ -415,8 +277,8 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
         open={deviationModalOpen}
         onOpenChange={setDeviationModalOpen}
         deviations={deviations}
-        onAddDeviation={handleAddDeviation}
-        onRemoveDeviation={handleRemoveDeviation}
+        onAddDeviation={addDeviation}
+        onRemoveDeviation={removeDeviation}
       />
     </>
   );
