@@ -14,6 +14,12 @@ interface ClaimsFilters {
   search?: string;
 }
 
+type ClaimStatus = "Ny" | "Avventer" | "Godkjent" | "Avslått" | "Bokført" | "Lukket" | "Venter på svar";
+
+const isValidClaimStatus = (status: string): status is ClaimStatus => {
+  return ["Ny", "Avventer", "Godkjent", "Avslått", "Bokført", "Lukket", "Venter på svar"].includes(status);
+};
+
 export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
   return useQuery({
     queryKey: ['claims', filters],
@@ -30,8 +36,8 @@ export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
           .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
-        if (filters.status && filters.status !== 'all') {
-          query = query.eq('status', filters.status as "Ny" | "Avventer" | "Godkjent" | "Avslått" | "Bokført" | "Lukket" | "Venter på svar");
+        if (filters.status && filters.status !== 'all' && isValidClaimStatus(filters.status)) {
+          query = query.eq('status', filters.status);
         }
 
         if (filters.supplier_id) {

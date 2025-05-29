@@ -40,9 +40,16 @@ const UserManagement = () => {
   };
 
   const handleEditUser = (user: UserWithPermissions) => {
-    // Handle edit user functionality
     console.log('Edit user:', user);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <OptimizedLoadingStates.Dashboard />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
