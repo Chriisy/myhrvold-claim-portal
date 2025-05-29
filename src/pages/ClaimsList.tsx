@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 import { useOptimizedClaims } from '@/hooks/useOptimizedClaims';
+import { useNavigationPerformance } from '@/hooks/performance/useNavigationPerformance';
 
 // Lazy load components with correct import syntax for named exports
 const ClaimsListTable = React.lazy(() => import('@/components/claims/ClaimsListTable').then(module => ({ default: module.ClaimsListTable })));
@@ -17,6 +18,9 @@ const ClaimsList = () => {
   const [statusFilter, setStatusFilter] = useState('Alle');
   const [categoryFilter, setCategoryFilter] = useState('Alle');
   const [partNumberFilter, setPartNumberFilter] = useState('');
+
+  // Monitor navigation performance
+  useNavigationPerformance();
 
   const filters = {
     status: statusFilter !== 'Alle' ? statusFilter : undefined,

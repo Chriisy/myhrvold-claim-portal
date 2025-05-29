@@ -11,31 +11,35 @@ import { DashboardFiltersProvider } from "./contexts/DashboardFiltersContext";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { OptimizedErrorBoundary } from "./components/shared/OptimizedErrorBoundary";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import ClaimsList from "./pages/ClaimsList";
-import ClaimDetail from "./pages/ClaimDetail";
-import ClaimWizard from "./pages/ClaimWizard";
-import Suppliers from "./pages/Suppliers";
-import Reports from "./pages/Reports";
-import UserManagement from "./pages/UserManagement";
-import UserProfile from "./pages/UserProfile";
-import FGasCertificates from "./pages/FGasCertificates";
-import InvoiceImport from "./pages/InvoiceImport";
-import Installations from "./pages/Installations";
-import InstallationDetail from "./pages/InstallationDetail";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import CookiePolicy from "./pages/CookiePolicy";
+import React, { Suspense } from "react";
+import { OptimizedLoadingStates } from "./components/shared/OptimizedLoadingStates";
 import "./App.css";
+
+// Lazy load modules for better performance
+const Index = React.lazy(() => import("./pages/Index"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const ClaimsList = React.lazy(() => import("./pages/ClaimsList"));
+const ClaimDetail = React.lazy(() => import("./pages/ClaimDetail"));
+const ClaimWizard = React.lazy(() => import("./pages/ClaimWizard"));
+const Suppliers = React.lazy(() => import("./pages/Suppliers"));
+const Reports = React.lazy(() => import("./pages/Reports"));
+const UserManagement = React.lazy(() => import("./pages/UserManagement"));
+const UserProfile = React.lazy(() => import("./pages/UserProfile"));
+const FGasCertificates = React.lazy(() => import("./pages/FGasCertificates"));
+const InvoiceImport = React.lazy(() => import("./pages/InvoiceImport"));
+const Installations = React.lazy(() => import("./pages/Installations"));
+const InstallationDetail = React.lazy(() => import("./pages/InstallationDetail"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
+const CookiePolicy = React.lazy(() => import("./pages/CookiePolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes - longer cache for better performance
+      gcTime: 10 * 60 * 1000, // 10 minutes
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
         if (error && typeof error === 'object' && 'status' in error) {
@@ -66,11 +70,31 @@ function App() {
                     <div className="min-h-screen flex w-full">
                       <Routes>
                         {/* Public routes */}
-                        <Route path="/" element={<Index />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/privacy" element={<PrivacyPolicy />} />
-                        <Route path="/terms" element={<TermsOfService />} />
-                        <Route path="/cookies" element={<CookiePolicy />} />
+                        <Route path="/" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <Index />
+                          </Suspense>
+                        } />
+                        <Route path="/login" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Form />}>
+                            <Login />
+                          </Suspense>
+                        } />
+                        <Route path="/privacy" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <PrivacyPolicy />
+                          </Suspense>
+                        } />
+                        <Route path="/terms" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <TermsOfService />
+                          </Suspense>
+                        } />
+                        <Route path="/cookies" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <CookiePolicy />
+                          </Suspense>
+                        } />
                         
                         {/* Protected routes with sidebar */}
                         <Route path="/*" element={
@@ -79,21 +103,23 @@ function App() {
                               <AppSidebar />
                               <main className="flex-1 overflow-auto">
                                 <OptimizedErrorBoundary>
-                                  <Routes>
-                                    <Route path="/dashboard" element={<Dashboard />} />
-                                    <Route path="/claims" element={<ClaimsList />} />
-                                    <Route path="/claims/:id" element={<ClaimDetail />} />
-                                    <Route path="/claims/new" element={<ClaimWizard />} />
-                                    <Route path="/suppliers" element={<Suppliers />} />
-                                    <Route path="/reports" element={<Reports />} />
-                                    <Route path="/users" element={<UserManagement />} />
-                                    <Route path="/profile" element={<UserProfile />} />
-                                    <Route path="/certificates" element={<FGasCertificates />} />
-                                    <Route path="/import" element={<InvoiceImport />} />
-                                    <Route path="/installations" element={<Installations />} />
-                                    <Route path="/installations/:id" element={<InstallationDetail />} />
-                                    <Route path="*" element={<NotFound />} />
-                                  </Routes>
+                                  <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                                    <Routes>
+                                      <Route path="/dashboard" element={<Dashboard />} />
+                                      <Route path="/claims" element={<ClaimsList />} />
+                                      <Route path="/claims/:id" element={<ClaimDetail />} />
+                                      <Route path="/claims/new" element={<ClaimWizard />} />
+                                      <Route path="/suppliers" element={<Suppliers />} />
+                                      <Route path="/reports" element={<Reports />} />
+                                      <Route path="/users" element={<UserManagement />} />
+                                      <Route path="/profile" element={<UserProfile />} />
+                                      <Route path="/certificates" element={<FGasCertificates />} />
+                                      <Route path="/import" element={<InvoiceImport />} />
+                                      <Route path="/installations" element={<Installations />} />
+                                      <Route path="/installations/:id" element={<InstallationDetail />} />
+                                      <Route path="*" element={<NotFound />} />
+                                    </Routes>
+                                  </Suspense>
                                 </OptimizedErrorBoundary>
                               </main>
                             </div>
