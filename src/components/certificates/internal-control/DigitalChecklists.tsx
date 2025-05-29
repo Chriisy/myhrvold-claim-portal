@@ -1,294 +1,184 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { useChecklistTemplates, useSubmitChecklist } from '@/hooks/useInternalControl';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle, AlertTriangle, Plus } from 'lucide-react';
-import { useSubmitChecklist } from '@/hooks/useInternalControl';
-import { ChecklistItem, internalControlService, ChecklistTemplate } from '@/services/internalControlService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CheckSquare, Plus, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '../EmptyState';
 
-interface Checklist {
+interface ChecklistItem {
   id: string;
-  type: string;
   title: string;
-  items: ChecklistItem[];
+  description: string;
+  completed: boolean;
+  deviation: boolean;
+  comment?: string;
 }
 
 export const DigitalChecklists = () => {
-  const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
-  const [checklists, setChecklists] = useState<Checklist[]>([]);
-  const [activeChecklist, setActiveChecklist] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const submitMutation = useSubmitChecklist();
+  const { data: templates = [], isLoading } = useChecklistTemplates();
+  const submitChecklist = useSubmitChecklist();
+  const [checklistOpen, setChecklistOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
+  const handleStartChecklist = (template: any) => {
+    setSelectedTemplate(template);
+    setChecklistItems(template.checklist_items.map((item: any, index: number) => ({
+      id: `item-${index}`,
+      title: item.title || `Punkt ${index + 1}`,
+      description: item.description || '',
+      completed: false,
+      deviation: false,
+      comment: ''
+    })));
+    setChecklistOpen(true);
+  };
 
-  const loadTemplates = async () => {
+  const updateChecklistItem = (id: string, updates: Partial<ChecklistItem>) => {
+    setChecklistItems(prev => prev.map(item => 
+      item.id === id ? { ...item, ...updates } : item
+    ));
+  };
+
+  const handleSubmitChecklist = async () => {
+    if (!selectedTemplate) return;
+
     try {
-      const templateData = await internalControlService.getChecklistTemplates();
-      setTemplates(templateData);
-      
-      // Convert templates to working checklists
-      const workingChecklists = templateData.map(template => ({
-        id: template.id,
-        type: template.document_type,
-        title: template.title,
-        items: template.checklist_items.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          completed: false,
-          deviation: false,
-          comment: ''
-        }))
-      }));
-      
-      setChecklists(workingChecklists);
+      await submitChecklist.mutateAsync({
+        documentType: selectedTemplate.document_type || 'general',
+        title: selectedTemplate.title,
+        checklistItems
+      });
+      setChecklistOpen(false);
+      setSelectedTemplate(null);
+      setChecklistItems([]);
     } catch (error) {
-      console.error('Error loading templates:', error);
-    } finally {
-      setLoading(false);
+      console.error('Submit failed:', error);
     }
   };
 
-  const handleItemToggle = (checklistId: string, itemId: string) => {
-    setChecklists(prev => prev.map(checklist => {
-      if (checklist.id === checklistId) {
-        return {
-          ...checklist,
-          items: checklist.items.map(item => {
-            if (item.id === itemId) {
-              return { ...item, completed: !item.completed };
-            }
-            return item;
-          })
-        };
-      }
-      return checklist;
-    }));
-  };
+  if (isLoading) {
+    return <div className="flex justify-center p-8">Laster sjekklister...</div>;
+  }
 
-  const handleDeviationToggle = (checklistId: string, itemId: string) => {
-    setChecklists(prev => prev.map(checklist => {
-      if (checklist.id === checklistId) {
-        return {
-          ...checklist,
-          items: checklist.items.map(item => {
-            if (item.id === itemId) {
-              return { ...item, deviation: !item.deviation };
-            }
-            return item;
-          })
-        };
-      }
-      return checklist;
-    }));
-  };
-
-  const handleCommentChange = (checklistId: string, itemId: string, comment: string) => {
-    setChecklists(prev => prev.map(checklist => {
-      if (checklist.id === checklistId) {
-        return {
-          ...checklist,
-          items: checklist.items.map(item => {
-            if (item.id === itemId) {
-              return { ...item, comment };
-            }
-            return item;
-          })
-        };
-      }
-      return checklist;
-    }));
-  };
-
-  const handleSubmitChecklist = (checklistId: string) => {
-    const checklist = checklists.find(c => c.id === checklistId);
-    if (!checklist) return;
-
-    const allCompleted = checklist.items.every(item => item.completed);
-    if (!allCompleted) {
-      alert('Alle punkter må være fullført før innlevering');
-      return;
-    }
-
-    submitMutation.mutate({
-      documentType: checklist.type,
-      title: checklist.title,
-      checklistItems: checklist.items
-    }, {
-      onSuccess: () => {
-        setActiveChecklist(null);
-        // Reset checklist
-        setChecklists(prev => prev.map(c => {
-          if (c.id === checklistId) {
-            return {
-              ...c,
-              items: c.items.map(item => ({
-                ...item,
-                completed: false,
-                deviation: false,
-                comment: ''
-              }))
-            };
-          }
-          return c;
-        }));
-      }
-    });
-  };
-
-  const getChecklistProgress = (checklist: Checklist) => {
-    const completed = checklist.items.filter(item => item.completed).length;
-    return `${completed}/${checklist.items.length}`;
-  };
-
-  const getChecklistStatus = (checklist: Checklist) => {
-    const allCompleted = checklist.items.every(item => item.completed);
-    const hasDeviations = checklist.items.some(item => item.deviation);
-    
-    if (hasDeviations) return { status: 'deviation', color: 'bg-red-100 text-red-800' };
-    if (allCompleted) return { status: 'completed', color: 'bg-green-100 text-green-800' };
-    return { status: 'in_progress', color: 'bg-yellow-100 text-yellow-800' };
-  };
-
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      'lekkasjekontroll': 'Lekkasjekontroll',
-      'egenkontroll': 'Egenkontroll',
-      'tomming_gjenvinning': 'Tømming og gjenvinning',
-      'pafylling': 'Påfylling'
-    };
-    return types[type] || type;
-  };
-
-  if (loading) {
-    return <div className="text-center py-4">Laster sjekklister...</div>;
+  if (templates.length === 0) {
+    return (
+      <EmptyState
+        title="Ingen sjekklister ennå"
+        description="Opprett din første digitale sjekkliste for internkontroll."
+        actionLabel="Opprett sjekkliste"
+        onAction={() => {/* TODO: Add template creation */}}
+      />
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Digitale sjekklister</h3>
-        <Button variant="outline" size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Ny sjekkliste
-        </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {templates.map((template) => (
+          <Card key={template.id}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CheckSquare className="w-5 h-5" />
+                {template.title}
+              </CardTitle>
+              {template.description && (
+                <p className="text-sm text-gray-600">{template.description}</p>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  {template.checklist_items?.length || 0} punkter
+                </p>
+                <Button 
+                  onClick={() => handleStartChecklist(template)}
+                  className="w-full"
+                >
+                  Start sjekkliste
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {checklists.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Ingen sjekklister tilgjengelig</p>
-          <p className="text-sm text-gray-400">Kontakt administrator for å legge til sjekklister</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {checklists.map((checklist) => {
-            const status = getChecklistStatus(checklist);
-            const progress = getChecklistProgress(checklist);
-            
-            return (
-              <Card key={checklist.id} className="relative">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{getTypeLabel(checklist.type)}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge className={status.color}>
-                        {status.status === 'completed' && 'Fullført'}
-                        {status.status === 'in_progress' && 'Pågår'}
-                        {status.status === 'deviation' && 'Avvik'}
-                      </Badge>
-                      <span className="text-sm text-gray-600">{progress}</span>
+      <Dialog open={checklistOpen} onOpenChange={setChecklistOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedTemplate?.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {checklistItems.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={item.completed}
+                        onCheckedChange={(checked) => 
+                          updateChecklistItem(item.id, { completed: !!checked })
+                        }
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium">{item.title}</h4>
+                        {item.description && (
+                          <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 ml-6">
+                      <Checkbox
+                        checked={item.deviation}
+                        onCheckedChange={(checked) => 
+                          updateChecklistItem(item.id, { deviation: !!checked })
+                        }
+                      />
+                      <label className="text-sm text-orange-600 flex items-center gap-1">
+                        <AlertTriangle className="w-4 h-4" />
+                        Avvik registrert
+                      </label>
+                    </div>
+                    
+                    <div className="ml-6">
+                      <Textarea
+                        placeholder="Kommentar eller beskrivelse av avvik..."
+                        value={item.comment}
+                        onChange={(e) => 
+                          updateChecklistItem(item.id, { comment: e.target.value })
+                        }
+                        className="text-sm"
+                      />
                     </div>
                   </div>
-                  <CardDescription>
-                    Klikk "Start kontroll" for å utføre denne sjekklisten
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full"
-                    onClick={() => setActiveChecklist(activeChecklist === checklist.id ? null : checklist.id)}
-                  >
-                    {activeChecklist === checklist.id ? 'Lukk sjekkliste' : 'Start kontroll'}
-                  </Button>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {activeChecklist && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {getTypeLabel(checklists.find(c => c.id === activeChecklist)?.type || '')} - Utførelse
-            </CardTitle>
-            <CardDescription>
-              Kryss av hver kontrollpunkt og noter eventuelle avvik
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {checklists.find(c => c.id === activeChecklist)?.items.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Checkbox 
-                      id={item.id}
-                      checked={item.completed}
-                      onCheckedChange={() => handleItemToggle(activeChecklist, item.id)}
-                    />
-                    <div className="flex-1">
-                      <label htmlFor={item.id} className="font-medium cursor-pointer">
-                        {item.title}
-                      </label>
-                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant={item.deviation ? "destructive" : "outline"}
-                        size="sm"
-                        onClick={() => handleDeviationToggle(activeChecklist, item.id)}
-                      >
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        Avvik
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {(item.deviation || item.comment) && (
-                    <Textarea
-                      placeholder="Kommentar eller beskrivelse av avvik..."
-                      value={item.comment || ''}
-                      onChange={(e) => handleCommentChange(activeChecklist, item.id, e.target.value)}
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+            ))}
             
-            <div className="flex gap-2 pt-4">
-              <Button 
-                className="flex-1"
-                onClick={() => handleSubmitChecklist(activeChecklist)}
-                disabled={submitMutation.isPending}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                {submitMutation.isPending ? 'Lagrer...' : 'Fullfør kontroll'}
-              </Button>
-              <Button variant="outline" onClick={() => setActiveChecklist(null)}>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" onClick={() => setChecklistOpen(false)}>
                 Avbryt
               </Button>
+              <Button 
+                onClick={handleSubmitChecklist}
+                disabled={submitChecklist.isPending}
+              >
+                {submitChecklist.isPending ? 'Lagrer...' : 'Fullfør sjekkliste'}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+export default DigitalChecklists;
