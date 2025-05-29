@@ -12,6 +12,7 @@ export const useRecentClaims = (filters: DashboardFilters) => {
         .from('claims')
         .select(`
           id,
+          display_id,
           created_at,
           customer_name,
           machine_model,
