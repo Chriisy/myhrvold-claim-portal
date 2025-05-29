@@ -406,6 +406,7 @@ export type Database = {
           deleted_at: string | null
           department: string | null
           description: string | null
+          display_id: string | null
           due_date: string | null
           id: string
           improvement_action:
@@ -454,6 +455,7 @@ export type Database = {
           deleted_at?: string | null
           department?: string | null
           description?: string | null
+          display_id?: string | null
           due_date?: string | null
           id?: string
           improvement_action?:
@@ -502,6 +504,7 @@ export type Database = {
           deleted_at?: string | null
           department?: string | null
           description?: string | null
+          display_id?: string | null
           due_date?: string | null
           id?: string
           improvement_action?:
@@ -1232,6 +1235,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_display_id: {
+        Args: { claim_date: string }
+        Returns: string
+      }
       get_expiring_certificates: {
         Args: { days_ahead?: number }
         Returns: {

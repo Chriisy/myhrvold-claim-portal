@@ -12,6 +12,7 @@ type Department = Database['public']['Enums']['department'];
 
 interface ClaimData {
   id: string;
+  display_id?: string;
   customer_name?: string;
   customer_no?: string;
   customer_address?: string;
@@ -53,6 +54,8 @@ export function ClaimOverviewDisplay({ claim, canEdit, onEdit }: ClaimOverviewDi
     return parts.length > 0 ? parts : ['Ikke angitt'];
   };
 
+  const displayId = claim.display_id || claim.id;
+
   return (
     <div className="space-y-6">
       {/* Status and Actions Header */}
@@ -63,7 +66,7 @@ export function ClaimOverviewDisplay({ claim, canEdit, onEdit }: ClaimOverviewDi
               <Badge variant="outline" className="bg-orange-100 text-orange-800 px-3 py-1">
                 {claim.status || 'Ny'}
               </Badge>
-              <span className="text-sm text-gray-500">Reklamasjon ID: {claim.id}</span>
+              <span className="text-sm text-gray-500">Reklamasjon ID: {displayId}</span>
             </div>
             {canEdit && (
               <Button variant="outline" onClick={onEdit}>

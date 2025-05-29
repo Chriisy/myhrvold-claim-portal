@@ -75,6 +75,8 @@ const ClaimDetail = () => {
   const canEdit = canEditAllClaims() || (canEditOwnClaims() && claim.created_by === user?.id);
   const shouldShowImprovementTab = canEdit || ['Godkjent', 'Avslått', 'Bokført', 'Lukket'].includes(claim.status || '');
 
+  const displayTitle = claim.display_id || id;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4">
@@ -86,7 +88,7 @@ const ClaimDetail = () => {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-myhrvold-primary">Reklamasjon {id}</h1>
+          <h1 className="text-3xl font-bold text-myhrvold-primary">Reklamasjon {displayTitle}</h1>
           <p className="text-gray-600">
             {claim.customer_name} - {claim.machine_model}
           </p>

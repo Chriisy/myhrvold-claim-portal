@@ -61,3 +61,20 @@ export interface ClaimFile {
   file_url: string;
   created_at: string;
 }
+
+// Enhanced claim interface with display_id
+export interface ClaimWithDisplayId {
+  id: string;
+  display_id?: string;
+  customer_name?: string;
+  machine_model?: string;
+  part_number?: string;
+  status?: string;
+  category?: string | null;
+  created_at: string;
+  created_by?: string;
+  suppliers?: { name: string } | null;
+  technician?: { name: string } | null;
+  salesperson?: { name: string } | null;
+  totalCost?: number;
+}

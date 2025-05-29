@@ -74,7 +74,9 @@ export const EnhancedRecentClaimsTable = () => {
         <div key={claim.id} className="border rounded-lg p-3 hover:bg-gray-50 transition-colors">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
             <div>
-              <p className="font-semibold text-myhrvold-primary text-sm">{claim.id.slice(0, 8)}...</p>
+              <p className="font-semibold text-myhrvold-primary text-sm">
+                {claim.display_id || claim.id.slice(0, 8) + '...'}
+              </p>
               <p className="text-xs text-gray-600">{new Date(claim.created_at).toLocaleDateString('nb-NO')}</p>
             </div>
             <div>
@@ -95,7 +97,7 @@ export const EnhancedRecentClaimsTable = () => {
               <p className="text-xs text-gray-600">Tekniker: {claim.technician?.name || 'Ingen'}</p>
             </div>
             <div className="flex justify-end">
-              <Link to={`/claim/${claim.id}`}>
+              <Link to={`/claims/${claim.id}`}>
                 <Button variant="outline" size="sm">
                   <Eye className="w-3 h-3 mr-1" />
                   Se

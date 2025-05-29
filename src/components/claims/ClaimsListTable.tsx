@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 interface ClaimData {
   id: string;
+  display_id?: string;
   customer_name?: string;
   machine_model?: string;
   part_number?: string;
@@ -105,7 +106,9 @@ export const ClaimsListTable = ({ claims, isLoading, error, hasAnyClaims }: Clai
             {/* Header with ID, Status and Action Button */}
             <div className="flex justify-between items-start mb-3">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <p className="font-semibold text-myhrvold-primary text-sm">{claim.id}</p>
+                <p className="font-semibold text-myhrvold-primary text-sm">
+                  {claim.display_id || claim.id}
+                </p>
                 <Badge className={`${getStatusColor(claim.status || 'Ny')} text-xs w-fit`}>
                   {claim.status || 'Ny'}
                 </Badge>

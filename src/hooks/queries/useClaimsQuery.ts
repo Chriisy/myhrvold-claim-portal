@@ -6,6 +6,7 @@ import { useUnifiedQuery } from './useUnifiedQuery';
 
 interface ClaimWithRelations {
   id: string;
+  display_id?: string;
   customer_name?: string;
   customer_no?: string;
   customer_address?: string;
@@ -78,7 +79,7 @@ export const useClaimsQuery = (filters: ClaimsQueryFilters = {}) => {
       .is('deleted_at', null);
 
     if (searchTerm) {
-      query = query.or(`customer_name.ilike.%${searchTerm}%,id.ilike.%${searchTerm}%,machine_model.ilike.%${searchTerm}%,customer_address.ilike.%${searchTerm}%`);
+      query = query.or(`customer_name.ilike.%${searchTerm}%,display_id.ilike.%${searchTerm}%,machine_model.ilike.%${searchTerm}%,customer_address.ilike.%${searchTerm}%`);
     }
 
     if (statusFilter !== 'Alle' && isValidClaimStatus(statusFilter)) {
@@ -126,9 +127,11 @@ export const useClaimQuery = (claimId: string) => {
     if (!claimId) return null;
     
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(claimId);
-    if (!isUUID) return null;
+    const isDisplayId = /^#\d{4}-\d{1,2}-\d+$/.test(claimId);
+    
+    if (!isUUID && !isDisplayId) return null;
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('claims')
       .select(`
         *,
@@ -137,9 +140,15 @@ export const useClaimQuery = (claimId: string) => {
         salesperson:users!claims_salesperson_id_fkey(name),
         account_codes(konto_nr, type, seller_flag, comment)
       `)
-      .eq('id', claimId)
-      .is('deleted_at', null)
-      .maybeSingle();
+      .is('deleted_at', null);
+
+    if (isDisplayId) {
+      query = query.eq('display_id', claimId);
+    } else {
+      query = query.eq('id', claimId);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) throw error;
     return data as ClaimWithRelations | null;

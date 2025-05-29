@@ -53,6 +53,7 @@ export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
         if (filters.search) {
           query = query.or(`
             customer_name.ilike.%${filters.search}%,
+            display_id.ilike.%${filters.search}%,
             machine_model.ilike.%${filters.search}%,
             part_number.ilike.%${filters.search}%
           `);
