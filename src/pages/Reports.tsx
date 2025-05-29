@@ -5,6 +5,8 @@ import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBounda
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
 const ReportDateRangePicker = React.lazy(() => import('@/components/reports/ReportDateRangePicker').then(module => ({ default: module.ReportDateRangePicker })));
+const AvailableReports = React.lazy(() => import('@/components/reports/AvailableReports').then(module => ({ default: module.AvailableReports })));
+const AIReportGenerator = React.lazy(() => import('@/components/ai/AIReportGenerator').then(module => ({ default: module.AIReportGenerator })));
 
 const Reports = () => {
   const [dateRange, setDateRange] = useState({
@@ -28,6 +30,18 @@ const Reports = () => {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
+        </Suspense>
+      </OptimizedErrorBoundary>
+
+      <OptimizedErrorBoundary>
+        <Suspense fallback={<OptimizedLoadingStates.Cards />}>
+          <AvailableReports dateRange={dateRange} />
+        </Suspense>
+      </OptimizedErrorBoundary>
+
+      <OptimizedErrorBoundary>
+        <Suspense fallback={<OptimizedLoadingStates.Form />}>
+          <AIReportGenerator />
         </Suspense>
       </OptimizedErrorBoundary>
     </div>
