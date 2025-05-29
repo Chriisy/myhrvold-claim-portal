@@ -348,7 +348,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
                 <div className="ml-7 space-y-3">
                   <Textarea
                     placeholder="Legg til kommentar eller notater..."
-                    value={item.comments}
+                    value={item.comments || ''}
                     onChange={(e) => handleCommentChange(item.id, e.target.value)}
                     rows={3}
                   />
@@ -397,7 +397,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
       <ImageUploadModal
         open={uploadModalOpen}
         onOpenChange={setUploadModalOpen}
-        checklistId={checklist.id}
+        checklistId={checklist?.id || ''}
         checklistItemId={selectedItemForUpload || ''}
         onUploadComplete={() => {
           queryClient.invalidateQueries({ queryKey: ['checklist-photo-count'] });
@@ -407,7 +407,7 @@ export const InstallationChecklist = ({ projectId }: InstallationChecklistProps)
       <ImageGallery
         open={galleryOpen}
         onOpenChange={setGalleryOpen}
-        checklistId={checklist.id}
+        checklistId={checklist?.id || ''}
         itemId={selectedItemForGallery || undefined}
       />
 

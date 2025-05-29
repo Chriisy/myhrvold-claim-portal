@@ -1,17 +1,20 @@
 
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, User, Calendar, FileText } from 'lucide-react';
 import { InstallationChecklist } from '@/components/installations/InstallationChecklist';
+import { ProjectStatusSelector } from '@/components/installations/ProjectStatusSelector';
+import { toast } from '@/hooks/use-toast';
 
 const InstallationDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: project, isLoading } = useQuery({
     queryKey: ['installation-project', id],
@@ -32,6 +35,38 @@ const InstallationDetail = () => {
       return data;
     },
     enabled: !!id
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!id) throw new Error('No project ID');
+      
+      const { error } = await supabase
+        .from('installation_projects')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+          ...(newStatus === 'Ferdig' ? { completed_at: new Date().toISOString() } : {})
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['installation-project', id] });
+      toast({
+        title: "Status oppdatert",
+        description: "Prosjektstatus er oppdatert"
+      });
+    },
+    onError: (error) => {
+      console.error('Status update error:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke oppdatere status",
+        variant: "destructive"
+      });
+    }
   });
 
   const getStatusColor = (status: string) => {
@@ -76,11 +111,17 @@ const InstallationDetail = () => {
           Tilbake
         </Button>
         <div className="flex-1">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-3xl font-bold">{project.project_name}</h1>
-            <Badge className={getStatusColor(project.status)}>
-              {project.status}
-            </Badge>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-3xl font-bold">{project.project_name}</h1>
+              <Badge className={getStatusColor(project.status)}>
+                {project.status}
+              </Badge>
+            </div>
+            <ProjectStatusSelector 
+              currentStatus={project.status}
+              onStatusChange={(newStatus) => updateStatusMutation.mutate(newStatus)}
+            />
           </div>
         </div>
       </div>
