@@ -64,7 +64,7 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
         />
         <AddCertificateModal 
           open={addModalOpen} 
-          onOpenChange={setAddModalOpen} 
+          onClose={() => setAddModalOpen(false)} 
         />
       </>
     );

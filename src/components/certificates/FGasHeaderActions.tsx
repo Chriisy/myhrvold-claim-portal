@@ -16,7 +16,7 @@ export const FGasHeaderActions = () => {
       
       <AddCertificateModal 
         open={addCertificateOpen} 
-        onOpenChange={setAddCertificateOpen} 
+        onClose={() => setAddCertificateOpen(false)} 
       />
     </div>
   );
