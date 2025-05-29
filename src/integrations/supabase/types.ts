@@ -712,13 +712,69 @@ export type Database = {
           },
         ]
       }
+      installation_checklist_photos: {
+        Row: {
+          caption: string | null
+          checklist_id: string | null
+          checklist_item_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_url: string
+          id: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          checklist_id?: string | null
+          checklist_item_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_url: string
+          id?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          checklist_id?: string | null
+          checklist_item_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_url?: string
+          id?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installation_checklist_photos_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "installation_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installation_checklist_photos_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       installation_checklists: {
         Row: {
           checklist_data: Json
           completed_at: string | null
           completed_by: string | null
           created_at: string
+          deviation_notes: Json | null
           id: string
+          internal_notes: string | null
           project_id: string
           status: string
           template_id: string | null
@@ -728,7 +784,9 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          deviation_notes?: Json | null
           id?: string
+          internal_notes?: string | null
           project_id: string
           status?: string
           template_id?: string | null
@@ -738,7 +796,9 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          deviation_notes?: Json | null
           id?: string
+          internal_notes?: string | null
           project_id?: string
           status?: string
           template_id?: string | null
