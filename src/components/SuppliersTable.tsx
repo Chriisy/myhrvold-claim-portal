@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Table,
@@ -120,7 +119,7 @@ export const SuppliersTable = () => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Leverandør Oversikt ({suppliers.length})</CardTitle>
+          <CardTitle>Leverandør Oversikt ({suppliers?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -218,3 +217,5 @@ export const SuppliersTable = () => {
     </>
   );
 };
+
+export default SuppliersTable;

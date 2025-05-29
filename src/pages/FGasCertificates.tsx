@@ -34,7 +34,7 @@ const FGasCertificates = () => {
 
       <OptimizedErrorBoundary>
         <Suspense fallback={<OptimizedLoadingStates.Table />}>
-          <CertificatesList />
+          <CertificatesList filterType="all" />
         </Suspense>
       </OptimizedErrorBoundary>
     </div>

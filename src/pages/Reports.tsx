@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
@@ -7,6 +7,11 @@ import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStat
 const ReportDateRangePicker = React.lazy(() => import('@/components/reports/ReportDateRangePicker').then(module => ({ default: module.ReportDateRangePicker })));
 
 const Reports = () => {
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    end: new Date()
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -19,7 +24,10 @@ const Reports = () => {
 
       <OptimizedErrorBoundary>
         <Suspense fallback={<OptimizedLoadingStates.Form />}>
-          <ReportDateRangePicker />
+          <ReportDateRangePicker 
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
         </Suspense>
       </OptimizedErrorBoundary>
     </div>

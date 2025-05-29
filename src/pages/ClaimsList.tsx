@@ -6,13 +6,24 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
+import { useOptimizedClaims } from '@/hooks/useOptimizedClaims';
 
 // Lazy load components with correct import syntax for named exports
 const ClaimsListTable = React.lazy(() => import('@/components/claims/ClaimsListTable').then(module => ({ default: module.ClaimsListTable })));
 const ClaimsListFilters = React.lazy(() => import('@/components/claims/ClaimsListFilters').then(module => ({ default: module.ClaimsListFilters })));
 
 const ClaimsList = () => {
-  const [filters, setFilters] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Alle');
+  const [categoryFilter, setCategoryFilter] = useState('Alle');
+  const [partNumberFilter, setPartNumberFilter] = useState('');
+
+  const filters = {
+    status: statusFilter !== 'Alle' ? statusFilter : undefined,
+    search: searchTerm || undefined,
+  };
+
+  const { data: claims = [], isLoading, error } = useOptimizedClaims(filters);
 
   return (
     <div className="p-6 space-y-6">
@@ -34,13 +45,27 @@ const ClaimsList = () => {
 
       <OptimizedErrorBoundary>
         <Suspense fallback={<OptimizedLoadingStates.Form />}>
-          <ClaimsListFilters onFiltersChange={setFilters} />
+          <ClaimsListFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            partNumberFilter={partNumberFilter}
+            setPartNumberFilter={setPartNumberFilter}
+          />
         </Suspense>
       </OptimizedErrorBoundary>
 
       <OptimizedErrorBoundary>
         <Suspense fallback={<OptimizedLoadingStates.Table />}>
-          <ClaimsListTable filters={filters} />
+          <ClaimsListTable
+            claims={claims}
+            isLoading={isLoading}
+            error={!!error}
+            hasAnyClaims={claims.length > 0}
+          />
         </Suspense>
       </OptimizedErrorBoundary>
     </div>
