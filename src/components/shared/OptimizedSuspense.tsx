@@ -35,7 +35,7 @@ export const OptimizedSuspense: React.FC<OptimizedSuspenseProps> = ({
       case 'table':
         return <OptimizedLoadingStates.Table />;
       case 'card':
-        return <OptimizedLoadingStates.Card />;
+        return <OptimizedLoadingStates.Cards />;
       default:
         return <OptimizedLoadingStates.Dashboard />;
     }
