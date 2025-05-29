@@ -4,10 +4,10 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
-// Lazy load components
-const CertificateStats = React.lazy(() => import('@/components/certificates/CertificateStats'));
-const ExpiringCertificatesAlert = React.lazy(() => import('@/components/certificates/ExpiringCertificatesAlert'));
-const CertificatesList = React.lazy(() => import('@/components/certificates/CertificatesList'));
+// Lazy load components with correct import syntax for named exports
+const CertificateStats = React.lazy(() => import('@/components/certificates/CertificateStats').then(module => ({ default: module.CertificateStats })));
+const ExpiringCertificatesAlert = React.lazy(() => import('@/components/certificates/ExpiringCertificatesAlert').then(module => ({ default: module.ExpiringCertificatesAlert })));
+const CertificatesList = React.lazy(() => import('@/components/certificates/CertificatesList').then(module => ({ default: module.CertificatesList })));
 
 const FGasCertificates = () => {
   return (

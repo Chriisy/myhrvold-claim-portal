@@ -4,7 +4,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
-const ImportWizard = React.lazy(() => import('@/components/import/ImportWizard'));
+const ImportWizard = React.lazy(() => import('@/components/import/ImportWizard').then(module => ({ default: module.ImportWizard })));
 
 const InvoiceImport = () => {
   return (

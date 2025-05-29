@@ -4,7 +4,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
-const ReportDateRangePicker = React.lazy(() => import('@/components/reports/ReportDateRangePicker'));
+const ReportDateRangePicker = React.lazy(() => import('@/components/reports/ReportDateRangePicker').then(module => ({ default: module.ReportDateRangePicker })));
 
 const Reports = () => {
   return (

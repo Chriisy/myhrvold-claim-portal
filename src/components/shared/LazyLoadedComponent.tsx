@@ -13,7 +13,7 @@ export const LazyLoadedComponent: React.FC<LazyLoadedComponentProps> = ({
   fallback,
   error
 }) => {
-  const defaultFallback = fallback || <OptimizedLoadingStates />;
+  const defaultFallback = fallback || <OptimizedLoadingStates.Dashboard />;
 
   return (
     <Suspense fallback={defaultFallback}>

@@ -30,7 +30,7 @@ export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
           .is('deleted_at', null)
           .order('created_at', { ascending: false });
 
-        if (filters.status) {
+        if (filters.status && filters.status !== 'all') {
           query = query.eq('status', filters.status);
         }
 

@@ -1,6 +1,5 @@
 
 import React, { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { DashboardHeader } from './DashboardHeader';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 import { UnifiedErrorBoundary } from '@/components/shared/UnifiedErrorBoundary';
@@ -16,19 +15,19 @@ const OptimizedDashboard = () => {
       <DashboardHeader />
       
       <UnifiedErrorBoundary title="Feil ved lasting av nøkkeltall">
-        <Suspense fallback={<OptimizedLoadingStates />}>
+        <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
           <DashboardKpiSection />
         </Suspense>
       </UnifiedErrorBoundary>
 
       <UnifiedErrorBoundary title="Feil ved lasting av filtre">
-        <Suspense fallback={<OptimizedLoadingStates />}>
+        <Suspense fallback={<OptimizedLoadingStates.Form />}>
           <EnhancedDashboardFilters />
         </Suspense>
       </UnifiedErrorBoundary>
 
       <UnifiedErrorBoundary title="Feil ved lasting av diagrammer">
-        <Suspense fallback={<OptimizedLoadingStates />}>
+        <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
           <DashboardChartsGrid />
         </Suspense>
       </UnifiedErrorBoundary>

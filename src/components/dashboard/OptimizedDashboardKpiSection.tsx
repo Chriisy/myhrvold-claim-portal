@@ -14,21 +14,21 @@ export const OptimizedDashboardKpiSection = () => {
     <div className="space-y-6">
       {/* Quick Stats Cards */}
       <UnifiedErrorBoundary title="Feil ved lasting av hurtigstatistikk">
-        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+        <LazyLoadedComponent fallback={<OptimizedLoadingStates.Cards />}>
           <QuickStatsCards />
         </LazyLoadedComponent>
       </UnifiedErrorBoundary>
 
       {/* Main KPI Cards */}
       <UnifiedErrorBoundary title="Feil ved lasting av nøkkeltall">
-        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+        <LazyLoadedComponent fallback={<OptimizedLoadingStates.Cards />}>
           <KpiCardsGrid />
         </LazyLoadedComponent>
       </UnifiedErrorBoundary>
 
       {/* Additional KPI Cards */}
       <UnifiedErrorBoundary title="Feil ved lasting av ekstra nøkkeltall">
-        <LazyLoadedComponent fallback={<OptimizedLoadingStates />}>
+        <LazyLoadedComponent fallback={<OptimizedLoadingStates.Cards />}>
           <AdditionalKpiCards />
         </LazyLoadedComponent>
       </UnifiedErrorBoundary>
