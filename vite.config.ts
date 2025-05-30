@@ -20,34 +20,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Performance optimizations
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select'],
-          charts: ['recharts'],
-          router: ['react-router-dom'],
-          query: ['@tanstack/react-query'],
-          supabase: ['@supabase/supabase-js']
-        }
-      }
-    },
-    // Enable code splitting
     target: 'esnext',
-    minify: mode === 'production' ? 'terser' : false,
-    terserOptions: mode === 'production' ? {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    } : undefined,
-    // Asset optimization
-    assetsInlineLimit: 4096,
-    cssCodeSplit: true,
+    minify: mode === 'production' ? 'esbuild' : false,
     sourcemap: mode === 'development'
   },
-  // Performance optimizations for development
   optimizeDeps: {
     include: [
       'react',

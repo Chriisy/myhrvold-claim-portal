@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
 import DashboardLayout from './components/layout/DashboardLayout';
+import { OptimizedDashboard } from './components/dashboard/OptimizedDashboard';
 import { ClaimList } from './components/claims/ClaimList';
 import { SupplierList } from './components/suppliers/SupplierList';
 import { UserList } from './components/users/UserList';
@@ -71,7 +72,8 @@ const App = () => {
                   
                   <Route path="/impersonate/:userId" element={<Impersonate />} />
 
-                  <Route path="/" element={<RequireAuth><DashboardLayout><ClaimList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/dashboard" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimList /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetails /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers" element={<RequireAuth><DashboardLayout><SupplierList /></DashboardLayout></RequireAuth>} />
