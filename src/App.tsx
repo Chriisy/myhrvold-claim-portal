@@ -7,13 +7,15 @@ import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
 import DashboardLayout from './components/layout/DashboardLayout';
 import OptimizedDashboard from './components/dashboard/OptimizedDashboard';
-import Users from './pages/Users';
+import UserManagement from './pages/UserManagement';
 import { ReportDashboard } from './components/reports/ReportDashboard';
 import { RequireAuth } from './components/auth/RequireAuth';
 import Login from './pages/Login';
 import ClaimsList from './pages/ClaimsList';
 import Suppliers from './pages/Suppliers';
+import Installations from './pages/Installations';
 import FGasCertificates from './pages/FGasCertificates';
+import InvoiceImport from './pages/InvoiceImport';
 import { Register } from './components/auth/Register';
 import { ForgotPassword } from './components/auth/ForgotPassword';
 import { ResetPassword } from './components/auth/ResetPassword';
@@ -82,12 +84,14 @@ const App = () => {
                   <Route path="/dashboard" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimsList /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetails /></DashboardLayout></RequireAuth>} />
+                  <Route path="/installations" element={<RequireAuth><DashboardLayout><Installations /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers" element={<RequireAuth><DashboardLayout><Suppliers /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
-                  <Route path="/users" element={<RequireAuth><DashboardLayout><Users /></DashboardLayout></RequireAuth>} />
+                  <Route path="/users" element={<RequireAuth><DashboardLayout><UserManagement /></DashboardLayout></RequireAuth>} />
                   <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
                   <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
+                  <Route path="/certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
+                  <Route path="/import" element={<RequireAuth><DashboardLayout><InvoiceImport /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
@@ -97,8 +101,8 @@ const App = () => {
                   <Route path="/suppliers/add" element={<AddSupplierModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/users/add" element={<AddUserModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/users/edit/:id" element={<EditUserModal open={true} onClose={() => { window.history.back(); }} />} />
-                  <Route path="/f-gas-certificates/add" element={<AddCertificateModal open={true} onClose={() => { window.history.back(); }} />} />
-                  <Route path="/f-gas-certificates/edit/:id" element={<EditCertificateModal open={true} onClose={() => { window.history.back(); }} certificate={null} />} />
+                  <Route path="/certificates/add" element={<AddCertificateModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/certificates/edit/:id" element={<EditCertificateModal open={true} onClose={() => { window.history.back(); }} certificate={null} />} />
                 </Routes>
                 <Toaster />
                 <PWAInstallButton />

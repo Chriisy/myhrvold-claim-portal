@@ -19,11 +19,11 @@ import { Button } from "@/components/ui/button"
 
 // Preload imports for performance
 const preloadModules = {
-  dashboard: () => import("@/pages/Dashboard"),
+  dashboard: () => import("@/components/dashboard/OptimizedDashboard"),
   claims: () => import("@/pages/ClaimsList"),
   installations: () => import("@/pages/Installations"),
   suppliers: () => import("@/pages/Suppliers"),
-  reports: () => import("@/pages/Reports"),
+  reports: () => import("@/components/reports/ReportDashboard"),
   users: () => import("@/pages/UserManagement"),
   certificates: () => import("@/pages/FGasCertificates"),
   import: () => import("@/pages/InvoiceImport"),
