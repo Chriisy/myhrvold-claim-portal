@@ -1,5 +1,5 @@
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 export const useDebounce = <T extends (...args: any[]) => void>(
   callback: T,
@@ -21,7 +21,7 @@ export const useDebounce = <T extends (...args: any[]) => void>(
   ) as T;
 
   // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
