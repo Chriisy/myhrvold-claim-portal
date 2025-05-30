@@ -4,8 +4,12 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
-const ClaimsListTable = React.lazy(() => import('@/components/claims/ClaimsListTable'));
-const ClaimsListFilters = React.lazy(() => import('@/components/claims/ClaimsListFilters'));
+const ClaimsListTable = React.lazy(() => 
+  import('@/components/claims/ClaimsListTable').then(module => ({ default: module.ClaimsListTable }))
+);
+const ClaimsListFilters = React.lazy(() => 
+  import('@/components/claims/ClaimsListFilters').then(module => ({ default: module.ClaimsListFilters }))
+);
 
 const ClaimsList = () => {
   return (

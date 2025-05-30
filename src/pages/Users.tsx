@@ -4,9 +4,15 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBoundary';
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 
-const UserListTable = React.lazy(() => import('@/components/user-management/UserListTable'));
-const UserManagementHeader = React.lazy(() => import('@/components/user-management/UserManagementHeader'));
-const UserStatsCards = React.lazy(() => import('@/components/user-management/UserStatsCards'));
+const UserListTable = React.lazy(() => 
+  import('@/components/user-management/UserListTable').then(module => ({ default: module.UserListTable }))
+);
+const UserManagementHeader = React.lazy(() => 
+  import('@/components/user-management/UserManagementHeader').then(module => ({ default: module.UserManagementHeader }))
+);
+const UserStatsCards = React.lazy(() => 
+  import('@/components/user-management/UserStatsCards').then(module => ({ default: module.UserStatsCards }))
+);
 
 const Users = () => {
   return (
