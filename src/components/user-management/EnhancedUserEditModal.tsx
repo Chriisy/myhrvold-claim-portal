@@ -71,22 +71,6 @@ const permissionOptions: { value: PermissionType; label: string; description: st
   // Administrasjon
   { value: 'manage_users', label: 'Administrere brukere', description: 'Kan administrere brukere og roller', category: 'Administrasjon' },
   { value: 'view_reports', label: 'Se rapporter', description: 'Kan se rapporter og statistikk', category: 'Administrasjon' },
-  
-  // Installasjoner
-  { value: 'view_installations', label: 'Se installasjoner', description: 'Kan se installasjonsprosjekter', category: 'Installasjoner' },
-  { value: 'manage_installations', label: 'Administrere installasjoner', description: 'Kan opprette og redigere installasjonsprosjekter', category: 'Installasjoner' },
-  
-  // Leverandører
-  { value: 'view_suppliers', label: 'Se leverandører', description: 'Kan se leverandørinformasjon', category: 'Leverandører' },
-  { value: 'manage_suppliers', label: 'Administrere leverandører', description: 'Kan legge til og redigere leverandører', category: 'Leverandører' },
-  
-  // F-gass sertifikater
-  { value: 'view_certificates', label: 'Se sertifikater', description: 'Kan se F-gass sertifikater', category: 'Sertifikater' },
-  { value: 'manage_certificates', label: 'Administrere sertifikater', description: 'Kan legge til og redigere F-gass sertifikater', category: 'Sertifikater' },
-  
-  // Import/Export
-  { value: 'import_data', label: 'Importere data', description: 'Kan importere fakturaer og annen data', category: 'Import/Export' },
-  { value: 'export_data', label: 'Eksportere data', description: 'Kan eksportere data og rapporter', category: 'Import/Export' },
 ];
 
 const groupedPermissions = permissionOptions.reduce((acc, permission) => {
@@ -190,7 +174,7 @@ export function EnhancedUserEditModal({ user, open, onOpenChange }: EnhancedUser
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Rediger bruker: {user.name}
