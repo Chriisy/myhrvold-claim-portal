@@ -70,7 +70,13 @@ export default defineConfig(({ mode }) => ({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu'
     ],
-    exclude: ['@supabase/supabase-js']
+    exclude: [
+      '@supabase/supabase-js',
+      '@supabase/postgrest-js',
+      '@supabase/realtime-js',
+      '@supabase/storage-js',
+      '@supabase/functions-js'
+    ]
   },
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
