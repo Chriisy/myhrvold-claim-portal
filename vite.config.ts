@@ -4,6 +4,15 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { componentTagger } from "lovable-tagger";
 
+const SUPABASE_PKGS = [
+  '@supabase/supabase-js',
+  '@supabase/postgrest-js',
+  '@supabase/gotrue-js',
+  '@supabase/realtime-js',
+  '@supabase/storage-js',
+  '@supabase/functions-js'
+];
+
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
@@ -67,14 +76,10 @@ export default defineConfig(({ mode }) => ({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu'
     ],
-    exclude: [
-      '@supabase/supabase-js',
-      '@supabase/postgrest-js',
-      '@supabase/realtime-js',
-      '@supabase/storage-js',
-      '@supabase/functions-js',
-      '@supabase/gotrue-js'
-    ]
+    exclude: SUPABASE_PKGS
+  },
+  ssr: {
+    noExternal: SUPABASE_PKGS
   },
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
