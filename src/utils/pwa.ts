@@ -1,5 +1,36 @@
 
 // PWA utilities for service worker registration and app installation
+
+// Type definitions for PWA features
+declare global {
+  interface ServiceWorkerRegistration {
+    sync?: {
+      register(tag: string): Promise<void>;
+    };
+  }
+  
+  interface Navigator {
+    connection?: {
+      effectiveType?: string;
+      downlink?: number;
+    };
+    mozConnection?: {
+      effectiveType?: string;
+      downlink?: number;
+    };
+    webkitConnection?: {
+      effectiveType?: string;
+      downlink?: number;
+    };
+    standalone?: boolean;
+  }
+}
+
+// Extended NotificationOptions interface
+interface ExtendedNotificationOptions extends NotificationOptions {
+  vibrate?: number[];
+}
+
 export class PWAManager {
   private static instance: PWAManager;
   private deferredPrompt: any = null;
@@ -149,20 +180,24 @@ export class PWAManager {
   }
 
   // Send a test push notification
-  async sendTestNotification(title: string, body: string, options: NotificationOptions = {}) {
+  async sendTestNotification(title: string, body: string, options: ExtendedNotificationOptions = {}) {
     const permission = await this.requestNotificationPermission();
     
     if (permission === 'granted') {
-      const defaultOptions: NotificationOptions = {
+      const defaultOptions: ExtendedNotificationOptions = {
         body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        vibrate: [100, 50, 100],
         tag: 'test-notification',
         requireInteraction: false,
         silent: false,
         ...options
       };
+
+      // Only add vibrate if it's supported
+      if ('vibrate' in navigator) {
+        defaultOptions.vibrate = [100, 50, 100];
+      }
 
       new Notification(title, defaultOptions);
       return true;
@@ -173,18 +208,25 @@ export class PWAManager {
 
   // Trigger background sync
   async triggerBackgroundSync(tag: string = 'background-sync'): Promise<boolean> {
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if ('serviceWorker' in navigator && this.hasBackgroundSyncSupport()) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        await registration.sync.register(tag);
-        console.log('Background sync registered:', tag);
-        return true;
+        if (registration.sync) {
+          await registration.sync.register(tag);
+          console.log('Background sync registered:', tag);
+          return true;
+        }
       } catch (error) {
         console.error('Background sync registration failed:', error);
         return false;
       }
     }
     return false;
+  }
+
+  private hasBackgroundSyncSupport(): boolean {
+    return 'serviceWorker' in navigator && 
+           'sync' in window.ServiceWorkerRegistration.prototype;
   }
 
   // Force service worker update

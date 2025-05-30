@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff, Sync, Trash2, AlertCircle } from 'lucide-react';
+import { Wifi, WifiOff, RotateCw, Trash2, AlertCircle } from 'lucide-react';
 import { backgroundSyncManager } from '@/utils/backgroundSync';
 import { toast } from '@/hooks/use-toast';
 
@@ -156,7 +156,7 @@ export const OfflineFormHandler = () => {
               <div className="space-x-2">
                 {isOnline && (
                   <Button onClick={forceSyncAll} size="sm" variant="outline">
-                    <Sync className="w-4 h-4 mr-2" />
+                    <RotateCw className="w-4 h-4 mr-2" />
                     Synkroniser nå
                   </Button>
                 )}
@@ -197,7 +197,7 @@ export const OfflineFormHandler = () => {
         {/* No Pending Requests */}
         {pendingRequests.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            <Sync className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <RotateCw className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>Ingen ventende forespørsler</p>
             <p className="text-sm">Alle skjemaer er synkronisert</p>
           </div>

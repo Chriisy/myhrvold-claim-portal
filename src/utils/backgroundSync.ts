@@ -1,5 +1,15 @@
 
 // Background sync utilities for offline form submissions
+
+// Type definitions for Background Sync API
+declare global {
+  interface ServiceWorkerRegistration {
+    sync?: {
+      register(tag: string): Promise<void>;
+    };
+  }
+}
+
 export class BackgroundSyncManager {
   private static instance: BackgroundSyncManager;
   private pendingRequests: Map<string, any> = new Map();
@@ -70,11 +80,13 @@ export class BackgroundSyncManager {
     this.savePendingRequests();
 
     // Try to register background sync if supported
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if ('serviceWorker' in navigator && this.hasBackgroundSyncSupport()) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        await registration.sync.register(`sync-${requestId}`);
-        console.log('Background sync registered for:', requestId);
+        if (registration.sync) {
+          await registration.sync.register(`sync-${requestId}`);
+          console.log('Background sync registered for:', requestId);
+        }
       } catch (error) {
         console.error('Failed to register background sync:', error);
         // Fallback: try immediate sync if background sync fails
@@ -84,6 +96,11 @@ export class BackgroundSyncManager {
       // Fallback for browsers without background sync
       this.syncPendingRequests();
     }
+  }
+
+  private hasBackgroundSyncSupport(): boolean {
+    return 'serviceWorker' in navigator && 
+           'sync' in window.ServiceWorkerRegistration.prototype;
   }
 
   async syncPendingRequests() {
