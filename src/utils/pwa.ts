@@ -1,4 +1,3 @@
-
 // PWA utilities for service worker registration and app installation
 
 // Type definitions for PWA features
@@ -35,6 +34,7 @@ export class PWAManager {
   private static instance: PWAManager;
   private deferredPrompt: any = null;
   private isInstallable = false;
+  private serviceWorkerRegistered = false;
 
   private constructor() {
     this.init();
@@ -64,16 +64,14 @@ export class PWAManager {
       this.isInstallable = false;
       this.hideInstallUI();
     });
-
-    // Register service worker
-    this.registerServiceWorker();
   }
 
   async registerServiceWorker(): Promise<void> {
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !this.serviceWorkerRegistered) {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
         console.log('Service Worker registered successfully:', registration);
+        this.serviceWorkerRegistered = true;
         
         // Listen for updates
         registration.addEventListener('updatefound', () => {

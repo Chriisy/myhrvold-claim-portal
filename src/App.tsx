@@ -12,7 +12,7 @@ import { SupplierList } from './components/suppliers/SupplierList';
 import { UserList } from './components/users/UserList';
 import { ReportDashboard } from './components/reports/ReportDashboard';
 import { RequireAuth } from './components/auth/RequireAuth';
-import { Login } from './components/auth/Login';
+import Login from './pages/Login';
 import { Register } from './components/auth/Register';
 import { ForgotPassword } from './components/auth/ForgotPassword';
 import { ResetPassword } from './components/auth/ResetPassword';
@@ -40,13 +40,19 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Initialize PWA on app start
-    pwaManager.registerServiceWorker();
+    // Initialize PWA on app start with reduced duplication
+    if ('serviceWorker' in navigator) {
+      pwaManager.registerServiceWorker();
+    }
     
     // Request notification permission on user interaction
     const requestNotifications = async () => {
-      const permission = await pwaManager.requestNotificationPermission();
-      console.log('Notification permission:', permission);
+      try {
+        const permission = await pwaManager.requestNotificationPermission();
+        console.log('Notification permission:', permission);
+      } catch (error) {
+        console.warn('Notification permission request failed:', error);
+      }
     };
     
     // Add click listener for notification permission
