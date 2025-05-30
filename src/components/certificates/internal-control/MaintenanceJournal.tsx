@@ -1,193 +1,118 @@
 
 import { useState } from 'react';
-import { useMaintenanceChecklists, useCreateMaintenanceChecklist } from '@/hooks/useMaintenance';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Wrench, Plus, Eye } from 'lucide-react';
-import { EmptyState } from '../EmptyState';
-import { MaintenanceChecklistDetail } from './MaintenanceChecklistDetail';
+import { Plus, FileText } from 'lucide-react';
+import { useCreateMaintenanceChecklist, useMaintenanceChecklists } from '@/hooks/useMaintenance';
+import { toast } from '@/hooks/use-toast';
 
 export const MaintenanceJournal = () => {
+  const [newChecklistName, setNewChecklistName] = useState('');
+  const [newChecklistLocation, setNewChecklistLocation] = useState('');
   const { data: checklists = [], isLoading } = useMaintenanceChecklists();
-  const createChecklist = useCreateMaintenanceChecklist();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    location: ''
-  });
+  const createChecklistMutation = useCreateMaintenanceChecklist();
 
-  const handleCreateChecklist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await createChecklist.mutateAsync({
-        name: formData.name,
-        location: formData.location,
-        created_by: '' // This will be set by RLS
+  const handleCreateChecklist = async () => {
+    if (!newChecklistName.trim()) {
+      toast({
+        title: "Navn mangler",
+        description: "Du må oppgi et navn for vedlikeholdsjournalen",
+        variant: "destructive",
       });
-      setCreateOpen(false);
-      setFormData({ name: '', location: '' });
+      return;
+    }
+
+    try {
+      await createChecklistMutation.mutateAsync({
+        name: newChecklistName.trim(),
+        location: newChecklistLocation.trim() || undefined,
+      });
+      
+      setNewChecklistName('');
+      setNewChecklistLocation('');
     } catch (error) {
-      console.error('Create failed:', error);
+      console.error('Failed to create checklist:', error);
     }
   };
-
-  if (selectedChecklistId) {
-    return (
-      <MaintenanceChecklistDetail 
-        checklistId={selectedChecklistId}
-        onBack={() => setSelectedChecklistId(null)}
-      />
-    );
-  }
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Laster vedlikeholdsjournaler...</div>;
   }
 
-  if (checklists.length === 0) {
-    return (
-      <>
-        <EmptyState
-          title="Ingen vedlikeholdsjournaler ennå"
-          description="Opprett din første vedlikeholdsjournal for utstyrskontroll."
-          actionLabel="Opprett vedlikeholdsjournal"
-          onAction={() => setCreateOpen(true)}
-        />
-        
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ny vedlikeholdsjournal</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateChecklist} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Navn</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="f.eks. Trondheim - Vedlikeholdsjournal"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="location">Lokasjon</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="f.eks. Trondheim avdeling"
-                />
-              </div>
-              
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
-                  Avbryt
-                </Button>
-                <Button type="submit" disabled={createChecklist.isPending}>
-                  {createChecklist.isPending ? 'Oppretter...' : 'Opprett'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <Wrench className="w-5 h-5" />
-          Vedlikeholdsjournaler
-        </CardTitle>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Ny journal
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ny vedlikeholdsjournal</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateChecklist} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Navn</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="f.eks. Trondheim - Vedlikeholdsjournal"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="location">Lokasjon</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="f.eks. Trondheim avdeling"
-                />
-              </div>
-              
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
-                  Avbryt
-                </Button>
-                <Button type="submit" disabled={createChecklist.isPending}>
-                  {createChecklist.isPending ? 'Oppretter...' : 'Opprett'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </CardHeader>
-      
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Navn</TableHead>
-              <TableHead>Lokasjon</TableHead>
-              <TableHead>Opprettet</TableHead>
-              <TableHead>Handlinger</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {checklists.map((checklist) => (
-              <TableRow key={checklist.id}>
-                <TableCell className="font-medium">{checklist.name}</TableCell>
-                <TableCell>{checklist.location}</TableCell>
-                <TableCell>
-                  {new Date(checklist.created_at).toLocaleDateString('nb-NO')}
-                </TableCell>
-                <TableCell>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setSelectedChecklistId(checklist.id)}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Vis
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            Opprett ny vedlikeholdsjournal
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="checklistName">Navn på journal</Label>
+              <Input
+                id="checklistName"
+                value={newChecklistName}
+                onChange={(e) => setNewChecklistName(e.target.value)}
+                placeholder="F.eks. Vedlikehold kjølesystem"
+              />
+            </div>
+            <div>
+              <Label htmlFor="checklistLocation">Lokasjon (valgfritt)</Label>
+              <Input
+                id="checklistLocation"
+                value={newChecklistLocation}
+                onChange={(e) => setNewChecklistLocation(e.target.value)}
+                placeholder="F.eks. Bygning A, rom 101"
+              />
+            </div>
+          </div>
+          <Button 
+            onClick={handleCreateChecklist}
+            disabled={createChecklistMutation.isPending}
+            className="w-full md:w-auto"
+          >
+            {createChecklistMutation.isPending ? 'Oppretter...' : 'Opprett journal'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Eksisterende journaler
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {checklists.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">
+              Ingen vedlikeholdsjournaler opprettet ennå.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {checklists.map((checklist) => (
+                <Card key={checklist.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2">{checklist.name}</h3>
+                    {checklist.location && (
+                      <p className="text-sm text-gray-600 mb-3">{checklist.location}</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Opprettet: {new Date(checklist.created_at).toLocaleDateString('nb-NO')}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

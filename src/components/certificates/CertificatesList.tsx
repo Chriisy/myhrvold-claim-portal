@@ -103,57 +103,65 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="w-full overflow-x-auto" style={{ maxHeight: '70vh' }}>
+          <div className="w-full" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
             <Table>
               <TableHeader className="sticky top-0 bg-white border-b z-10">
                 <TableRow>
-                  <TableHead>Sertifikatnummer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Kategori</TableHead>
-                  <TableHead>Innehaver</TableHead>
-                  <TableHead>Fødselsdato</TableHead>
-                  <TableHead>Utstedelsesdato</TableHead>
-                  <TableHead>Utløpsdato</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Handlinger</TableHead>
+                  <TableHead className="min-w-[120px]">Nr.</TableHead>
+                  <TableHead className="min-w-[100px]">Type</TableHead>
+                  <TableHead className="min-w-[80px]">Kat.</TableHead>
+                  <TableHead className="min-w-[150px]">Innehaver</TableHead>
+                  <TableHead className="min-w-[110px]">Fødsel</TableHead>
+                  <TableHead className="min-w-[110px]">Utstedt</TableHead>
+                  <TableHead className="min-w-[110px]">Utløper</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {certificates.map((cert) => (
                   <TableRow key={cert.id}>
-                    <TableCell className="font-medium">{cert.certificate_number}</TableCell>
+                    <TableCell className="font-medium text-sm">{cert.certificate_number}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         {cert.certificate_type === 'personal' ? (
-                          <User className="w-4 h-4" />
+                          <User className="w-3 h-3" />
                         ) : (
-                          <Building className="w-4 h-4" />
+                          <Building className="w-3 h-3" />
                         )}
-                        {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
+                        <span className="text-xs">
+                          {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       {cert.category && getCategoryBadge(cert.category)}
                     </TableCell>
-                    <TableCell>{cert.holder_name}</TableCell>
+                    <TableCell className="text-sm">{cert.holder_name}</TableCell>
                     <TableCell>
                       {cert.birth_date && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs">
+                            {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                          </span>
                         </div>
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs">
+                          {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs">
+                          {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -164,9 +172,9 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditClick(cert)}
-                        className="h-8 w-8 p-0"
+                        className="h-6 w-6 p-0"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                     </TableCell>
                   </TableRow>
