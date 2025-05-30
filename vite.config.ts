@@ -72,7 +72,8 @@ export default defineConfig(({ mode }) => ({
       '@supabase/postgrest-js',
       '@supabase/realtime-js',
       '@supabase/storage-js',
-      '@supabase/functions-js'
+      '@supabase/functions-js',
+      '@supabase/gotrue-js'
     ]
   },
   esbuild: {
