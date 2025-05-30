@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ErrorService } from '@/services/errorHandling/errorService';
+import { ErrorHandlers, RetryService } from '@/services/errorHandling';
 
 interface ChecklistItem {
   id: string;
@@ -67,7 +67,7 @@ export const useInstallationChecklist = (projectId: string) => {
         if (error) throw error;
         return newChecklist;
       } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'laste sjekkliste', {
+        ErrorHandlers.handleSupabaseError(error as any, 'laste sjekkliste', {
           component: 'useInstallationChecklist',
           severity: 'high'
         });
@@ -75,7 +75,7 @@ export const useInstallationChecklist = (projectId: string) => {
       }
     },
     enabled: !!projectId,
-    retry: (failureCount, error) => ErrorService.shouldRetryQuery(failureCount, error),
+    retry: (failureCount, error) => RetryService.shouldRetryQuery(failureCount, error),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -89,7 +89,7 @@ export const useInstallationChecklist = (projectId: string) => {
 
         if (error) throw error;
       } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'oppdatere sjekkliste', {
+        ErrorHandlers.handleSupabaseError(error as any, 'oppdatere sjekkliste', {
           component: 'useInstallationChecklist',
           severity: 'medium'
         });

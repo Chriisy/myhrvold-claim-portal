@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Camera, Eye } from 'lucide-react';
-import { useDebounce } from '@/utils/performance/performanceUtils';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface ChecklistItemData {
   id: string;

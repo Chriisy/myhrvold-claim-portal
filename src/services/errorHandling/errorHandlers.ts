@@ -107,25 +107,6 @@ export class ErrorHandlers {
 
     return errorDetails;
   }
-
-  static shouldRetryQuery(failureCount: number, error: any): boolean {
-    // Don't retry on auth errors
-    if ('code' in error && ['42501', '42P17'].includes(error.code)) {
-      return false;
-    }
-    
-    // Don't retry on data validation errors
-    if ('code' in error && ['23505', '22P02'].includes(error.code)) {
-      return false;
-    }
-    
-    // Retry on network/connection issues
-    if ('code' in error && ['PGRST301', '53300', '08P01'].includes(error.code)) {
-      return failureCount < 3;
-    }
-    
-    return failureCount < 2;
-  }
 }
 
 // Export with alternative names for backward compatibility
