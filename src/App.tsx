@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { FullPageLoader } from "@/components/shared/LoadingSpinner";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -27,15 +28,11 @@ const FGasCertificates = lazy(() => import("@/pages/FGasCertificates"));
 const InvoiceImport = lazy(() => import("@/pages/InvoiceImport"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
-// Import ProtectedRoute normally since it's used frequently
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       retry: (failureCount, error) => {
-        // Don't retry on 4xx errors
         if (error && typeof error === 'object' && 'status' in error) {
           const status = error.status as number;
           if (status >= 400 && status < 500) return false;
@@ -148,7 +145,7 @@ function App() {
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </ErrorBoundary>
   );

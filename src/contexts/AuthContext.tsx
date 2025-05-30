@@ -40,10 +40,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const loadingUserRef = useRef<string | null>(null);
   const mounted = useRef(true);
   const permissionCache = useRef<Map<string, boolean>>(new Map());
@@ -68,7 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (userResult.error) {
         console.error('Error loading user:', userResult.error);
-        throw userResult.error;
+        if (mounted.current) setUser(null);
+        return;
       }
 
       if (!userResult.data) {
@@ -90,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           seller_no: userResult.data.seller_no,
           permissions: permissions as PermissionType[],
         });
-        // Clear permission cache when user changes
         permissionCache.current.clear();
       }
       
@@ -98,16 +98,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
       if (mounted.current) setUser(null);
-      throw error;
     }
   }, []);
 
   const hasPermission = useCallback((permission: string): boolean => {
-    if (!user) {
-      return false;
-    }
+    if (!user) return false;
     
-    // Check cache first to avoid repeated logging
     const cacheKey = `${user.id}-${permission}`;
     if (permissionCache.current.has(cacheKey)) {
       return permissionCache.current.get(cacheKey)!;
@@ -115,28 +111,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     let result = false;
     
-    // Admin has all permissions
     if (user.user_role === 'admin') {
       result = true;
     } else if (user.permissions && user.permissions.includes(permission as PermissionType)) {
-      // Check specific permissions
       result = true;
     } else {
-      // Role-based permissions
       const rolePermissions = {
         'saksbehandler': ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'],
         'avdelingsleder': ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'],
         'tekniker': ['edit_own_claims', 'create_claims'],
-        'admin': [] // Handled above
+        'admin': []
       };
       
       const userRolePermissions = rolePermissions[user.user_role] || [];
       result = userRolePermissions.includes(permission);
     }
     
-    // Cache the result
     permissionCache.current.set(cacheKey, result);
-    
     return result;
   }, [user]);
 
@@ -149,7 +140,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
-        console.log('Global sign out completed');
       } catch (err) {
         console.log('Global sign out failed (continuing anyway):', err);
       }
@@ -228,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth initialization error:', error);
         if (isMounted) {
           setIsLoading(false);
+          setIsInitialized(true);
         }
       }
     };
