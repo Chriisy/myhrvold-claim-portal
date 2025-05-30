@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
 import { Database } from '@/integrations/supabase/types';
-import { handleSupabaseError } from '@/utils/supabaseErrorHandler';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
@@ -210,6 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     mounted.current = true;
     
     const initializeAuth = async () => {
@@ -220,7 +220,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (mounted.current) {
+        if (isMounted) {
           setSession(session);
           if (session?.user) {
             await loadUserProfile(session.user);
@@ -230,7 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        if (mounted.current) {
+        if (isMounted) {
           setIsLoading(false);
         }
       }
@@ -239,7 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
-      if (mounted.current) {
+      if (isMounted) {
         setSession(session);
         
         if (session?.user) {
@@ -257,10 +257,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               await loadUserProfile(session.user);
             } catch (error) {
               console.error('Error loading user profile:', error);
-              if (mounted.current) setUser(null);
+              if (isMounted) setUser(null);
             } finally {
               loadingUserRef.current = null;
-              if (mounted.current) setIsLoading(false);
+              if (isMounted) setIsLoading(false);
             }
           }, 0);
         } else {
@@ -277,6 +277,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return () => {
+      isMounted = false;
       mounted.current = false;
       subscription.unsubscribe();
     };
