@@ -127,3 +127,6 @@ export class ErrorHandlers {
     return failureCount < 2;
   }
 }
+
+// Export with alternative names for backward compatibility
+export const SupabaseErrorHandler = ErrorHandlers;
