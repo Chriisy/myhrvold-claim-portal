@@ -79,6 +79,7 @@ export const useClaimsQuery = (filters: ClaimsQueryFilters = {}) => {
       .is('deleted_at', null);
 
     if (searchTerm) {
+      // Fix: Remove line breaks and format properly for Supabase
       query = query.or(`customer_name.ilike.%${searchTerm}%,display_id.ilike.%${searchTerm}%,machine_model.ilike.%${searchTerm}%,customer_address.ilike.%${searchTerm}%`);
     }
 

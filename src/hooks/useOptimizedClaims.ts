@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -51,12 +50,7 @@ export const useOptimizedClaims = (filters: ClaimsFilters = {}) => {
         }
 
         if (filters.search) {
-          query = query.or(`
-            customer_name.ilike.%${filters.search}%,
-            display_id.ilike.%${filters.search}%,
-            machine_model.ilike.%${filters.search}%,
-            part_number.ilike.%${filters.search}%
-          `);
+          query = query.or(`customer_name.ilike.%${filters.search}%,display_id.ilike.%${filters.search}%,machine_model.ilike.%${filters.search}%,part_number.ilike.%${filters.search}%`);
         }
 
         const { data, error } = await query;
