@@ -1,17 +1,22 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['user_role'];
+type Department = Database['public']['Enums']['department'];
+type PermissionType = Database['public']['Enums']['permission_type'];
 
 export interface UserWithPermissions {
   id: string;
   name: string;
   email: string;
   role: string; // Added missing role property
-  user_role: string;
-  department: string;
+  user_role: UserRole;
+  department: Department;
   created_at: string;
   seller_no?: number;
-  permissions?: string[];
+  permissions?: PermissionType[];
 }
 
 export const useOptimizedUsers = () => {
@@ -51,7 +56,9 @@ export const useOptimizedUsers = () => {
         return (users || []).map(user => ({
           ...user,
           role: user.role || user.user_role, // Map role property to ensure compatibility
-          permissions: permissionsByUser[user.id] || []
+          user_role: user.user_role as UserRole, // Ensure proper typing
+          department: user.department as Department, // Ensure proper typing
+          permissions: (permissionsByUser[user.id] || []) as PermissionType[]
         }));
       } catch (error) {
         console.error('Error in useOptimizedUsers:', error);

@@ -15,7 +15,7 @@ const SUPABASE_PKGS = [
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    react(), // Removed invalid jsxRuntime option
+    react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
