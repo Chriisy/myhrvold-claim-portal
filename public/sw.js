@@ -1,89 +1,134 @@
 
-const CACHE_NAME = 'myhrvold-portal-v1';
+const CACHE_NAME = 'reklamasjonssystem-v1';
+const STATIC_CACHE = 'static-v1';
+const API_CACHE = 'api-v1';
 
-// Minimal cache strategy - only cache navigation requests
 const STATIC_ASSETS = [
   '/',
-  '/favicon.ico'
+  '/index.html',
+  '/manifest.json',
+  // Add critical CSS and JS files here
 ];
 
-// Install event - cache only essential assets
+const API_ENDPOINTS = [
+  '/api/claims',
+  '/api/users', 
+  '/api/suppliers',
+  '/api/dashboard'
+];
+
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => self.skipWaiting())
+    Promise.all([
+      caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS)),
+      self.skipWaiting()
+    ])
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    Promise.all([
+      caches.keys().then(cacheNames =>
+        Promise.all(
+          cacheNames
+            .filter(name => name !== STATIC_CACHE && name !== API_CACHE)
+            .map(name => caches.delete(name))
+        )
+      ),
+      self.clients.claim()
+    ])
   );
 });
 
-// Fetch event - DO NOT INTERFERE with any module files
+// Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
+
+  // Cache first for static assets
+  if (request.destination === 'script' || 
+      request.destination === 'style' || 
+      request.destination === 'image') {
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+
+  // Stale-while-revalidate for API calls
+  if (url.pathname.startsWith('/api/') || url.hostname.includes('supabase')) {
+    event.respondWith(staleWhileRevalidate(request, API_CACHE));
+    return;
+  }
+
+  // Network first for HTML pages
+  if (request.destination === 'document') {
+    event.respondWith(networkFirst(request, CACHE_NAME));
+    return;
+  }
+
+  // Default to network
+  event.respondWith(fetch(request));
+});
+
+// Cache strategies
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
   
-  // Skip non-GET requests
-  if (request.method !== 'GET') return;
-  
-  // Skip Chrome extension requests
-  if (request.url.startsWith('chrome-extension://')) return;
-  
-  // CRITICAL: DO NOT cache or interfere with these files
-  const skipPatterns = [
-    '.css',
-    '.js',
-    '.jsx',
-    '.ts',
-    '.tsx',
-    'chunk-',
-    'node_modules',
-    'src/',
-    '@',
-    'vite',
-    'hot',
-    'react',
-    'components'
-  ];
-  
-  const shouldSkip = skipPatterns.some(pattern => request.url.includes(pattern));
-  if (shouldSkip) {
-    return; // Let browser handle these directly
+  if (cached) {
+    return cached;
   }
   
-  // Only handle basic navigation requests for offline fallback
-  if (request.destination === 'document') {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match('/');
-      })
-    );
+  try {
+    const response = await fetch(request);
+    if (response.status === 200) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    return new Response('Network error', { status: 503 });
+  }
+}
+
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  
+  const fetchPromise = fetch(request).then(response => {
+    if (response.status === 200) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  }).catch(() => cached);
+
+  return cached || fetchPromise;
+}
+
+async function networkFirst(request, cacheName) {
+  try {
+    const response = await fetch(request);
+    if (response.status === 200) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cache = await caches.open(cacheName);
+    const cached = await cache.match(request);
+    return cached || new Response('Offline', { status: 503 });
+  }
+}
+
+// Background sync for offline forms
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
   }
 });
 
-// Handle messages from the main thread
-self.addEventListener('message', (event) => {
-  console.log('Service Worker: Message received:', event.data);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
+async function doBackgroundSync() {
+  // Handle offline form submissions here
+  console.log('Background sync triggered');
+}

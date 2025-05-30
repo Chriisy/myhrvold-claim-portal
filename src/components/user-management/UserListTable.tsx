@@ -43,6 +43,7 @@ interface UserListTableProps {
   onEditUser: (user: UserWithPermissions) => void;
   searchQuery: string;
   totalUsers: number;
+  isFiltering?: boolean;
 }
 
 export const UserListTable = memo(({ 
@@ -51,7 +52,8 @@ export const UserListTable = memo(({
   onUserSelection, 
   onEditUser, 
   searchQuery, 
-  totalUsers 
+  totalUsers,
+  isFiltering = false
 }: UserListTableProps) => {
   const { user: currentUser } = useAuth();
   const [editingUser, setEditingUser] = useState<UserWithPermissions | null>(null);
@@ -78,6 +80,11 @@ export const UserListTable = memo(({
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
               {searchQuery ? `Søkeresultater (${users.length})` : 'Alle brukere i systemet'}
+              {isFiltering && (
+                <Badge variant="outline" className="text-xs">
+                  Filtrerer...
+                </Badge>
+              )}
             </div>
             <Badge variant="secondary">
               {users.length} av {totalUsers} brukere
@@ -85,6 +92,16 @@ export const UserListTable = memo(({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Show loading indicator when filtering */}
+          {isFiltering && (
+            <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
+                Oppdaterer resultater...
+              </div>
+            </div>
+          )}
+          
           <div className="space-y-4">
             {users.map((user) => (
               <div
@@ -146,7 +163,7 @@ export const UserListTable = memo(({
               </div>
             ))}
 
-            {users.length === 0 && searchQuery && (
+            {users.length === 0 && searchQuery && !isFiltering && (
               <div className="text-center py-8">
                 <p className="text-gray-500">Ingen brukere funnet som matcher søket "{searchQuery}"</p>
               </div>

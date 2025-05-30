@@ -1,5 +1,6 @@
+
 import { Home, FileText, Users, BarChart3, UserCheck, Shield, Upload, Wrench } from "lucide-react"
-import React, { useTransition } from "react"
+import React, { useTransition, useEffect, useRef } from "react"
 
 import {
   Sidebar,
@@ -16,69 +17,59 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useQueryClient } from "@tanstack/react-query"
+import PrefetchService, { ROUTE_PREFETCH_CONFIGS } from "@/services/performance/prefetchService"
 
-// Preload imports for performance
-const preloadModules = {
-  dashboard: () => import("@/components/dashboard/OptimizedDashboard"),
-  claims: () => import("@/pages/ClaimsList"),
-  installations: () => import("@/pages/Installations"),
-  suppliers: () => import("@/pages/Suppliers"),
-  reports: () => import("@/components/reports/ReportDashboard"),
-  users: () => import("@/pages/UserManagement"),
-  certificates: () => import("@/pages/FGasCertificates"),
-  import: () => import("@/pages/InvoiceImport"),
-};
-
-// Menu items with preload functions
+// Menu items with enhanced prefetch configurations
 const items = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
-    preload: preloadModules.dashboard,
+    routeKey: "dashboard" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Reklamasjoner",
     url: "/claims",
     icon: FileText,
-    preload: preloadModules.claims,
+    routeKey: "claims" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Installasjoner",
     url: "/installations",
     icon: Wrench,
-    preload: preloadModules.installations,
+    routeKey: "installations" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Leverandører",
     url: "/suppliers",
     icon: Users,
-    preload: preloadModules.suppliers,
+    routeKey: "suppliers" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Rapporter",
     url: "/reports",
     icon: BarChart3,
-    preload: preloadModules.reports,
+    routeKey: "reports" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Brukere",
     url: "/users",
     icon: UserCheck,
     adminOnly: true,
-    preload: preloadModules.users,
+    routeKey: "users" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "F-gass Sertifikater",
     url: "/certificates",
     icon: Shield,
-    preload: preloadModules.certificates,
+    routeKey: "certificates" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
   {
     title: "Import",
     url: "/import",
     icon: Upload,
-    preload: preloadModules.import,
+    routeKey: "import" as keyof typeof ROUTE_PREFETCH_CONFIGS,
   },
 ]
 
@@ -88,6 +79,18 @@ export function AppSidebar() {
   const location = useLocation();
   const [isPending, startTransition] = useTransition();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+  
+  const prefetchService = useRef<PrefetchService>();
+  const prefetchedRoutes = useRef<Set<string>>(new Set());
+
+  // Initialize prefetch service
+  useEffect(() => {
+    prefetchService.current = new PrefetchService(queryClient);
+    
+    // Prefetch critical data on app load
+    prefetchService.current.prefetchCriticalData();
+  }, [queryClient]);
 
   const handleSignOut = async () => {
     await logout();
@@ -98,6 +101,18 @@ export function AppSidebar() {
     startTransition(() => {
       navigate(url);
     });
+  };
+
+  const handlePrefetch = (routeKey: keyof typeof ROUTE_PREFETCH_CONFIGS) => {
+    if (!prefetchService.current || prefetchedRoutes.current.has(routeKey)) {
+      return;
+    }
+
+    const config = ROUTE_PREFETCH_CONFIGS[routeKey];
+    if (config) {
+      prefetchService.current.prefetchRoute(routeKey, config);
+      prefetchedRoutes.current.add(routeKey);
+    }
   };
 
   const filteredItems = items.filter(item => {
@@ -123,8 +138,8 @@ export function AppSidebar() {
                   >
                     <a 
                       href={item.url}
-                      onMouseEnter={() => !isMobile && item.preload?.().catch(console.warn)}
-                      onFocus={() => item.preload?.().catch(console.warn)}
+                      onMouseEnter={() => !isMobile && handlePrefetch(item.routeKey)}
+                      onFocus={() => handlePrefetch(item.routeKey)}
                       onClick={(e) => {
                         e.preventDefault();
                         handleNavigation(item.url);
