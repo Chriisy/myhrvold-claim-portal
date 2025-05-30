@@ -1,55 +1,38 @@
 
-export const createMemoryLeakDetector = () => {
-  const subscribers = new Set<() => void>();
-  const intervals = new Set<NodeJS.Timeout>();
-  const timeouts = new Set<NodeJS.Timeout>();
+// Simplified memory utils to prevent interference with React hooks
+export interface MemoryLeakDetector {
+  addCleanup: (cleanup: () => void) => void;
+  cleanup: () => void;
+}
 
-  const addCleanup = (cleanup: () => void) => {
-    subscribers.add(cleanup);
-  };
-
-  const addInterval = (intervalId: NodeJS.Timeout) => {
-    intervals.add(intervalId);
-  };
-
-  const addTimeout = (timeoutId: NodeJS.Timeout) => {
-    timeouts.add(timeoutId);
-  };
-
-  const cleanup = () => {
-    subscribers.forEach(cleanup => {
-      try {
-        cleanup();
-      } catch (error) {
-        console.error('Cleanup error:', error);
-      }
-    });
-    
-    intervals.forEach(clearInterval);
-    timeouts.forEach(clearTimeout);
-    
-    subscribers.clear();
-    intervals.clear();
-    timeouts.clear();
-  };
-
+export const createMemoryLeakDetector = (): MemoryLeakDetector => {
+  const cleanupCallbacks: (() => void)[] = [];
+  
   return {
-    addCleanup,
-    addInterval,
-    addTimeout,
-    cleanup
+    addCleanup: (cleanup: () => void) => {
+      cleanupCallbacks.push(cleanup);
+    },
+    cleanup: () => {
+      cleanupCallbacks.forEach(callback => {
+        try {
+          callback();
+        } catch (error) {
+          console.warn('Memory cleanup error:', error);
+        }
+      });
+      cleanupCallbacks.length = 0;
+    }
   };
 };
 
-export const withMemoryCleanup = <T extends any[], R>(
-  fn: (...args: T) => R,
-  cleanup: () => void
-) => {
-  return (...args: T): R => {
-    try {
-      return fn(...args);
-    } finally {
-      cleanup();
-    }
-  };
+// Simple memory monitoring utility
+export const trackMemoryUsage = () => {
+  if (typeof window !== 'undefined' && 'performance' in window && 'memory' in (window.performance as any)) {
+    const memory = (window.performance as any).memory;
+    console.log('Memory usage:', {
+      used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + ' MB',
+      total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + ' MB',
+      limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
+    });
+  }
 };
