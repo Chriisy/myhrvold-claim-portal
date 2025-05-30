@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
 import { Database } from '@/integrations/supabase/types';
+import { createMemoryLeakDetector } from '@/utils/memoryUtils';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
@@ -46,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const loadingUserRef = useRef<string | null>(null);
   const mounted = useRef(true);
+  const memoryDetector = useRef(createMemoryLeakDetector());
 
   // Memoize the expensive user profile loading function
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser) => {
@@ -189,6 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       cleanupAuthState();
       loadingUserRef.current = null;
+      memoryDetector.current.cleanup();
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -271,6 +274,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
+    // Add subscription to memory detector
+    memoryDetector.current.addCleanup(() => subscription.unsubscribe());
+
     // Initialize only once
     if (!isInitialized) {
       initializeAuth();
@@ -279,7 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       isMounted = false;
       mounted.current = false;
-      subscription.unsubscribe();
+      memoryDetector.current.cleanup();
     };
   }, [loadUserProfile, isInitialized]);
 
