@@ -23,8 +23,6 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
   const updateControl = useUpdateMaintenanceControl();
   
   const [addEquipmentOpen, setAddEquipmentOpen] = useState(false);
-  const [addControlOpen, setAddControlOpen] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState<string>('');
   const [equipmentFormData, setEquipmentFormData] = useState({
     equipmentId: '',
     idNumberOverride: ''
@@ -100,19 +98,32 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
       <div className="flex items-center gap-4">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Tilbake
+          Tilbake til oversikt
         </Button>
         <div>
           <h2 className="text-2xl font-semibold">{checklist.name}</h2>
           {checklist.location && (
             <p className="text-gray-600">{checklist.location}</p>
           )}
+          <p className="text-sm text-gray-500">
+            Opprettet: {new Date(checklist.created_at).toLocaleDateString('nb-NO')}
+          </p>
         </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="font-semibold text-blue-900 mb-2">Slik fungerer vedlikeholdsjournalen:</h3>
+        <ul className="text-sm text-blue-800 space-y-1">
+          <li>• Hver rad representerer et utstyr med ID-nummer</li>
+          <li>• Hver kolonne representerer en kontrollrunde (Kontroll 1, Kontroll 2, osv.)</li>
+          <li>• Fyll inn dato og signatur for hver gjennomførte kontroll</li>
+          <li>• Legg til nye kontrollrunder ved å klikke "Legg til kontroll"</li>
+        </ul>
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Utstyr og kontroller</CardTitle>
+          <CardTitle>Vedlikeholdsmatrise</CardTitle>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleAddNewControl}>
               <Plus className="w-4 h-4 mr-2" />
@@ -127,22 +138,22 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Legg til utstyr</DialogTitle>
+                  <DialogTitle>Legg til utstyr i journal</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleAddEquipment} className="space-y-4">
                   <div>
-                    <Label htmlFor="equipment">Utstyr</Label>
+                    <Label htmlFor="equipment">Velg utstyr</Label>
                     <Select 
                       value={equipmentFormData.equipmentId}
                       onValueChange={(value) => setEquipmentFormData(prev => ({ ...prev, equipmentId: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Velg utstyr" />
+                        <SelectValue placeholder="Velg utstyr fra listen" />
                       </SelectTrigger>
                       <SelectContent>
                         {equipment.map((eq) => (
                           <SelectItem key={eq.id} value={eq.id}>
-                            {eq.name} (ID: {eq.default_id_number})
+                            {eq.name} (Standard ID: {eq.default_id_number})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -150,12 +161,12 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
                   </div>
                   
                   <div>
-                    <Label htmlFor="idNumber">ID-nummer (valgfritt override)</Label>
+                    <Label htmlFor="idNumber">Overstyr ID-nummer (valgfritt)</Label>
                     <Input
                       id="idNumber"
                       value={equipmentFormData.idNumberOverride}
                       onChange={(e) => setEquipmentFormData(prev => ({ ...prev, idNumberOverride: e.target.value }))}
-                      placeholder="Overstyr standard ID-nummer"
+                      placeholder="La stå tom for å bruke standard ID"
                     />
                   </div>
                   
@@ -163,7 +174,10 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
                     <Button type="button" variant="outline" onClick={() => setAddEquipmentOpen(false)}>
                       Avbryt
                     </Button>
-                    <Button type="submit" disabled={addEquipment.isPending}>
+                    <Button 
+                      type="submit" 
+                      disabled={addEquipment.isPending || !equipmentFormData.equipmentId}
+                    >
                       {addEquipment.isPending ? 'Legger til...' : 'Legg til'}
                     </Button>
                   </div>
@@ -178,58 +192,77 @@ export const MaintenanceChecklistDetail = ({ checklistId, onBack }: MaintenanceC
         </CardHeader>
 
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">Utstyr</TableHead>
-                  <TableHead className="min-w-[100px]">ID</TableHead>
-                  {allControlNumbers.map(controlNo => (
-                    <TableHead key={controlNo} className="min-w-[200px]">
-                      Kontroll {controlNo}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-medium">
-                      {row.equipment?.name}
-                    </TableCell>
-                    <TableCell>
-                      {row.id_number_override || row.equipment?.default_id_number}
-                    </TableCell>
-                    {allControlNumbers.map(controlNo => {
-                      const control = controlsByRow[row.id]?.[controlNo];
-                      return (
-                        <TableCell key={controlNo}>
-                          {control ? (
-                            <div className="space-y-2">
-                              <Input
-                                type="date"
-                                value={control.control_date || ''}
-                                onChange={(e) => handleUpdateControl(control.id, 'control_date', e.target.value)}
-                                className="w-full"
-                              />
-                              <Input
-                                placeholder="Signatur/initialer"
-                                value={control.signature || ''}
-                                onChange={(e) => handleUpdateControl(control.id, 'signature', e.target.value)}
-                                className="w-full"
-                              />
-                            </div>
-                          ) : (
-                            <div className="text-gray-400 text-sm">Ingen kontroll</div>
-                          )}
-                        </TableCell>
-                      );
-                    })}
+          {rows.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                Ingen utstyr lagt til ennå
+              </h3>
+              <p className="text-gray-500 mb-6">
+                Legg til utstyr for å starte med vedlikeholdsjournalen.
+              </p>
+              <Button onClick={() => setAddEquipmentOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Legg til første utstyr
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[200px] font-semibold">Utstyr</TableHead>
+                    <TableHead className="min-w-[80px] font-semibold">ID</TableHead>
+                    {allControlNumbers.map(controlNo => (
+                      <TableHead key={controlNo} className="min-w-[200px] font-semibold text-center">
+                        Kontroll {controlNo}
+                      </TableHead>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.id} className="border-b">
+                      <TableCell className="font-medium">
+                        {row.equipment?.name}
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {row.id_number_override || row.equipment?.default_id_number}
+                      </TableCell>
+                      {allControlNumbers.map(controlNo => {
+                        const control = controlsByRow[row.id]?.[controlNo];
+                        return (
+                          <TableCell key={controlNo} className="p-2">
+                            {control ? (
+                              <div className="space-y-2">
+                                <Input
+                                  type="date"
+                                  value={control.control_date || ''}
+                                  onChange={(e) => handleUpdateControl(control.id, 'control_date', e.target.value)}
+                                  className="w-full text-sm"
+                                  placeholder="Velg dato"
+                                />
+                                <Input
+                                  placeholder="Signatur/initialer"
+                                  value={control.signature || ''}
+                                  onChange={(e) => handleUpdateControl(control.id, 'signature', e.target.value)}
+                                  className="w-full text-sm"
+                                />
+                              </div>
+                            ) : (
+                              <div className="text-gray-400 text-sm text-center py-4">
+                                Ingen kontroll
+                              </div>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

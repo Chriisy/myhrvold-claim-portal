@@ -35,13 +35,13 @@ export default defineConfig(({ mode }) => ({
     },
     // Enable code splitting
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
+    minify: mode === 'production' ? 'terser' : false,
+    terserOptions: mode === 'production' ? {
       compress: {
-        drop_console: mode === 'production',
+        drop_console: true,
         drop_debugger: true
       }
-    },
+    } : undefined,
     // Asset optimization
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
