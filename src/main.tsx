@@ -1,29 +1,31 @@
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+import "./utils/serviceWorkerDisabler";
 
-// Register service worker with error handling
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
+// Global error handling for better debugging
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error
   });
-}
+});
 
-const container = document.getElementById("root");
-if (!container) {
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
+
+const rootElement = document.getElementById("root");
+if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-const root = createRoot(container);
-root.render(
+createRoot(rootElement).render(
   <StrictMode>
     <App />
   </StrictMode>

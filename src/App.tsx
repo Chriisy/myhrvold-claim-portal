@@ -74,72 +74,74 @@ function App() {
                     Du er offline. Noen funksjoner kan være begrenset.
                   </div>
                 )}
-                <Suspense fallback={<FullPageLoader text="Laster side..." />}>
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={
-                      <ProtectedRoute>
-                        <Navigate to="/dashboard" replace />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/dashboard" element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/claims" element={
-                      <ProtectedRoute>
-                        <ClaimsList />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/claims/new" element={
-                      <ProtectedRoute>
-                        <ClaimWizard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/claims/:id" element={
-                      <ProtectedRoute>
-                        <ClaimDetail />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/suppliers" element={
-                      <ProtectedRoute>
-                        <Suppliers />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/users" element={
-                      <ProtectedRoute>
-                        <UserManagement />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/reports" element={
-                      <ProtectedRoute>
-                        <Reports />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/installations" element={
-                      <ProtectedRoute>
-                        <Installations />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/installations/:id" element={
-                      <ProtectedRoute>
-                        <InstallationDetail />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/certificates" element={
-                      <ProtectedRoute>
-                        <FGasCertificates />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/import" element={
-                      <ProtectedRoute>
-                        <InvoiceImport />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense fallback={<FullPageLoader text="Laster side..." />}>
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/" element={
+                        <ProtectedRoute>
+                          <Navigate to="/dashboard" replace />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/claims" element={
+                        <ProtectedRoute>
+                          <ClaimsList />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/claims/new" element={
+                        <ProtectedRoute>
+                          <ClaimWizard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/claims/:id" element={
+                        <ProtectedRoute>
+                          <ClaimDetail />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/suppliers" element={
+                        <ProtectedRoute>
+                          <Suppliers />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/users" element={
+                        <ProtectedRoute>
+                          <UserManagement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/reports" element={
+                        <ProtectedRoute>
+                          <Reports />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/installations" element={
+                        <ProtectedRoute>
+                          <Installations />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/installations/:id" element={
+                        <ProtectedRoute>
+                          <InstallationDetail />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/certificates" element={
+                        <ProtectedRoute>
+                          <FGasCertificates />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/import" element={
+                        <ProtectedRoute>
+                          <InvoiceImport />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </ErrorBoundary>
               </div>
               <Toaster />
               <Sonner />
