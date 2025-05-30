@@ -35,25 +35,40 @@ import { OfflineFormHandler } from '@/components/shared/OfflineFormHandler';
 import { pwaManager } from '@/utils/pwa';
 import { useEffect } from 'react';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => {
   useEffect(() => {
     // Initialize PWA on app start
-    pwaManager.registerServiceWorker();
-    
-    // Request notification permission on user interaction
-    const requestNotifications = async () => {
-      const permission = await pwaManager.requestNotificationPermission();
-      console.log('Notification permission:', permission);
-    };
-    
-    // Add click listener for notification permission
-    document.addEventListener('click', requestNotifications, { once: true });
-    
-    return () => {
-      document.removeEventListener('click', requestNotifications);
-    };
+    try {
+      pwaManager.registerServiceWorker();
+      
+      // Request notification permission on user interaction
+      const requestNotifications = async () => {
+        try {
+          const permission = await pwaManager.requestNotificationPermission();
+          console.log('Notification permission:', permission);
+        } catch (error) {
+          console.error('Notification permission error:', error);
+        }
+      };
+      
+      // Add click listener for notification permission
+      document.addEventListener('click', requestNotifications, { once: true });
+      
+      return () => {
+        document.removeEventListener('click', requestNotifications);
+      };
+    } catch (error) {
+      console.error('PWA initialization error:', error);
+    }
   }, []);
 
   return (
