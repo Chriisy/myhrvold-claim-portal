@@ -41,14 +41,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const loadingUserRef = useRef<string | null>(null);
-  const isInitialized = useRef(false);
+  const mounted = useRef(true);
 
   // Memoize the expensive user profile loading function
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser) => {
+    if (!mounted.current) return;
+    
     try {
       console.log('Loading user profile for:', supabaseUser.email);
       
@@ -72,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!userResult.data) {
         console.warn('User not found in database');
-        setUser(null);
+        if (mounted.current) setUser(null);
         return;
       }
 
@@ -84,21 +87,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         permissions: permissions
       });
       
-      setUser({
-        id: userResult.data.id,
-        name: userResult.data.name,
-        email: userResult.data.email,
-        role: userResult.data.role as User['role'],
-        user_role: userResult.data.user_role as UserRole,
-        department: userResult.data.department as Department,
-        seller_no: userResult.data.seller_no,
-        permissions: permissions as PermissionType[],
-      });
+      if (mounted.current) {
+        setUser({
+          id: userResult.data.id,
+          name: userResult.data.name,
+          email: userResult.data.email,
+          role: userResult.data.role as User['role'],
+          user_role: userResult.data.user_role as UserRole,
+          department: userResult.data.department as Department,
+          seller_no: userResult.data.seller_no,
+          permissions: permissions as PermissionType[],
+        });
+      }
       
       console.log('User set successfully with role:', userResult.data.user_role);
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
-      setUser(null);
+      if (mounted.current) setUser(null);
       throw error;
     }
   }, []);
@@ -192,8 +197,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Sign out error (continuing anyway):', err);
       }
       
-      setUser(null);
-      setSession(null);
+      if (mounted.current) {
+        setUser(null);
+        setSession(null);
+      }
       
       window.location.href = '/login';
     } catch (error) {
@@ -203,85 +210,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (isInitialized.current) return;
-    isInitialized.current = true;
+    mounted.current = true;
     
-    console.log('AuthProvider: Setting up auth state listeners');
-    
+    const initializeAuth = async () => {
+      if (isInitialized) return;
+      
+      try {
+        console.log('AuthProvider: Initializing auth');
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (mounted.current) {
+          setSession(session);
+          if (session?.user) {
+            await loadUserProfile(session.user);
+          }
+          setIsInitialized(true);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (mounted.current) {
+          setIsLoading(false);
+        }
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
       
-      setSession(session);
-      
-      if (session?.user) {
-        // Prevent multiple simultaneous user profile loads for the same user
-        if (loadingUserRef.current === session.user.id) {
-          console.log('Already loading user profile for:', session.user.id);
-          return;
-        }
+      if (mounted.current) {
+        setSession(session);
         
-        loadingUserRef.current = session.user.id;
-        
-        // Use setTimeout to defer the user profile loading
-        setTimeout(async () => {
-          try {
-            await loadUserProfile(session.user);
-          } catch (error) {
-            console.error('Error loading user profile:', error);
-            setUser(null);
-          } finally {
-            loadingUserRef.current = null;
-            setIsLoading(false);
+        if (session?.user) {
+          // Prevent multiple simultaneous user profile loads for the same user
+          if (loadingUserRef.current === session.user.id) {
+            console.log('Already loading user profile for:', session.user.id);
+            return;
           }
-        }, 0);
-      } else {
-        loadingUserRef.current = null;
-        setUser(null);
-        setIsLoading(false);
+          
+          loadingUserRef.current = session.user.id;
+          
+          // Use setTimeout to defer the user profile loading
+          setTimeout(async () => {
+            try {
+              await loadUserProfile(session.user);
+            } catch (error) {
+              console.error('Error loading user profile:', error);
+              if (mounted.current) setUser(null);
+            } finally {
+              loadingUserRef.current = null;
+              if (mounted.current) setIsLoading(false);
+            }
+          }, 0);
+        } else {
+          loadingUserRef.current = null;
+          setUser(null);
+          setIsLoading(false);
+        }
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('Error getting session:', error);
-        cleanupAuthState();
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      
-      if (session?.user) {
-        // Prevent multiple simultaneous user profile loads for the same user
-        if (loadingUserRef.current === session.user.id) {
-          console.log('Already loading user profile for:', session.user.id);
-          return;
-        }
-        
-        loadingUserRef.current = session.user.id;
-        
-        setTimeout(async () => {
-          try {
-            await loadUserProfile(session.user);
-          } catch (error) {
-            console.error('Error loading user profile on init:', error);
-            setUser(null);
-          } finally {
-            loadingUserRef.current = null;
-            setIsLoading(false);
-          }
-        }, 0);
-      } else {
-        setIsLoading(false);
-      }
-    });
+    // Initialize only once
+    if (!isInitialized) {
+      initializeAuth();
+    }
 
     return () => {
-      console.log('AuthProvider: Cleaning up auth subscription');
+      mounted.current = false;
       subscription.unsubscribe();
     };
-  }, [loadUserProfile]);
+  }, [loadUserProfile, isInitialized]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

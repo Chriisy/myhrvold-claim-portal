@@ -40,14 +40,34 @@ export function AddCertificateModal({ open, onClose }: AddCertificateModalProps)
     resolver: zodResolver(certificateSchema),
     defaultValues: {
       certificate_type: 'personal',
+      certificate_number: '',
+      holder_name: '',
+      issue_date: '',
+      expiry_date: '',
+      issuing_authority: '',
       category: 'I',
+      birth_date: '',
+      notes: '',
     },
   });
 
   const onSubmit = async (data: CertificateFormData) => {
     setIsSubmitting(true);
     try {
-      createCertificate(data, {
+      // Ensure all required fields are present
+      const certificateData = {
+        certificate_type: data.certificate_type,
+        certificate_number: data.certificate_number,
+        holder_name: data.holder_name,
+        issue_date: data.issue_date,
+        expiry_date: data.expiry_date,
+        issuing_authority: data.issuing_authority || undefined,
+        category: data.category || undefined,
+        birth_date: data.birth_date || undefined,
+        notes: data.notes || undefined,
+      };
+
+      createCertificate(certificateData, {
         onSuccess: () => {
           toast({
             title: "Sertifikat opprettet",

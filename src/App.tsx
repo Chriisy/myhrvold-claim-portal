@@ -31,47 +31,18 @@ import { EditUserModal } from './components/users/EditUserModal';
 import { AddCertificateModal } from './components/certificates/AddCertificateModal';
 import { EditCertificateModal } from './components/certificates/EditCertificateModal';
 import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
-import { PWAInstallButton } from '@/components/shared/PWAInstallButton';
-import { TouchOptimizedNav } from '@/components/shared/TouchOptimizedNav';
-import { PushNotificationSettings } from '@/components/shared/PushNotificationSettings';
-import { OfflineFormHandler } from '@/components/shared/OfflineFormHandler';
-import { pwaManager } from '@/utils/pwa';
-import { useEffect } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
     },
   },
 });
 
 const App = () => {
-  useEffect(() => {
-    // Initialize PWA on app start with reduced duplication
-    if ('serviceWorker' in navigator) {
-      pwaManager.registerServiceWorker();
-    }
-    
-    // Request notification permission on user interaction
-    const requestNotifications = async () => {
-      try {
-        const permission = await pwaManager.requestNotificationPermission();
-        console.log('Notification permission:', permission);
-      } catch (error) {
-        console.warn('Notification permission request failed:', error);
-      }
-    };
-    
-    // Add click listener for notification permission
-    document.addEventListener('click', requestNotifications, { once: true });
-    
-    return () => {
-      document.removeEventListener('click', requestNotifications);
-    };
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
@@ -100,7 +71,6 @@ const App = () => {
                   <Route path="/certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
                   <Route path="/import" element={<RequireAuth><DashboardLayout><InvoiceImport /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
                   {/* Modals as routes */}
                   <Route path="/claims/add" element={<AddClaimModal open={true} onClose={() => { window.history.back(); }} />} />
@@ -112,8 +82,6 @@ const App = () => {
                   <Route path="/certificates/edit/:id" element={<EditCertificateModal open={true} onClose={() => { window.history.back(); }} certificate={null} />} />
                 </Routes>
                 <Toaster />
-                <PWAInstallButton />
-                <TouchOptimizedNav />
               </div>
             </DashboardFiltersProvider>
           </CookieConsentProvider>
