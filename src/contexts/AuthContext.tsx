@@ -40,22 +40,20 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize all hooks at the top level
   const [isInitialized, setIsInitialized] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const loadingUserRef = useRef<string | null>(null);
   const mounted = useRef(true);
+  const permissionCache = useRef<Map<string, boolean>>(new Map());
 
-  // Memoize the user profile loading function
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     if (!mounted.current) return;
     
     try {
       console.log('Loading user profile for:', supabaseUser.email);
       
-      // Use Promise.all to fetch user data and permissions in parallel
       const [userResult, permissionsResult] = await Promise.all([
         supabase
           .from('users')
@@ -81,12 +79,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const permissions = permissionsResult.data?.map(p => p.permission_name) || [];
       
-      console.log('User profile loaded:', {
-        id: userResult.data.id,
-        role: userResult.data.user_role,
-        permissions: permissions
-      });
-      
       if (mounted.current) {
         setUser({
           id: userResult.data.id,
@@ -98,6 +90,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           seller_no: userResult.data.seller_no,
           permissions: permissions as PermissionType[],
         });
+        // Clear permission cache when user changes
+        permissionCache.current.clear();
       }
       
       console.log('User set successfully with role:', userResult.data.user_role);
@@ -108,43 +102,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Memoize the permission check function
   const hasPermission = useCallback((permission: string): boolean => {
     if (!user) {
-      console.log('hasPermission: No user');
       return false;
     }
     
-    console.log('Checking permission:', permission, 'for user role:', user.user_role);
+    // Check cache first to avoid repeated logging
+    const cacheKey = `${user.id}-${permission}`;
+    if (permissionCache.current.has(cacheKey)) {
+      return permissionCache.current.get(cacheKey)!;
+    }
+    
+    let result = false;
     
     // Admin has all permissions
     if (user.user_role === 'admin') {
-      console.log('User is admin, has permission:', permission);
-      return true;
+      result = true;
+    } else if (user.permissions && user.permissions.includes(permission as PermissionType)) {
+      // Check specific permissions
+      result = true;
+    } else {
+      // Role-based permissions
+      const rolePermissions = {
+        'saksbehandler': ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'],
+        'avdelingsleder': ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'],
+        'tekniker': ['edit_own_claims', 'create_claims'],
+        'admin': [] // Handled above
+      };
+      
+      const userRolePermissions = rolePermissions[user.user_role] || [];
+      result = userRolePermissions.includes(permission);
     }
     
-    // Check specific permissions
-    if (user.permissions && user.permissions.includes(permission as PermissionType)) {
-      console.log('User has specific permission:', permission);
-      return true;
-    }
+    // Cache the result
+    permissionCache.current.set(cacheKey, result);
     
-    // Role-based permissions
-    const rolePermissions = {
-      'saksbehandler': ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'],
-      'avdelingsleder': ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'],
-      'tekniker': ['edit_own_claims', 'create_claims'],
-      'admin': [] // Handled above
-    };
-    
-    const userRolePermissions = rolePermissions[user.user_role] || [];
-    const hasRolePermission = userRolePermissions.includes(permission);
-    
-    console.log('Role-based permission check:', permission, 'result:', hasRolePermission);
-    return hasRolePermission;
+    return result;
   }, [user]);
 
-  // Memoize the login function
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     console.log('Login attempt for:', email);
     setIsLoading(true);
@@ -184,12 +179,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Memoize the logout function
   const logout = useCallback(async () => {
     console.log('Logout initiated');
     try {
       cleanupAuthState();
       loadingUserRef.current = null;
+      permissionCache.current.clear();
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
@@ -244,7 +239,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         
         if (session?.user) {
-          // Prevent multiple simultaneous user profile loads for the same user
           if (loadingUserRef.current === session.user.id) {
             console.log('Already loading user profile for:', session.user.id);
             return;
@@ -252,7 +246,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           loadingUserRef.current = session.user.id;
           
-          // Use setTimeout to defer the user profile loading
           setTimeout(async () => {
             try {
               await loadUserProfile(session.user);
@@ -268,11 +261,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           loadingUserRef.current = null;
           setUser(null);
           setIsLoading(false);
+          permissionCache.current.clear();
         }
       }
     });
 
-    // Initialize only once
     if (!isInitialized) {
       initializeAuth();
     }
@@ -284,7 +277,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [loadUserProfile, isInitialized]);
 
-  // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     user,
     session,
