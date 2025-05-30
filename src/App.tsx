@@ -12,6 +12,7 @@ import { ReportDashboard } from './components/reports/ReportDashboard';
 import { RequireAuth } from './components/auth/RequireAuth';
 import Login from './pages/Login';
 import ClaimsList from './pages/ClaimsList';
+import ClaimDetail from './pages/ClaimDetail';
 import Suppliers from './pages/Suppliers';
 import Installations from './pages/Installations';
 import FGasCertificates from './pages/FGasCertificates';
@@ -22,7 +23,6 @@ import { ResetPassword } from './components/auth/ResetPassword';
 import { Impersonate } from './components/admin/Impersonate';
 import { AddClaimModal } from './components/claims/AddClaimModal';
 import { EditClaimModal } from './components/claims/EditClaimModal';
-import { ClaimDetails } from './components/claims/ClaimDetails';
 import { SupplierDetails } from './components/suppliers/SupplierDetails';
 import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
 import { UserDetails } from './components/users/UserDetails';
@@ -90,7 +90,7 @@ const App = () => {
                   <Route path="/" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/dashboard" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimsList /></DashboardLayout></RequireAuth>} />
-                  <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetails /></DashboardLayout></RequireAuth>} />
+                  <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetail /></DashboardLayout></RequireAuth>} />
                   <Route path="/installations" element={<RequireAuth><DashboardLayout><Installations /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers" element={<RequireAuth><DashboardLayout><Suppliers /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
