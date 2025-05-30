@@ -1,4 +1,3 @@
-
 import { Home, FileText, Users, BarChart3, UserCheck, Shield, Upload, Wrench } from "lucide-react"
 import React, { useTransition } from "react"
 
@@ -16,6 +15,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 // Preload imports for performance
 const preloadModules = {
