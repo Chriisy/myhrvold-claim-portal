@@ -103,84 +103,86 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="w-full" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-            <Table>
-              <TableHeader className="sticky top-0 bg-white border-b z-10">
-                <TableRow>
-                  <TableHead className="min-w-[120px]">Nr.</TableHead>
-                  <TableHead className="min-w-[100px]">Type</TableHead>
-                  <TableHead className="min-w-[80px]">Kat.</TableHead>
-                  <TableHead className="min-w-[150px]">Innehaver</TableHead>
-                  <TableHead className="min-w-[110px]">Fødsel</TableHead>
-                  <TableHead className="min-w-[110px]">Utstedt</TableHead>
-                  <TableHead className="min-w-[110px]">Utløper</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="min-w-[80px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {certificates.map((cert) => (
-                  <TableRow key={cert.id}>
-                    <TableCell className="font-medium text-sm">{cert.certificate_number}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {cert.certificate_type === 'personal' ? (
-                          <User className="w-3 h-3" />
-                        ) : (
-                          <Building className="w-3 h-3" />
+          <div className="w-full overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table className="table-fixed w-full min-w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-24 sm:w-32">Nr.</TableHead>
+                    <TableHead className="w-20 sm:w-24">Type</TableHead>
+                    <TableHead className="w-16 sm:w-20">Kat.</TableHead>
+                    <TableHead className="hidden md:table-cell w-32 lg:w-40">Innehaver</TableHead>
+                    <TableHead className="hidden lg:table-cell w-24">Fødsel</TableHead>
+                    <TableHead className="hidden sm:table-cell w-24">Utstedt</TableHead>
+                    <TableHead className="w-24 sm:w-28">Utløper</TableHead>
+                    <TableHead className="w-20 sm:w-24">Status</TableHead>
+                    <TableHead className="w-16">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {certificates.map((cert) => (
+                    <TableRow key={cert.id}>
+                      <TableCell className="font-medium text-xs sm:text-sm truncate">{cert.certificate_number}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {cert.certificate_type === 'personal' ? (
+                            <User className="w-3 h-3" />
+                          ) : (
+                            <Building className="w-3 h-3" />
+                          )}
+                          <span className="text-xs hidden sm:inline">
+                            {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {cert.category && getCategoryBadge(cert.category)}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-xs lg:text-sm truncate">{cert.holder_name}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {cert.birth_date && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-gray-400" />
+                            <span className="text-xs">
+                              {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                            </span>
+                          </div>
                         )}
-                        <span className="text-xs">
-                          {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {cert.category && getCategoryBadge(cert.category)}
-                    </TableCell>
-                    <TableCell className="text-sm">{cert.holder_name}</TableCell>
-                    <TableCell>
-                      {cert.birth_date && (
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-gray-400" />
                           <span className="text-xs">
-                            {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                            {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
                           </span>
                         </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs">
-                          {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs">
-                          {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(cert.status)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditClick(cert)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs">
+                            {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(cert.status)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditClick(cert)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
