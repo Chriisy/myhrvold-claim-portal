@@ -90,7 +90,12 @@ export const maintenanceService = {
   async createChecklist(data: Omit<MaintenanceChecklist, 'id' | 'created_at'>): Promise<MaintenanceChecklist> {
     const { data: checklist, error } = await supabase
       .from('maintenance_checklists')
-      .insert(data)
+      .insert({
+        name: data.name,
+        location: data.location || null,
+        installation_id: data.installation_id || null,
+        created_by: data.created_by
+      })
       .select()
       .single();
 
@@ -104,7 +109,7 @@ export const maintenanceService = {
       .insert({
         checklist_id: checklistId,
         equipment_id: equipmentId,
-        id_number_override: idNumberOverride
+        id_number_override: idNumberOverride || null
       })
       .select()
       .single();
@@ -119,8 +124,8 @@ export const maintenanceService = {
       .insert({
         row_id: rowId,
         control_no: controlNo,
-        control_date: controlDate,
-        signature: signature
+        control_date: controlDate || null,
+        signature: signature || null
       })
       .select()
       .single();
@@ -133,8 +138,8 @@ export const maintenanceService = {
     const { data, error } = await supabase
       .from('maintenance_controls')
       .update({
-        control_date: controlDate,
-        signature: signature
+        control_date: controlDate || null,
+        signature: signature || null
       })
       .eq('id', controlId)
       .select()
