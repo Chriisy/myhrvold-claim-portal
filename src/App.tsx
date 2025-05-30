@@ -24,7 +24,7 @@ import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
 import { UserDetails } from './components/users/UserDetails';
 import { AddUserModal } from './components/users/AddUserModal';
 import { EditUserModal } from './components/users/EditUserModal';
-import { FGasCertificateDashboard } from './components/certificates/FGasCertificateDashboard';
+import FGasCertificates from './pages/FGasCertificates';
 import { AddCertificateModal } from './components/certificates/AddCertificateModal';
 import { EditCertificateModal } from './components/certificates/EditCertificateModal';
 import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
@@ -79,7 +79,7 @@ const App = () => {
                   <Route path="/users" element={<RequireAuth><DashboardLayout><UserList /></DashboardLayout></RequireAuth>} />
                   <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
                   <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificateDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
