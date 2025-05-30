@@ -10,6 +10,9 @@ interface FGasCertificate {
   status: 'active' | 'expiring_soon' | 'expired' | 'pending_renewal';
   issuing_authority?: string;
   notes?: string;
+  category?: string;
+  birth_date?: string;
+  issued_date?: string;
   created_at: string;
   updated_at: string;
   created_by: string;
