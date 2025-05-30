@@ -45,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const loadingUserRef = useRef<string | null>(null);
+  const isInitialized = useRef(false);
 
   // Memoize the expensive user profile loading function
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser) => {
@@ -202,6 +203,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+    
     console.log('AuthProvider: Setting up auth state listeners');
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -218,32 +222,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         loadingUserRef.current = session.user.id;
         
-        // Use requestIdleCallback for better performance
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(async () => {
-            try {
-              await loadUserProfile(session.user);
-            } catch (error) {
-              console.error('Error loading user profile:', error);
-              setUser(null);
-            } finally {
-              loadingUserRef.current = null;
-              setIsLoading(false);
-            }
-          });
-        } else {
-          setTimeout(async () => {
-            try {
-              await loadUserProfile(session.user);
-            } catch (error) {
-              console.error('Error loading user profile:', error);
-              setUser(null);
-            } finally {
-              loadingUserRef.current = null;
-              setIsLoading(false);
-            }
-          }, 0);
-        }
+        // Use setTimeout to defer the user profile loading
+        setTimeout(async () => {
+          try {
+            await loadUserProfile(session.user);
+          } catch (error) {
+            console.error('Error loading user profile:', error);
+            setUser(null);
+          } finally {
+            loadingUserRef.current = null;
+            setIsLoading(false);
+          }
+        }, 0);
       } else {
         loadingUserRef.current = null;
         setUser(null);
@@ -271,31 +261,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         loadingUserRef.current = session.user.id;
         
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(async () => {
-            try {
-              await loadUserProfile(session.user);
-            } catch (error) {
-              console.error('Error loading user profile on init:', error);
-              setUser(null);
-            } finally {
-              loadingUserRef.current = null;
-              setIsLoading(false);
-            }
-          });
-        } else {
-          setTimeout(async () => {
-            try {
-              await loadUserProfile(session.user);
-            } catch (error) {
-              console.error('Error loading user profile on init:', error);
-              setUser(null);
-            } finally {
-              loadingUserRef.current = null;
-              setIsLoading(false);
-            }
-          }, 0);
-        }
+        setTimeout(async () => {
+          try {
+            await loadUserProfile(session.user);
+          } catch (error) {
+            console.error('Error loading user profile on init:', error);
+            setUser(null);
+          } finally {
+            loadingUserRef.current = null;
+            setIsLoading(false);
+          }
+        }, 0);
       } else {
         setIsLoading(false);
       }

@@ -38,7 +38,14 @@ import { OfflineFormHandler } from '@/components/shared/OfflineFormHandler';
 import { pwaManager } from '@/utils/pwa';
 import { useEffect } from 'react';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
 const App = () => {
   useEffect(() => {
@@ -67,10 +74,10 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CookieConsentProvider>
-          <DashboardFiltersProvider>
-            <Router>
+      <Router>
+        <AuthProvider>
+          <CookieConsentProvider>
+            <DashboardFiltersProvider>
               <div className="min-h-screen bg-background">
                 <Routes>
                   <Route path="/login" element={<Login />} />
@@ -108,10 +115,10 @@ const App = () => {
                 <PWAInstallButton />
                 <TouchOptimizedNav />
               </div>
-            </Router>
-          </DashboardFiltersProvider>
-        </CookieConsentProvider>
-      </AuthProvider>
+            </DashboardFiltersProvider>
+          </CookieConsentProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 };
