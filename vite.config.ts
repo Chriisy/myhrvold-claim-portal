@@ -42,10 +42,7 @@ export default defineConfig(({ mode }) => ({
           
           // Utility chunks
           utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
-          icons: ['lucide-react'],
-          
-          // Supabase
-          supabase: ['@supabase/supabase-js']
+          icons: ['lucide-react']
         }
       }
     },
