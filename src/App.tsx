@@ -6,7 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
 import DashboardLayout from './components/layout/DashboardLayout';
-import { OptimizedDashboard } from './components/dashboard/OptimizedDashboard';
+import OptimizedDashboard from './components/dashboard/OptimizedDashboard';
 import { ClaimList } from './components/claims/ClaimList';
 import { SupplierList } from './components/suppliers/SupplierList';
 import { UserList } from './components/users/UserList';
