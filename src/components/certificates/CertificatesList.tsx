@@ -39,6 +39,21 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
     );
   };
 
+  const getCategoryBadge = (category: string) => {
+    const categoryColors = {
+      'I': 'bg-blue-100 text-blue-800',
+      'II': 'bg-green-100 text-green-800',
+      'III': 'bg-yellow-100 text-yellow-800',
+      'IV': 'bg-red-100 text-red-800'
+    };
+    
+    return (
+      <Badge className={categoryColors[category as keyof typeof categoryColors] || 'bg-gray-100 text-gray-800'}>
+        Kat. {category}
+      </Badge>
+    );
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-8">Laster sertifikater...</div>;
   }
@@ -84,7 +99,9 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
             <TableRow>
               <TableHead>Sertifikatnummer</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Kategori</TableHead>
               <TableHead>Innehaver</TableHead>
+              <TableHead>Fødselsdato</TableHead>
               <TableHead>Utstedelsesdato</TableHead>
               <TableHead>Utløpsdato</TableHead>
               <TableHead>Status</TableHead>
@@ -104,7 +121,18 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                     {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
                   </div>
                 </TableCell>
+                <TableCell>
+                  {cert.category && getCategoryBadge(cert.category)}
+                </TableCell>
                 <TableCell>{cert.holder_name}</TableCell>
+                <TableCell>
+                  {cert.birth_date && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-400" />

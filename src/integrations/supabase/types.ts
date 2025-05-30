@@ -660,6 +660,8 @@ export type Database = {
       }
       f_gas_certificates: {
         Row: {
+          birth_date: string | null
+          category: string
           certificate_number: string
           certificate_type: Database["public"]["Enums"]["certificate_type"]
           created_at: string
@@ -669,12 +671,15 @@ export type Database = {
           holder_user_id: string | null
           id: string
           issue_date: string
+          issued_date: string | null
           issuing_authority: string | null
           notes: string | null
           status: Database["public"]["Enums"]["certificate_status"]
           updated_at: string
         }
         Insert: {
+          birth_date?: string | null
+          category?: string
           certificate_number: string
           certificate_type: Database["public"]["Enums"]["certificate_type"]
           created_at?: string
@@ -684,12 +689,15 @@ export type Database = {
           holder_user_id?: string | null
           id?: string
           issue_date: string
+          issued_date?: string | null
           issuing_authority?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["certificate_status"]
           updated_at?: string
         }
         Update: {
+          birth_date?: string | null
+          category?: string
           certificate_number?: string
           certificate_type?: Database["public"]["Enums"]["certificate_type"]
           created_at?: string
@@ -699,6 +707,7 @@ export type Database = {
           holder_user_id?: string | null
           id?: string
           issue_date?: string
+          issued_date?: string | null
           issuing_authority?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["certificate_status"]
@@ -1093,6 +1102,143 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      maintenance_checklists: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          installation_id: string | null
+          location: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          installation_id?: string | null
+          location?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          installation_id?: string | null
+          location?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_checklists_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_checklists_installation_id_fkey"
+            columns: ["installation_id"]
+            isOneToOne: false
+            referencedRelation: "installation_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_controls: {
+        Row: {
+          control_date: string | null
+          control_no: number
+          created_at: string | null
+          id: string
+          row_id: string | null
+          signature: string | null
+        }
+        Insert: {
+          control_date?: string | null
+          control_no: number
+          created_at?: string | null
+          id?: string
+          row_id?: string | null
+          signature?: string | null
+        }
+        Update: {
+          control_date?: string | null
+          control_no?: number
+          created_at?: string | null
+          id?: string
+          row_id?: string | null
+          signature?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_controls_row_id_fkey"
+            columns: ["row_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_rows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_equipment: {
+        Row: {
+          created_at: string | null
+          default_id_number: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_id_number?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          default_id_number?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      maintenance_rows: {
+        Row: {
+          checklist_id: string | null
+          created_at: string | null
+          equipment_id: string | null
+          id: string
+          id_number_override: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          created_at?: string | null
+          equipment_id?: string | null
+          id?: string
+          id_number_override?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          created_at?: string | null
+          equipment_id?: string | null
+          id?: string
+          id_number_override?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_rows_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_rows_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_equipment"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {

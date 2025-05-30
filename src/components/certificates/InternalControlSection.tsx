@@ -3,19 +3,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RoutineDocuments } from './internal-control/RoutineDocuments';
 import { DigitalChecklists } from './internal-control/DigitalChecklists';
 import { ControlHistory } from './internal-control/ControlHistory';
+import { MaintenanceJournal } from './internal-control/MaintenanceJournal';
 
 export const InternalControlSection = () => {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold mb-2">Internkontroll</h2>
-        <p className="text-gray-600">Administrer rutinedokumenter, sjekklister og kontrollhistorikk</p>
+        <p className="text-gray-600">Administrer rutinedokumenter, sjekklister, vedlikeholdsjournaler og kontrollhistorikk</p>
       </div>
       
       <Tabs defaultValue="documents" className="space-y-6">
         <TabsList>
           <TabsTrigger value="documents">Rutinedokumenter</TabsTrigger>
           <TabsTrigger value="checklists">Digitale Sjekklister</TabsTrigger>
+          <TabsTrigger value="maintenance">Vedlikeholdsjournal</TabsTrigger>
           <TabsTrigger value="history">Kontrollhistorikk</TabsTrigger>
         </TabsList>
 
@@ -25,6 +27,10 @@ export const InternalControlSection = () => {
 
         <TabsContent value="checklists">
           <DigitalChecklists />
+        </TabsContent>
+
+        <TabsContent value="maintenance">
+          <MaintenanceJournal />
         </TabsContent>
 
         <TabsContent value="history">

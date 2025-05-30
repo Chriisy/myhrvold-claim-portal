@@ -24,7 +24,10 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
     issue_date: '',
     expiry_date: '',
     issuing_authority: '',
-    notes: ''
+    notes: '',
+    category: 'I',
+    birth_date: '',
+    issued_date: ''
   });
 
   const { data: users } = useUsers();
@@ -37,7 +40,9 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
       ...formData,
       holder_user_id: formData.holder_user_id || null,
       issue_date: new Date(formData.issue_date).toISOString(),
-      expiry_date: new Date(formData.expiry_date).toISOString()
+      expiry_date: new Date(formData.expiry_date).toISOString(),
+      issued_date: formData.issued_date ? new Date(formData.issued_date).toISOString() : undefined,
+      birth_date: formData.birth_date || undefined
     };
 
     createCertificate.mutate(submitData, {
@@ -60,7 +65,7 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nytt F-gass Sertifikat</DialogTitle>
         </DialogHeader>
@@ -85,6 +90,24 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
           </div>
 
           <div>
+            <Label htmlFor="category">Kategori</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => setFormData({...formData, category: value})}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="I">Kategori I</SelectItem>
+                <SelectItem value="II">Kategori II</SelectItem>
+                <SelectItem value="III">Kategori III</SelectItem>
+                <SelectItem value="IV">Kategori IV</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label htmlFor="certificate_number">Sertifikatnummer</Label>
             <Input
               id="certificate_number"
@@ -103,6 +126,16 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
                   value={formData.holder_name}
                   onChange={(e) => setFormData({...formData, holder_name: e.target.value})}
                   required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="birth_date">Fødselsdato</Label>
+                <Input
+                  id="birth_date"
+                  type="date"
+                  value={formData.birth_date}
+                  onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
                 />
               </div>
 
@@ -149,6 +182,16 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="issued_date">Utstedt dato</Label>
+            <Input
+              id="issued_date"
+              type="date"
+              value={formData.issued_date}
+              onChange={(e) => setFormData({...formData, issued_date: e.target.value})}
+            />
           </div>
 
           <div>

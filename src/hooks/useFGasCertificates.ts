@@ -13,6 +13,9 @@ interface CreateCertificateData {
   expiry_date: string;
   issuing_authority?: string;
   notes?: string;
+  category?: string;
+  birth_date?: string;
+  issued_date?: string;
 }
 
 export const useFGasCertificates = (filterType: 'personal' | 'company' | 'all' = 'all') => {
