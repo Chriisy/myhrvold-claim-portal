@@ -40,7 +40,8 @@ const UserManagement = () => {
   };
 
   const handleEditUser = (user: UserWithPermissions) => {
-    console.log('Edit user:', user);
+    console.log('Edit user requested:', user);
+    // The UserListTable component will handle opening the modal
   };
 
   if (isLoading) {
