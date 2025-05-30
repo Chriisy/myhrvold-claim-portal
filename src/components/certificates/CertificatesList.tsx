@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useFGasCertificates } from '@/hooks/useFGasCertificates';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +26,6 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
-  const navigate = useNavigate();
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -59,16 +57,7 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
     );
   };
 
-  const handleRowClick = (certificateId: string) => {
-    const certificate = certificates.find(cert => cert.id === certificateId);
-    if (certificate) {
-      setSelectedCertificate(certificate);
-      setEditModalOpen(true);
-    }
-  };
-
-  const handleEditClick = (e: React.MouseEvent, certificate: any) => {
-    e.stopPropagation();
+  const handleEditClick = (certificate: any) => {
     setSelectedCertificate(certificate);
     setEditModalOpen(true);
   };
@@ -114,28 +103,24 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {/* Desktop table view */}
-          <div className="hidden md:block w-full" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+          <div className="w-full" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
             <Table>
               <TableHeader className="sticky top-0 bg-white border-b z-10">
                 <TableRow>
                   <TableHead className="min-w-[120px]">Nr.</TableHead>
                   <TableHead className="min-w-[100px]">Type</TableHead>
                   <TableHead className="min-w-[80px]">Kat.</TableHead>
-                  <TableHead className="min-w-[150px] col-holder hidden lg:table-cell">Innehaver</TableHead>
-                  <TableHead className="min-w-[110px] col-birth hidden xl:table-cell">Fødsel</TableHead>
-                  <TableHead className="min-w-[110px] col-issued hidden lg:table-cell">Utstedt</TableHead>
+                  <TableHead className="min-w-[150px]">Innehaver</TableHead>
+                  <TableHead className="min-w-[110px]">Fødsel</TableHead>
+                  <TableHead className="min-w-[110px]">Utstedt</TableHead>
                   <TableHead className="min-w-[110px]">Utløper</TableHead>
                   <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {certificates.map((cert) => (
-                  <TableRow 
-                    key={cert.id}
-                    className="cursor-pointer hover:bg-muted/40 transition-colors relative group"
-                    onClick={() => handleRowClick(cert.id)}
-                  >
+                  <TableRow key={cert.id}>
                     <TableCell className="font-medium text-sm">{cert.certificate_number}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -152,8 +137,8 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                     <TableCell>
                       {cert.category && getCategoryBadge(cert.category)}
                     </TableCell>
-                    <TableCell className="text-sm col-holder hidden lg:table-cell">{cert.holder_name}</TableCell>
-                    <TableCell className="col-birth hidden xl:table-cell">
+                    <TableCell className="text-sm">{cert.holder_name}</TableCell>
+                    <TableCell>
                       {cert.birth_date && (
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-gray-400" />
@@ -163,7 +148,7 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="col-issued hidden lg:table-cell">
+                    <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-gray-400" />
                         <span className="text-xs">
@@ -182,13 +167,12 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                     <TableCell>
                       {getStatusBadge(cert.status)}
                     </TableCell>
-                    {/* Floating edit button on hover */}
-                    <TableCell className="relative">
+                    <TableCell>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => handleEditClick(e, cert)}
-                        className="edit-btn absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleEditClick(cert)}
+                        className="h-6 w-6 p-0"
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
@@ -197,55 +181,6 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
                 ))}
               </TableBody>
             </Table>
-          </div>
-
-          {/* Mobile card view */}
-          <div className="md:hidden space-y-3 p-4">
-            {certificates.map((cert) => (
-              <div
-                key={cert.id}
-                className="rounded-xl border p-4 cursor-pointer hover:bg-muted/40 transition-colors"
-                onClick={() => handleRowClick(cert.id)}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="font-medium text-myhrvold-primary">{cert.certificate_number}</span>
-                  <div className="flex items-center gap-1">
-                    {cert.certificate_type === 'personal' ? (
-                      <User className="w-3 h-3" />
-                    ) : (
-                      <Building className="w-3 h-3" />
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Innehaver:</span>
-                    <span className="text-sm font-medium">{cert.holder_name}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Kategori:</span>
-                    {cert.category && getCategoryBadge(cert.category)}
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Utløper:</span>
-                    <span className="text-sm font-medium">
-                      {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Status:</span>
-                    {getStatusBadge(cert.status)}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </CardContent>
       </Card>

@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Performance optimizations
     rollupOptions: {
       output: {
         manualChunks: {
@@ -32,12 +33,21 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
+    // Enable code splitting
     target: 'esnext',
-    minify: mode === 'production' ? 'esbuild' : false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: true
+      }
+    },
+    // Asset optimization
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
     sourcemap: mode === 'development'
   },
+  // Performance optimizations for development
   optimizeDeps: {
     include: [
       'react',
@@ -46,8 +56,5 @@ export default defineConfig(({ mode }) => ({
       '@tanstack/react-query',
       '@supabase/supabase-js'
     ]
-  },
-  esbuild: {
-    target: 'esnext'
   }
 }));

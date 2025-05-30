@@ -24,7 +24,7 @@ import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
 import { UserDetails } from './components/users/UserDetails';
 import { AddUserModal } from './components/users/AddUserModal';
 import { EditUserModal } from './components/users/EditUserModal';
-import FGasCertificates from './pages/FGasCertificates';
+import { FGasCertificateDashboard } from './components/certificates/FGasCertificateDashboard';
 import { AddCertificateModal } from './components/certificates/AddCertificateModal';
 import { EditCertificateModal } from './components/certificates/EditCertificateModal';
 import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
@@ -35,40 +35,25 @@ import { OfflineFormHandler } from '@/components/shared/OfflineFormHandler';
 import { pwaManager } from '@/utils/pwa';
 import { useEffect } from 'react';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
     // Initialize PWA on app start
-    try {
-      pwaManager.registerServiceWorker();
-      
-      // Request notification permission on user interaction
-      const requestNotifications = async () => {
-        try {
-          const permission = await pwaManager.requestNotificationPermission();
-          console.log('Notification permission:', permission);
-        } catch (error) {
-          console.error('Notification permission error:', error);
-        }
-      };
-      
-      // Add click listener for notification permission
-      document.addEventListener('click', requestNotifications, { once: true });
-      
-      return () => {
-        document.removeEventListener('click', requestNotifications);
-      };
-    } catch (error) {
-      console.error('PWA initialization error:', error);
-    }
+    pwaManager.registerServiceWorker();
+    
+    // Request notification permission on user interaction
+    const requestNotifications = async () => {
+      const permission = await pwaManager.requestNotificationPermission();
+      console.log('Notification permission:', permission);
+    };
+    
+    // Add click listener for notification permission
+    document.addEventListener('click', requestNotifications, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', requestNotifications);
+    };
   }, []);
 
   return (
@@ -94,7 +79,7 @@ const App = () => {
                   <Route path="/users" element={<RequireAuth><DashboardLayout><UserList /></DashboardLayout></RequireAuth>} />
                   <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
                   <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
+                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificateDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
