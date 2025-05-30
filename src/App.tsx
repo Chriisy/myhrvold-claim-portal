@@ -7,12 +7,13 @@ import { CookieConsentProvider } from './contexts/CookieConsentContext';
 import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
 import DashboardLayout from './components/layout/DashboardLayout';
 import OptimizedDashboard from './components/dashboard/OptimizedDashboard';
-import { ClaimList } from './components/claims/ClaimList';
-import { SupplierList } from './components/suppliers/SupplierList';
-import { UserList } from './components/users/UserList';
+import Users from './pages/Users';
 import { ReportDashboard } from './components/reports/ReportDashboard';
 import { RequireAuth } from './components/auth/RequireAuth';
 import Login from './pages/Login';
+import ClaimsList from './pages/ClaimsList';
+import Suppliers from './pages/Suppliers';
+import FGasCertificates from './pages/FGasCertificates';
 import { Register } from './components/auth/Register';
 import { ForgotPassword } from './components/auth/ForgotPassword';
 import { ResetPassword } from './components/auth/ResetPassword';
@@ -25,7 +26,6 @@ import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
 import { UserDetails } from './components/users/UserDetails';
 import { AddUserModal } from './components/users/AddUserModal';
 import { EditUserModal } from './components/users/EditUserModal';
-import { FGasCertificateDashboard } from './components/certificates/FGasCertificateDashboard';
 import { AddCertificateModal } from './components/certificates/AddCertificateModal';
 import { EditCertificateModal } from './components/certificates/EditCertificateModal';
 import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
@@ -80,14 +80,14 @@ const App = () => {
 
                   <Route path="/" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/dashboard" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimsList /></DashboardLayout></RequireAuth>} />
                   <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetails /></DashboardLayout></RequireAuth>} />
-                  <Route path="/suppliers" element={<RequireAuth><DashboardLayout><SupplierList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/suppliers" element={<RequireAuth><DashboardLayout><Suppliers /></DashboardLayout></RequireAuth>} />
                   <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
-                  <Route path="/users" element={<RequireAuth><DashboardLayout><UserList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/users" element={<RequireAuth><DashboardLayout><Users /></DashboardLayout></RequireAuth>} />
                   <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
                   <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
-                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificateDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
