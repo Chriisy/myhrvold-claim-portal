@@ -58,28 +58,17 @@ const roleOptions: { value: UserRole; label: string; description: string }[] = [
   },
 ];
 
-const permissionOptions: { value: PermissionType; label: string; description: string; category: string }[] = [
-  // Reklamasjoner
-  { value: 'view_all_claims', label: 'Se alle reklamasjoner', description: 'Kan se alle reklamasjoner i systemet', category: 'Reklamasjoner' },
-  { value: 'edit_all_claims', label: 'Redigere alle reklamasjoner', description: 'Kan redigere alle reklamasjoner', category: 'Reklamasjoner' },
-  { value: 'delete_claims', label: 'Slette reklamasjoner', description: 'Kan slette reklamasjoner', category: 'Reklamasjoner' },
-  { value: 'approve_claims', label: 'Godkjenne reklamasjoner', description: 'Kan godkjenne/avslå reklamasjoner', category: 'Reklamasjoner' },
-  { value: 'view_department_claims', label: 'Se avdelingsreklamasjoner', description: 'Kan se reklamasjoner for egen avdeling', category: 'Reklamasjoner' },
-  { value: 'edit_own_claims', label: 'Redigere egne reklamasjoner', description: 'Kan redigere egne reklamasjoner', category: 'Reklamasjoner' },
-  { value: 'create_claims', label: 'Opprette reklamasjoner', description: 'Kan opprette nye reklamasjoner', category: 'Reklamasjoner' },
-  
-  // Administrasjon
-  { value: 'manage_users', label: 'Administrere brukere', description: 'Kan administrere brukere og roller', category: 'Administrasjon' },
-  { value: 'view_reports', label: 'Se rapporter', description: 'Kan se rapporter og statistikk', category: 'Administrasjon' },
+const permissionOptions: { value: PermissionType; label: string; description: string }[] = [
+  { value: 'view_all_claims', label: 'Se alle reklamasjoner', description: 'Kan se alle reklamasjoner i systemet' },
+  { value: 'edit_all_claims', label: 'Redigere alle reklamasjoner', description: 'Kan redigere alle reklamasjoner' },
+  { value: 'delete_claims', label: 'Slette reklamasjoner', description: 'Kan slette reklamasjoner' },
+  { value: 'manage_users', label: 'Administrere brukere', description: 'Kan administrere brukere og roller' },
+  { value: 'view_reports', label: 'Se rapporter', description: 'Kan se rapporter og statistikk' },
+  { value: 'approve_claims', label: 'Godkjenne reklamasjoner', description: 'Kan godkjenne/avslå reklamasjoner' },
+  { value: 'view_department_claims', label: 'Se avdelingsreklamasjoner', description: 'Kan se reklamasjoner for egen avdeling' },
+  { value: 'edit_own_claims', label: 'Redigere egne reklamasjoner', description: 'Kan redigere egne reklamasjoner' },
+  { value: 'create_claims', label: 'Opprette reklamasjoner', description: 'Kan opprette nye reklamasjoner' },
 ];
-
-const groupedPermissions = permissionOptions.reduce((acc, permission) => {
-  if (!acc[permission.category]) {
-    acc[permission.category] = [];
-  }
-  acc[permission.category].push(permission);
-  return acc;
-}, {} as Record<string, typeof permissionOptions>);
 
 export function EnhancedUserEditModal({ user, open, onOpenChange }: EnhancedUserEditModalProps) {
   const [selectedRole, setSelectedRole] = useState<UserRole>('tekniker');
@@ -252,35 +241,29 @@ export function EnhancedUserEditModal({ user, open, onOpenChange }: EnhancedUser
             <p className="text-sm text-gray-600 mb-4">
               Velg spesifikke tillatelser for denne brukeren. Dette gir mer granulær kontroll utover standard rolle-tillatelser.
             </p>
-            
-            {Object.entries(groupedPermissions).map(([category, permissions]) => (
-              <div key={category} className="mb-6">
-                <h4 className="font-medium text-sm text-gray-700 mb-3 border-b pb-1">{category}</h4>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {permissions.map(permission => (
-                    <div key={permission.value} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
-                      <Checkbox
-                        id={permission.value}
-                        checked={selectedPermissions.includes(permission.value)}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.value, checked as boolean)
-                        }
-                        disabled={selectedRole === 'admin'}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <Label 
-                          htmlFor={permission.value} 
-                          className="text-sm font-medium cursor-pointer leading-5"
-                        >
-                          {permission.label}
-                        </Label>
-                        <p className="text-xs text-gray-500 mt-1 leading-4">{permission.description}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="grid gap-3 md:grid-cols-2">
+              {permissionOptions.map(permission => (
+                <div key={permission.value} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                  <Checkbox
+                    id={permission.value}
+                    checked={selectedPermissions.includes(permission.value)}
+                    onCheckedChange={(checked) => 
+                      handlePermissionChange(permission.value, checked as boolean)
+                    }
+                    disabled={selectedRole === 'admin'}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <Label 
+                      htmlFor={permission.value} 
+                      className="text-sm font-medium cursor-pointer leading-5"
+                    >
+                      {permission.label}
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-1 leading-4">{permission.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Handlinger */}

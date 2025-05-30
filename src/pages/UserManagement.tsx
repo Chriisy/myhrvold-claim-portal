@@ -4,7 +4,6 @@ import { OptimizedErrorBoundary } from '@/components/shared/OptimizedErrorBounda
 import { OptimizedLoadingStates } from '@/components/shared/OptimizedLoadingStates';
 import { useOptimizedUsers } from '@/hooks/useOptimizedUsers';
 import { UserWithPermissions } from '@/hooks/useUsers';
-import { useOptimizedFiltering } from '@/hooks/performance/useOptimizedFiltering';
 import { Database } from '@/integrations/supabase/types';
 
 type UserRole = Database['public']['Enums']['user_role'];
@@ -22,14 +21,14 @@ const UserManagement = () => {
 
   const { data: users = [], isLoading } = useOptimizedUsers();
 
-  // Use optimized filtering for better performance
-  const { filteredData: filteredUsers, isFiltering } = useOptimizedFiltering({
-    data: users,
-    searchFields: ['name', 'email'],
-    filters: {
-      search: searchQuery,
-      user_role: roleFilter
-    }
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = !searchQuery || 
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesRole = roleFilter === 'all' || user.user_role === roleFilter;
+    
+    return matchesSearch && matchesRole;
   });
 
   const handleUserSelection = (user: UserWithPermissions, selected: boolean) => {
@@ -41,8 +40,7 @@ const UserManagement = () => {
   };
 
   const handleEditUser = (user: UserWithPermissions) => {
-    console.log('Edit user requested:', user);
-    // The UserListTable component will handle opening the modal
+    console.log('Edit user:', user);
   };
 
   if (isLoading) {
@@ -86,7 +84,6 @@ const UserManagement = () => {
             onEditUser={handleEditUser}
             searchQuery={searchQuery}
             totalUsers={users.length}
-            isFiltering={isFiltering}
           />
         </Suspense>
       </OptimizedErrorBoundary>

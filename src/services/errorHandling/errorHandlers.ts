@@ -1,11 +1,11 @@
 
 import { PostgrestError } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
-import { globalErrorHandler } from './globalErrorHandler';
 import { ErrorDetails, ErrorContext } from './errorTypes';
+import { globalErrorHandler } from './globalErrorHandler';
 
-export class ErrorHandlers {
-  static handleSupabaseError(
+export class SupabaseErrorHandler {
+  static handle(
     error: PostgrestError | Error, 
     operation: string,
     context: ErrorContext = {}
@@ -18,58 +18,16 @@ export class ErrorHandlers {
     let hint = '';
     
     if ('code' in error) {
-      switch (error.code) {
-        case 'PGRST116':
-          userMessage = 'Ingen data funnet';
-          severity = 'low';
-          break;
-        case '42501':
-          userMessage = 'Du har ikke tilgang til denne operasjonen';
-          severity = 'high';
-          hint = 'Kontakt administrator for å få nødvendige tilganger';
-          break;
-        case '23505':
-          userMessage = 'Denne oppføringen eksisterer allerede';
-          severity = 'medium';
-          hint = 'Prøv med andre verdier eller oppdater eksisterende data';
-          break;
-        case '23503':
-          userMessage = 'Kan ikke slette - det finnes relaterte data';
-          severity = 'medium';
-          hint = 'Fjern relaterte data først, eller kontakt administrator';
-          break;
-        case 'PGRST301':
-          userMessage = 'Database forbindelse feilet';
-          severity = 'critical';
-          hint = 'Sjekk internettforbindelsen eller kontakt administrator';
-          break;
-        case '22P02':
-          if (error.message?.includes('enum')) {
-            userMessage = 'Ugyldig verdi. Last siden på nytt og prøv igjen.';
-            severity = 'medium';
-          } else {
-            userMessage = 'Ugyldig dataformat';
-            severity = 'medium';
-          }
-          break;
-        default:
-          userMessage = error.message || userMessage;
-          severity = 'medium';
-      }
-      details = error.details || '';
-      if (error.hint && !hint) hint = error.hint;
+      const result = this.handlePostgrestError(error, severity);
+      userMessage = result.message;
+      severity = result.severity;
+      details = result.details;
+      hint = result.hint;
     } else {
-      if (error.message.includes('fetch')) {
-        userMessage = 'Nettverksfeil';
-        severity = 'high';
-        hint = 'Sjekk internettforbindelsen og prøv igjen';
-      } else if (error.message.includes('timeout')) {
-        userMessage = 'Operasjonen tok for lang tid';
-        severity = 'medium';
-        hint = 'Prøv igjen, eller kontakt administrator hvis problemet vedvarer';
-      } else {
-        userMessage = error.message || userMessage;
-      }
+      const result = this.handleGenericError(error);
+      userMessage = result.message;
+      severity = result.severity;
+      hint = result.hint;
     }
 
     const errorDetails: ErrorDetails = {
@@ -88,10 +46,94 @@ export class ErrorHandlers {
     });
 
     // Show appropriate toast based on severity
+    this.showToastNotification(userMessage, hint, severity);
+
+    return errorDetails;
+  }
+
+  private static handlePostgrestError(error: PostgrestError, defaultSeverity: 'low' | 'medium' | 'high' | 'critical') {
+    let message = error.message || 'Ukjent database feil';
+    let severity = defaultSeverity;
+    let details = error.details || '';
+    let hint = error.hint || '';
+
+    switch (error.code) {
+      case 'PGRST116':
+        message = 'Ingen data funnet';
+        severity = 'low';
+        break;
+      case '42501':
+        message = 'Du har ikke tilgang til denne operasjonen';
+        severity = 'high';
+        hint = 'Kontakt administrator for å få nødvendige tilganger';
+        break;
+      case '23505':
+        message = 'Denne oppføringen eksisterer allerede';
+        severity = 'medium';
+        hint = 'Prøv med andre verdier eller oppdater eksisterende data';
+        break;
+      case '23503':
+        message = 'Kan ikke slette - det finnes relaterte data';
+        severity = 'medium';
+        hint = 'Fjern relaterte data først, eller kontakt administrator';
+        break;
+      case 'PGRST301':
+        message = 'Database forbindelse feilet';
+        severity = 'critical';
+        hint = 'Sjekk internettforbindelsen eller kontakt administrator';
+        break;
+      case '42P17':
+        message = 'Database konfigurasjonsfeil';
+        severity = 'critical';
+        hint = 'Kontakt administrator umiddelbart';
+        break;
+      case '22P02':
+        if (error.message?.includes('enum')) {
+          message = 'Ugyldig verdi. Last siden på nytt og prøv igjen.';
+          severity = 'medium';
+        } else {
+          message = 'Ugyldig dataformat';
+          severity = 'medium';
+        }
+        break;
+      case '08P01':
+        message = 'Database protokollfeil';
+        severity = 'high';
+        hint = 'Dette kan være et midlertidig problem. Prøv igjen.';
+        break;
+      case '53300':
+        message = 'Database er for opptatt';
+        severity = 'high';
+        hint = 'Vent litt og prøv igjen';
+        break;
+    }
+
+    return { message, severity, details, hint };
+  }
+
+  private static handleGenericError(error: Error) {
+    let message = error.message || 'Ukjent feil';
+    let severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+    let hint = '';
+
+    if (error.message.includes('fetch')) {
+      message = 'Nettverksfeil';
+      severity = 'high';
+      hint = 'Sjekk internettforbindelsen og prøv igjen';
+    } else if (error.message.includes('timeout')) {
+      message = 'Operasjonen tok for lang tid';
+      severity = 'medium';
+      hint = 'Prøv igjen, eller kontakt administrator hvis problemet vedvarer';
+    }
+
+    return { message, severity, hint };
+  }
+
+  private static showToastNotification(message: string, hint: string, severity: 'low' | 'medium' | 'high' | 'critical') {
     if (severity !== 'low') {
       toast({
         title: severity === 'critical' ? "Kritisk feil" : "Feil",
-        description: userMessage,
+        description: message,
         variant: "destructive",
       });
       
@@ -104,10 +146,5 @@ export class ErrorHandlers {
         }, 1000);
       }
     }
-
-    return errorDetails;
   }
 }
-
-// Export with alternative names for backward compatibility
-export const SupabaseErrorHandler = ErrorHandlers;

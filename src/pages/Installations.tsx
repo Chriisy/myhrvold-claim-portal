@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, MapPin, User, Calendar } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { InstallationProjectCard } from '@/components/installations/InstallationProjectCard';
 import { CreateProjectDialog } from '@/components/installations/CreateProjectDialog';
 
@@ -70,15 +69,9 @@ const Installations = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-3xl font-bold text-myhrvold-primary">Installasjoner</h1>
-            <p className="text-gray-600">Administrer installasjonprosjekter og sjekklister</p>
-          </div>
-        </div>
+      <div className="container mx-auto p-6">
         <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-48 bg-gray-200 rounded-lg"></div>
@@ -90,20 +83,17 @@ const Installations = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 
-              className="text-3xl font-bold text-myhrvold-primary"
-              onMouseEnter={prefetchInstallations}
-              onFocus={prefetchInstallations}
-            >
-              Installasjoner
-            </h1>
-            <p className="text-gray-600">Administrer installasjonprosjekter og sjekklister</p>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 
+            className="text-3xl font-bold"
+            onMouseEnter={prefetchInstallations}
+            onFocus={prefetchInstallations}
+          >
+            Installasjoner
+          </h1>
+          <p className="text-gray-600">Administrer installasjonprosjekter og sjekklister</p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />

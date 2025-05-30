@@ -1,7 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { maintenanceService } from '@/services/maintenanceService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export const useMaintenanceEquipment = () => {
@@ -28,18 +27,9 @@ export const useMaintenanceChecklist = (checklistId: string) => {
 
 export const useCreateMaintenanceChecklist = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: (data: { name: string; location?: string; installation_id?: string }) => {
-      if (!user) {
-        throw new Error('Du må være logget inn for å opprette vedlikeholdsjournaler');
-      }
-      return maintenanceService.createChecklist({
-        ...data,
-        created_by: user.id
-      });
-    },
+    mutationFn: maintenanceService.createChecklist,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-checklists'] });
       toast({
@@ -48,7 +38,6 @@ export const useCreateMaintenanceChecklist = () => {
       });
     },
     onError: (error) => {
-      console.error('Error creating maintenance checklist:', error);
       toast({
         title: "Feil ved opprettelse",
         description: "Kunne ikke opprette vedlikeholdsjournal",

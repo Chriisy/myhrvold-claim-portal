@@ -39,19 +39,6 @@ interface SupplierReport {
 }
 
 export class ReportService {
-  static async generateReport(type: ReportType, format: ReportFormat, dateRange?: { start: Date; end: Date }) {
-    switch (type) {
-      case 'claims':
-        return this.generateClaimsReport(format, dateRange);
-      case 'costs':
-        return this.generateCostsReport(format, dateRange);
-      case 'suppliers':
-        return this.generateSuppliersReport(format, dateRange);
-      default:
-        throw new Error(`Unknown report type: ${type}`);
-    }
-  }
-
   static async generateClaimsReport(format: ReportFormat, dateRange?: { start: Date; end: Date }) {
     const data = await this.fetchClaimsData(dateRange);
     

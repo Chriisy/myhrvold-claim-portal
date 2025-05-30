@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { DeviationModal } from './DeviationModal';
 import { useInstallationChecklist } from '@/hooks/useInstallationChecklist';
 import { usePhotoCount } from '@/hooks/usePhotoCount';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from '@/utils/performance/performanceUtils';
 
 interface ChecklistItem {
   id: string;

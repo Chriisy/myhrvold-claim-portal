@@ -10,8 +10,6 @@ interface ClaimWithRelations {
   customer_name?: string;
   customer_no?: string;
   customer_address?: string;
-  customer_postal_code?: string;
-  customer_city?: string;
   department?: string;
   machine_model?: string;
   machine_serial?: string;
@@ -20,14 +18,6 @@ interface ClaimWithRelations {
   quantity?: number;
   category?: ClaimCategory | null;
   status?: ClaimStatus;
-  description?: string;
-  visma_order_no?: string;
-  customer_po?: string;
-  reported_by?: string;
-  internal_note?: string;
-  root_cause?: string;
-  corrective_action?: string;
-  preventive_action?: string;
   created_at: string;
   created_by?: string;
   suppliers?: { name: string } | null;

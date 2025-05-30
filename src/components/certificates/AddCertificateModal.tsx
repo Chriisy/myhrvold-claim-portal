@@ -1,262 +1,229 @@
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useCreateFGasCertificate } from '@/hooks/useFGasCertificates';
-import { useToast } from '@/hooks/use-toast';
-
-const certificateSchema = z.object({
-  certificate_type: z.enum(['personal', 'company']),
-  certificate_number: z.string().min(1, 'Sertifikatnummer er påkrevd'),
-  holder_name: z.string().min(1, 'Navn på innehaver er påkrevd'),
-  issue_date: z.string().min(1, 'Utstedelsesdato er påkrevd'),
-  expiry_date: z.string().min(1, 'Utløpsdato er påkrevd'),
-  issuing_authority: z.string().optional(),
-  category: z.string().optional(),
-  birth_date: z.string().optional(),
-  notes: z.string().optional(),
-});
-
-type CertificateFormData = z.infer<typeof certificateSchema>;
+import { useUsers } from '@/hooks/useUsers';
+import { toast } from '@/hooks/use-toast';
 
 interface AddCertificateModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-export function AddCertificateModal({ open, onClose }: AddCertificateModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { mutate: createCertificate } = useCreateFGasCertificate();
-  const { toast } = useToast();
-
-  const form = useForm<CertificateFormData>({
-    resolver: zodResolver(certificateSchema),
-    defaultValues: {
-      certificate_type: 'personal',
-      certificate_number: '',
-      holder_name: '',
-      issue_date: '',
-      expiry_date: '',
-      issuing_authority: '',
-      category: 'I',
-      birth_date: '',
-      notes: '',
-    },
+export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps) => {
+  const [formData, setFormData] = useState({
+    certificate_type: 'personal' as 'personal' | 'company',
+    certificate_number: '',
+    holder_name: '',
+    holder_user_id: '',
+    issue_date: '',
+    expiry_date: '',
+    issuing_authority: '',
+    notes: '',
+    category: 'I',
+    birth_date: '',
+    issued_date: ''
   });
 
-  const onSubmit = async (data: CertificateFormData) => {
-    setIsSubmitting(true);
-    try {
-      // Ensure all required fields are present
-      const certificateData = {
-        certificate_type: data.certificate_type,
-        certificate_number: data.certificate_number,
-        holder_name: data.holder_name,
-        issue_date: data.issue_date,
-        expiry_date: data.expiry_date,
-        issuing_authority: data.issuing_authority || undefined,
-        category: data.category || undefined,
-        birth_date: data.birth_date || undefined,
-        notes: data.notes || undefined,
-      };
+  const { data: users } = useUsers();
+  const createCertificate = useCreateFGasCertificate();
 
-      createCertificate(certificateData, {
-        onSuccess: () => {
-          toast({
-            title: "Sertifikat opprettet",
-            description: "F-gass sertifikatet har blitt opprettet",
-          });
-          form.reset();
-          onClose();
-        },
-        onError: (error: any) => {
-          toast({
-            title: "Feil",
-            description: error.message || "Kunne ikke opprette sertifikat",
-            variant: "destructive",
-          });
-        },
-      });
-    } catch (error) {
-      console.error('Error creating certificate:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const submitData = {
+      ...formData,
+      holder_user_id: formData.holder_user_id || null,
+      issue_date: new Date(formData.issue_date).toISOString(),
+      expiry_date: new Date(formData.expiry_date).toISOString(),
+      issued_date: formData.issued_date ? new Date(formData.issued_date).toISOString() : undefined,
+      birth_date: formData.birth_date || undefined
+    };
+
+    createCertificate.mutate(submitData, {
+      onSuccess: () => {
+        toast({
+          title: 'Sertifikat opprettet',
+          description: 'Det nye sertifikatet har blitt lagt til.',
+        });
+        onClose();
+      },
+      onError: (error) => {
+        toast({
+          title: 'Feil ved opprettelse',
+          description: 'Kunne ikke opprette sertifikat. Prøv igjen.',
+          variant: 'destructive',
+        });
+      }
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Legg til nytt F-gass sertifikat</DialogTitle>
+          <DialogTitle>Nytt F-gass Sertifikat</DialogTitle>
         </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="certificate_type">Type sertifikat</Label>
+            <Select 
+              value={formData.certificate_type} 
+              onValueChange={(value: 'personal' | 'company') => 
+                setFormData({...formData, certificate_type: value})
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="personal">Personlig</SelectItem>
+                <SelectItem value="company">Bedrift</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="certificate_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type sertifikat</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Velg type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="personal">Personlig</SelectItem>
-                      <SelectItem value="company">Bedrift</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div>
+            <Label htmlFor="category">Kategori</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => setFormData({...formData, category: value})}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="I">Kategori I</SelectItem>
+                <SelectItem value="II">Kategori II</SelectItem>
+                <SelectItem value="III">Kategori III</SelectItem>
+                <SelectItem value="IV">Kategori IV</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="certificate_number">Sertifikatnummer</Label>
+            <Input
+              id="certificate_number"
+              value={formData.certificate_number}
+              onChange={(e) => setFormData({...formData, certificate_number: e.target.value})}
+              required
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="certificate_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sertifikatnummer</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Skriv inn sertifikatnummer" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {formData.certificate_type === 'personal' && (
+            <>
+              <div>
+                <Label htmlFor="holder_name">Innehaver navn</Label>
+                <Input
+                  id="holder_name"
+                  value={formData.holder_name}
+                  onChange={(e) => setFormData({...formData, holder_name: e.target.value})}
+                  required
+                />
+              </div>
 
-            <FormField
-              control={form.control}
-              name="holder_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Navn på innehaver</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Skriv inn navn" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div>
+                <Label htmlFor="birth_date">Fødselsdato</Label>
+                <Input
+                  id="birth_date"
+                  type="date"
+                  value={formData.birth_date}
+                  onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
+                />
+              </div>
 
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kategori</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Velg kategori" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="I">Kategori I</SelectItem>
-                      <SelectItem value="II">Kategori II</SelectItem>
-                      <SelectItem value="III">Kategori III</SelectItem>
-                      <SelectItem value="IV">Kategori IV</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <div>
+                <Label htmlFor="holder_user_id">Koble til bruker (valgfritt)</Label>
+                <Select 
+                  value={formData.holder_user_id} 
+                  onValueChange={(value) => setFormData({...formData, holder_user_id: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Velg bruker..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users?.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="issue_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Utstedelsesdato</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="expiry_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Utløpsdato</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="issue_date">Utstedelsesdato</Label>
+              <Input
+                id="issue_date"
+                type="date"
+                value={formData.issue_date}
+                onChange={(e) => setFormData({...formData, issue_date: e.target.value})}
+                required
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="birth_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fødselsdato (valgfritt)</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="issuing_authority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Utstedende myndighet (valgfritt)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="F.eks. Direktoratet for samfunnssikkerhet og beredskap" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notater (valgfritt)</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Eventuelle notater..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Avbryt
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Lagrer...' : 'Lagre sertifikat'}
-              </Button>
+            <div>
+              <Label htmlFor="expiry_date">Utløpsdato</Label>
+              <Input
+                id="expiry_date"
+                type="date"
+                value={formData.expiry_date}
+                onChange={(e) => setFormData({...formData, expiry_date: e.target.value})}
+                required
+              />
             </div>
-          </form>
-        </Form>
+          </div>
+
+          <div>
+            <Label htmlFor="issued_date">Utstedt dato</Label>
+            <Input
+              id="issued_date"
+              type="date"
+              value={formData.issued_date}
+              onChange={(e) => setFormData({...formData, issued_date: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="issuing_authority">Utstedende myndighet</Label>
+            <Input
+              id="issuing_authority"
+              value={formData.issuing_authority}
+              onChange={(e) => setFormData({...formData, issuing_authority: e.target.value})}
+              placeholder="F.eks. Direktoratet for byggkvalitet"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="notes">Notater</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              placeholder="Eventuelle notater eller kommentarer..."
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Avbryt
+            </Button>
+            <Button type="submit" disabled={createCertificate.isPending}>
+              {createCertificate.isPending ? 'Oppretter...' : 'Opprett sertifikat'}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
-}
+};

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText, Download, Sparkles } from 'lucide-react';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
-import { useToast } from '@/hooks/use-toast';
 
 interface AIReportGeneratorProps {
   dashboardData?: any;
@@ -14,21 +13,15 @@ interface AIReportGeneratorProps {
 export const AIReportGenerator = ({ dashboardData }: AIReportGeneratorProps) => {
   const [prompt, setPrompt] = useState('');
   const [generatedReport, setGeneratedReport] = useState('');
-  const { sendMessage, isLoading } = useAIAssistant();
-  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { sendMessage } = useAIAssistant();
 
   const generateReport = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: 'Feil',
-        description: 'Vennligst skriv inn en beskrivelse av rapporten du ønsker',
-        variant: 'destructive',
-      });
-      return;
-    }
+    if (!prompt.trim()) return;
     
-    try {
-      const reportPrompt = `Lag en detaljert rapport basert på denne forespørselen: "${prompt}"
+    setIsGenerating(true);
+    
+    const reportPrompt = `Lag en detaljert rapport basert på denne forespørselen: "${prompt}"
 
 Bruk følgende data fra systemet:
 ${JSON.stringify(dashboardData, null, 2)}
@@ -41,64 +34,41 @@ Lag en profesjonell rapport på norsk som inkluderer:
 
 Format rapporten med tydelige overskrifter og punktlister.`;
 
-      // For now, generate a mock report until AI integration is fully set up
+    try {
+      // Her ville vi kalt AI-tjenesten
       const mockReport = `# Reklamasjonsrapport
 
 ## Sammendrag
-Basert på dine data for siste periode viser analysen følgende hovedtrender og utviklingsmønstre.
+Basert på dine data for siste periode viser analysen følgende hovedtrender...
 
 ## Hovedfunn
-- Totalt antall reklamasjoner: ${Math.floor(Math.random() * 100) + 50}
-- Mest vanlige kategorier: Service (45%), Produkt (30%), Installasjon (25%)
-- Gjennomsnittlig behandlingstid: ${Math.floor(Math.random() * 10) + 5} dager
-- Kostnadstrend: ${Math.random() > 0.5 ? 'Nedadgående' : 'Oppadgående'}
+- Totalt antall reklamasjoner: [fra data]
+- Mest vanlige kategorier: Service (45%), Produkt (30%)
+- Gjennomsnittlig behandlingstid: X dager
 
 ## Anbefalinger
-1. Fokuser på forebyggende vedlikehold for å redusere servicereklamasjoner
-2. Styrk leverandørkommunikasjon for raskere problemløsning
-3. Implementer raskere responstid på kritiske saker
-4. Vurder tilleggsopplæring for teknisk personell
+1. Fokuser på forebyggende vedlikehold
+2. Styrk leverandørkommunikasjon
+3. Implementer raskere responstid
 
 ## Konklusjon
-Systemet viser forbedringspotensial innen behandlingstid og forebyggende tiltak. Anbefaler oppfølging av implementerte tiltak innen 30 dager.
-
----
-*Rapport generert: ${new Date().toLocaleDateString('nb-NO')}*`;
+Systemet viser forbedringspotensial innen...`;
 
       setGeneratedReport(mockReport);
-      
-      toast({
-        title: 'Rapport generert',
-        description: 'AI-rapporten er klar for nedlasting',
-      });
     } catch (error) {
       console.error('Error generating report:', error);
-      toast({
-        title: 'Feil ved generering av rapport',
-        description: 'Det oppstod en feil ved generering av rapporten. Prøv igjen.',
-        variant: 'destructive',
-      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
   const downloadReport = () => {
-    if (!generatedReport) {
-      toast({
-        title: 'Ingen rapport',
-        description: 'Generer en rapport først',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const blob = new Blob([generatedReport], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([generatedReport], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `myhrvold-mentor-rapport-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
+    a.download = 'myhrvold-mentor-rapport.txt';
     a.click();
-    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
@@ -125,11 +95,11 @@ Systemet viser forbedringspotensial innen behandlingstid og forebyggende tiltak.
         
         <Button 
           onClick={generateReport}
-          disabled={isLoading || !prompt.trim()}
+          disabled={isGenerating || !prompt.trim()}
           className="w-full"
         >
           <FileText className="w-4 h-4 mr-2" />
-          {isLoading ? 'Genererer rapport...' : 'Generer Rapport'}
+          {isGenerating ? 'Genererer rapport...' : 'Generer Rapport'}
         </Button>
 
         {generatedReport && (

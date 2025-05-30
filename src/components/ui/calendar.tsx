@@ -1,9 +1,9 @@
-
 import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
+
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -52,45 +52,13 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />
   );
 }
 Calendar.displayName = "Calendar";
-
-interface CalendarDateRangePickerProps {
-  dateRange: { start: Date; end: Date };
-  onDateRangeChange: (range: { start: Date; end: Date }) => void;
-}
-
-export function CalendarDateRangePicker({ dateRange, onDateRangeChange }: CalendarDateRangePickerProps) {
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center space-x-4">
-        <div className="grid gap-2">
-          <label className="text-sm font-medium">Fra dato</label>
-          <input
-            type="date"
-            value={dateRange.start.toISOString().split('T')[0]}
-            onChange={(e) => onDateRangeChange({ ...dateRange, start: new Date(e.target.value) })}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-        <div className="grid gap-2">
-          <label className="text-sm font-medium">Til dato</label>
-          <input
-            type="date"
-            value={dateRange.end.toISOString().split('T')[0]}
-            onChange={(e) => onDateRangeChange({ ...dateRange, end: new Date(e.target.value) })}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export { Calendar };

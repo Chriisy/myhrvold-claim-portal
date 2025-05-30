@@ -1,153 +1,145 @@
 
-import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { FullPageLoader } from "@/components/shared/LoadingSpinner";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { AuthProvider } from "./contexts/AuthContext";
+import { DashboardFiltersProvider } from "./contexts/DashboardFiltersContext";
+import { CookieConsentProvider } from "./contexts/CookieConsentContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { OptimizedErrorBoundary } from "./components/shared/OptimizedErrorBoundary";
+import React, { Suspense } from "react";
+import { OptimizedLoadingStates } from "./components/shared/OptimizedLoadingStates";
+import { motion } from "framer-motion";
+import "./App.css";
 
-// Lazy load pages for better performance
-import { lazy, Suspense } from "react";
-
-const Login = lazy(() => import("@/pages/Login"));
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const ClaimsList = lazy(() => import("@/pages/ClaimsList"));
-const ClaimDetail = lazy(() => import("@/pages/ClaimDetail"));
-const ClaimWizard = lazy(() => import("@/pages/ClaimWizard"));
-const Suppliers = lazy(() => import("@/pages/Suppliers"));
-const UserManagement = lazy(() => import("@/pages/UserManagement"));
-const Reports = lazy(() => import("@/pages/Reports"));
-const Installations = lazy(() => import("@/pages/Installations"));
-const InstallationDetail = lazy(() => import("@/pages/InstallationDetail"));
-const FGasCertificates = lazy(() => import("@/pages/FGasCertificates"));
-const InvoiceImport = lazy(() => import("@/pages/InvoiceImport"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+// Lazy load modules for better performance
+const Index = React.lazy(() => import("./pages/Index"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const ClaimsList = React.lazy(() => import("./pages/ClaimsList"));
+const ClaimDetail = React.lazy(() => import("./pages/ClaimDetail"));
+const ClaimWizard = React.lazy(() => import("./pages/ClaimWizard"));
+const Suppliers = React.lazy(() => import("./pages/Suppliers"));
+const Reports = React.lazy(() => import("./pages/Reports"));
+const UserManagement = React.lazy(() => import("./pages/UserManagement"));
+const UserProfile = React.lazy(() => import("./pages/UserProfile"));
+const FGasCertificates = React.lazy(() => import("./pages/FGasCertificates"));
+const InvoiceImport = React.lazy(() => import("./pages/InvoiceImport"));
+const Installations = React.lazy(() => import("./pages/Installations"));
+const InstallationDetail = React.lazy(() => import("./pages/InstallationDetail"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
+const CookiePolicy = React.lazy(() => import("./pages/CookiePolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes - longer cache for better performance
+      gcTime: 10 * 60 * 1000, // 10 minutes
       retry: (failureCount, error) => {
+        // Don't retry on 4xx errors (client errors)
         if (error && typeof error === 'object' && 'status' in error) {
-          const status = error.status as number;
-          if (status >= 400 && status < 500) return false;
+          const status = (error as any).status;
+          if (status >= 400 && status < 500) {
+            return false;
+          }
         }
         return failureCount < 3;
       },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
   },
 });
 
 function App() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
   return (
-    <ErrorBoundary>
+    <OptimizedErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <div className="min-h-screen bg-background">
-                {!isOnline && (
-                  <div className="bg-destructive text-destructive-foreground text-center py-2 text-sm">
-                    Du er offline. Noen funksjoner kan være begrenset.
-                  </div>
-                )}
-                <ErrorBoundary>
-                  <Suspense fallback={<FullPageLoader text="Laster side..." />}>
-                    <Routes>
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/" element={
-                        <ProtectedRoute>
-                          <Navigate to="/dashboard" replace />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dashboard" element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/claims" element={
-                        <ProtectedRoute>
-                          <ClaimsList />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/claims/new" element={
-                        <ProtectedRoute>
-                          <ClaimWizard />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/claims/:id" element={
-                        <ProtectedRoute>
-                          <ClaimDetail />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/suppliers" element={
-                        <ProtectedRoute>
-                          <Suppliers />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/users" element={
-                        <ProtectedRoute>
-                          <UserManagement />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/reports" element={
-                        <ProtectedRoute>
-                          <Reports />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/installations" element={
-                        <ProtectedRoute>
-                          <Installations />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/installations/:id" element={
-                        <ProtectedRoute>
-                          <InstallationDetail />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/certificates" element={
-                        <ProtectedRoute>
-                          <FGasCertificates />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/import" element={
-                        <ProtectedRoute>
-                          <InvoiceImport />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </ErrorBoundary>
-              </div>
-              <Toaster />
-              <Sonner />
-            </BrowserRouter>
-          </AuthProvider>
+          <CookieConsentProvider>
+            <AuthProvider>
+              <DashboardFiltersProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <Routes>
+                        {/* Public routes */}
+                        <Route path="/" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <Index />
+                          </Suspense>
+                        } />
+                        <Route path="/login" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Form />}>
+                            <Login />
+                          </Suspense>
+                        } />
+                        <Route path="/privacy" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <PrivacyPolicy />
+                          </Suspense>
+                        } />
+                        <Route path="/terms" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <TermsOfService />
+                          </Suspense>
+                        } />
+                        <Route path="/cookies" element={
+                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                            <CookiePolicy />
+                          </Suspense>
+                        } />
+                        
+                        {/* Protected routes with sidebar */}
+                        <Route path="/*" element={
+                          <ProtectedRoute>
+                            <div className="flex w-full">
+                              <AppSidebar />
+                              <motion.main 
+                                className="flex-1 overflow-auto"
+                                layout="position"
+                                transition={{ duration: 0.2 }}
+                              >
+                                <OptimizedErrorBoundary>
+                                  <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
+                                    <Routes>
+                                      <Route path="/dashboard" element={<Dashboard />} />
+                                      <Route path="/claims" element={<ClaimsList />} />
+                                      <Route path="/claims/:id" element={<ClaimDetail />} />
+                                      <Route path="/claims/new" element={<ClaimWizard />} />
+                                      <Route path="/suppliers" element={<Suppliers />} />
+                                      <Route path="/reports" element={<Reports />} />
+                                      <Route path="/users" element={<UserManagement />} />
+                                      <Route path="/profile" element={<UserProfile />} />
+                                      <Route path="/certificates" element={<FGasCertificates />} />
+                                      <Route path="/import" element={<InvoiceImport />} />
+                                      <Route path="/installations" element={<Installations />} />
+                                      <Route path="/installations/:id" element={<InstallationDetail />} />
+                                      <Route path="*" element={<NotFound />} />
+                                    </Routes>
+                                  </Suspense>
+                                </OptimizedErrorBoundary>
+                              </motion.main>
+                            </div>
+                          </ProtectedRoute>
+                        } />
+                      </Routes>
+                    </div>
+                  </SidebarProvider>
+                </BrowserRouter>
+              </DashboardFiltersProvider>
+            </AuthProvider>
+          </CookieConsentProvider>
         </TooltipProvider>
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
-    </ErrorBoundary>
+    </OptimizedErrorBoundary>
   );
 }
 

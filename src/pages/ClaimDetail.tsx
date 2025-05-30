@@ -22,7 +22,7 @@ const ClaimDetail = () => {
 
   if (!id) {
     return (
-      <div className="space-y-6 animate-fade-in p-6">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div>
@@ -36,7 +36,7 @@ const ClaimDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in p-6">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div>
@@ -53,7 +53,7 @@ const ClaimDetail = () => {
 
   if (error || !claim) {
     return (
-      <div className="space-y-6 animate-fade-in p-6">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <Link to="/claims">
@@ -78,7 +78,7 @@ const ClaimDetail = () => {
   const displayTitle = claim.display_id || id;
 
   return (
-    <div className="space-y-6 animate-fade-in p-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <Link to="/claims">
