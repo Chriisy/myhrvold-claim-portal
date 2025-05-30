@@ -1,146 +1,105 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from './contexts/AuthContext';
+import { CookieConsentProvider } from './contexts/CookieConsentContext';
+import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
+import DashboardLayout from './components/layout/DashboardLayout';
+import { ClaimList } from './components/claims/ClaimList';
+import { SupplierList } from './components/suppliers/SupplierList';
+import { UserList } from './components/users/UserList';
+import { ReportDashboard } from './components/reports/ReportDashboard';
+import { RequireAuth } from './components/auth/RequireAuth';
+import { Login } from './components/auth/Login';
+import { Register } from './components/auth/Register';
+import { ForgotPassword } from './components/auth/ForgotPassword';
+import { ResetPassword } from './components/auth/ResetPassword';
+import { Impersonate } from './components/admin/Impersonate';
+import { AddClaimModal } from './components/claims/AddClaimModal';
+import { EditClaimModal } from './components/claims/EditClaimModal';
+import { ClaimDetails } from './components/claims/ClaimDetails';
+import { SupplierDetails } from './components/suppliers/SupplierDetails';
+import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
+import { EditSupplierModal } from './components/suppliers/EditSupplierModal';
+import { UserDetails } from './components/users/UserDetails';
+import { AddUserModal } from './components/users/AddUserModal';
+import { EditUserModal } from './components/users/EditUserModal';
+import { FGasCertificateDashboard } from './components/certificates/FGasCertificateDashboard';
+import { AddCertificateModal } from './components/certificates/AddCertificateModal';
+import { EditCertificateModal } from './components/certificates/EditCertificateModal';
+import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
+import { PWAInstallButton } from '@/components/shared/PWAInstallButton';
+import { TouchOptimizedNav } from '@/components/shared/TouchOptimizedNav';
+import { pwaManager } from '@/utils/pwa';
+import { useEffect } from 'react';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { AuthProvider } from "./contexts/AuthContext";
-import { DashboardFiltersProvider } from "./contexts/DashboardFiltersContext";
-import { CookieConsentProvider } from "./contexts/CookieConsentContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { OptimizedErrorBoundary } from "./components/shared/OptimizedErrorBoundary";
-import React, { Suspense } from "react";
-import { OptimizedLoadingStates } from "./components/shared/OptimizedLoadingStates";
-import { motion } from "framer-motion";
-import "./App.css";
+const queryClient = new QueryClient();
 
-// Lazy load modules for better performance
-const Index = React.lazy(() => import("./pages/Index"));
-const Login = React.lazy(() => import("./pages/Login"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
-const ClaimsList = React.lazy(() => import("./pages/ClaimsList"));
-const ClaimDetail = React.lazy(() => import("./pages/ClaimDetail"));
-const ClaimWizard = React.lazy(() => import("./pages/ClaimWizard"));
-const Suppliers = React.lazy(() => import("./pages/Suppliers"));
-const Reports = React.lazy(() => import("./pages/Reports"));
-const UserManagement = React.lazy(() => import("./pages/UserManagement"));
-const UserProfile = React.lazy(() => import("./pages/UserProfile"));
-const FGasCertificates = React.lazy(() => import("./pages/FGasCertificates"));
-const InvoiceImport = React.lazy(() => import("./pages/InvoiceImport"));
-const Installations = React.lazy(() => import("./pages/Installations"));
-const InstallationDetail = React.lazy(() => import("./pages/InstallationDetail"));
-const NotFound = React.lazy(() => import("./pages/NotFound"));
-const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
-const CookiePolicy = React.lazy(() => import("./pages/CookiePolicy"));
+const App = () => {
+  useEffect(() => {
+    // Initialize PWA on app start
+    pwaManager.registerServiceWorker();
+    
+    // Request notification permission on user interaction
+    const requestNotifications = async () => {
+      const permission = await pwaManager.requestNotificationPermission();
+      console.log('Notification permission:', permission);
+    };
+    
+    // Add click listener for notification permission
+    document.addEventListener('click', requestNotifications, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', requestNotifications);
+    };
+  }, []);
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - longer cache for better performance
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: (failureCount, error) => {
-        // Don't retry on 4xx errors (client errors)
-        if (error && typeof error === 'object' && 'status' in error) {
-          const status = (error as any).status;
-          if (status >= 400 && status < 500) {
-            return false;
-          }
-        }
-        return failureCount < 3;
-      },
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    },
-  },
-});
-
-function App() {
   return (
-    <OptimizedErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <CookieConsentProvider>
-            <AuthProvider>
-              <DashboardFiltersProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CookieConsentProvider>
+          <DashboardFiltersProvider>
+            <Router>
+              <div className="min-h-screen bg-background">
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password/:token" element={<ResetPassword />} />
+                  
+                  <Route path="/impersonate/:userId" element={<Impersonate />} />
+
+                  <Route path="/" element={<RequireAuth><DashboardLayout><ClaimList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetails /></DashboardLayout></RequireAuth>} />
+                  <Route path="/suppliers" element={<RequireAuth><DashboardLayout><SupplierList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
+                  <Route path="/users" element={<RequireAuth><DashboardLayout><UserList /></DashboardLayout></RequireAuth>} />
+                  <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
+                  <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificateDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
+
+                  {/* Modals as routes */}
+                  <Route path="/claims/add" element={<AddClaimModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/claims/edit/:id" element={<EditClaimModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/suppliers/add" element={<AddSupplierModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/suppliers/edit/:id" element={<EditSupplierModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/users/add" element={<AddUserModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/users/edit/:id" element={<EditUserModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/f-gas-certificates/add" element={<AddCertificateModal open={true} onClose={() => { window.history.back(); }} />} />
+                  <Route path="/f-gas-certificates/edit/:id" element={<EditCertificateModal open={true} onClose={() => { window.history.back(); }} certificate={null} />} />
+                </Routes>
                 <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <SidebarProvider>
-                    <div className="min-h-screen flex w-full">
-                      <Routes>
-                        {/* Public routes */}
-                        <Route path="/" element={
-                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
-                            <Index />
-                          </Suspense>
-                        } />
-                        <Route path="/login" element={
-                          <Suspense fallback={<OptimizedLoadingStates.Form />}>
-                            <Login />
-                          </Suspense>
-                        } />
-                        <Route path="/privacy" element={
-                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
-                            <PrivacyPolicy />
-                          </Suspense>
-                        } />
-                        <Route path="/terms" element={
-                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
-                            <TermsOfService />
-                          </Suspense>
-                        } />
-                        <Route path="/cookies" element={
-                          <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
-                            <CookiePolicy />
-                          </Suspense>
-                        } />
-                        
-                        {/* Protected routes with sidebar */}
-                        <Route path="/*" element={
-                          <ProtectedRoute>
-                            <div className="flex w-full">
-                              <AppSidebar />
-                              <motion.main 
-                                className="flex-1 overflow-auto"
-                                layout="position"
-                                transition={{ duration: 0.2 }}
-                              >
-                                <OptimizedErrorBoundary>
-                                  <Suspense fallback={<OptimizedLoadingStates.Dashboard />}>
-                                    <Routes>
-                                      <Route path="/dashboard" element={<Dashboard />} />
-                                      <Route path="/claims" element={<ClaimsList />} />
-                                      <Route path="/claims/:id" element={<ClaimDetail />} />
-                                      <Route path="/claims/new" element={<ClaimWizard />} />
-                                      <Route path="/suppliers" element={<Suppliers />} />
-                                      <Route path="/reports" element={<Reports />} />
-                                      <Route path="/users" element={<UserManagement />} />
-                                      <Route path="/profile" element={<UserProfile />} />
-                                      <Route path="/certificates" element={<FGasCertificates />} />
-                                      <Route path="/import" element={<InvoiceImport />} />
-                                      <Route path="/installations" element={<Installations />} />
-                                      <Route path="/installations/:id" element={<InstallationDetail />} />
-                                      <Route path="*" element={<NotFound />} />
-                                    </Routes>
-                                  </Suspense>
-                                </OptimizedErrorBoundary>
-                              </motion.main>
-                            </div>
-                          </ProtectedRoute>
-                        } />
-                      </Routes>
-                    </div>
-                  </SidebarProvider>
-                </BrowserRouter>
-              </DashboardFiltersProvider>
-            </AuthProvider>
-          </CookieConsentProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </OptimizedErrorBoundary>
+                <PWAInstallButton />
+                <TouchOptimizedNav />
+              </div>
+            </Router>
+          </DashboardFiltersProvider>
+        </CookieConsentProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
-}
+};
 
 export default App;

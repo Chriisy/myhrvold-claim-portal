@@ -19,4 +19,42 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // Performance optimizations
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-button'],
+          charts: ['recharts'],
+          router: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    },
+    // Enable code splitting
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: true
+      }
+    },
+    // Asset optimization
+    assetsInlineLimit: 4096,
+    cssCodeSplit: true,
+    sourcemap: mode === 'development'
+  },
+  // Performance optimizations for development
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@supabase/supabase-js'
+    ]
+  }
 }));
