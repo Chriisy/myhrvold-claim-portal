@@ -6,6 +6,7 @@ export interface UserWithPermissions {
   id: string;
   name: string;
   email: string;
+  role: string; // Added missing role property
   user_role: string;
   department: string;
   created_at: string;
@@ -49,6 +50,7 @@ export const useOptimizedUsers = () => {
 
         return (users || []).map(user => ({
           ...user,
+          role: user.role || user.user_role, // Map role property to ensure compatibility
           permissions: permissionsByUser[user.id] || []
         }));
       } catch (error) {

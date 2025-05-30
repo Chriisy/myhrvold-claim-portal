@@ -27,8 +27,8 @@ const FGasCertificates = lazy(() => import("@/pages/FGasCertificates"));
 const InvoiceImport = lazy(() => import("@/pages/InvoiceImport"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
-// Protected route wrapper
-const ProtectedRoute = lazy(() => import("@/components/ProtectedRoute"));
+// Import ProtectedRoute normally since it's used frequently
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
