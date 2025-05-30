@@ -1,40 +1,39 @@
 
-import React, { Component, ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Props {
   children: ReactNode;
+  title?: string;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: any) => void;
 }
 
 interface State {
   hasError: boolean;
-  error?: Error;
+  error: Error | null;
 }
 
 export class OptimizedErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  public state: State = {
+    hasError: false,
+    error: null
+  };
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    this.props.onError?.(error, errorInfo);
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('OptimizedErrorBoundary caught an error:', error, errorInfo);
   }
 
-  handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+  private handleReset = () => {
+    this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
@@ -45,7 +44,7 @@ export class OptimizedErrorBoundary extends Component<Props, State> {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-red-800">
               <AlertTriangle className="w-5 h-5" />
-              <span>Noe gikk galt</span>
+              <span>{this.props.title || 'Noe gikk galt'}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -57,7 +56,7 @@ export class OptimizedErrorBoundary extends Component<Props, State> {
                 <summary className="cursor-pointer text-sm font-medium">
                   Tekniske detaljer (kun synlig i utvikling)
                 </summary>
-                <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto">
+                <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto max-h-40">
                   {this.state.error.stack}
                 </pre>
               </details>

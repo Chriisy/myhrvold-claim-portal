@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
@@ -9,7 +8,7 @@ import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import DashboardLayout from './components/layout/DashboardLayout';
 import OptimizedDashboard from './components/dashboard/OptimizedDashboard';
 import UserManagement from './pages/UserManagement';
-import { ReportDashboard } from './components/reports/ReportDashboard';
+import Reports from './pages/Reports';
 import { RequireAuth } from './components/auth/RequireAuth';
 import Login from './pages/Login';
 import ClaimsList from './pages/ClaimsList';
@@ -81,7 +80,7 @@ const App = () => {
                     <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
                     <Route path="/users" element={<RequireAuth><DashboardLayout><UserManagement /></DashboardLayout></RequireAuth>} />
                     <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
-                    <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
+                    <Route path="/reports" element={<RequireAuth><DashboardLayout><Reports /></DashboardLayout></RequireAuth>} />
                     <Route path="/certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
                     <Route path="/import" element={<RequireAuth><DashboardLayout><InvoiceImport /></DashboardLayout></RequireAuth>} />
                     <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
