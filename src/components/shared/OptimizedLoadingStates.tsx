@@ -60,6 +60,24 @@ export const OptimizedLoadingStates = {
     </div>
   ),
 
+  Table: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex space-x-4">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 flex-1" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  ),
+
   Spinner: ({ text }: { text?: string }) => (
     <div className="flex flex-col items-center justify-center py-12">
       <LoadingSpinner size="lg" text={text} />
