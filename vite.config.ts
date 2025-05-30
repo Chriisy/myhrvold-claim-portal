@@ -15,7 +15,9 @@ const SUPABASE_PKGS = [
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
@@ -30,28 +32,22 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks(id) {
+          // Handle Supabase separately to avoid CJS/ESM conflicts
+          if (id.includes('@supabase')) {
+            return 'supabase';
+          }
           // Core vendor chunks
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          
-          // UI framework chunks
-          'ui-core': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          'ui-forms': ['@radix-ui/react-checkbox', '@radix-ui/react-radio-group', '@radix-ui/react-switch'],
-          'ui-navigation': ['@radix-ui/react-navigation-menu', '@radix-ui/react-tabs', '@radix-ui/react-accordion'],
-          
-          // Heavy libraries
-          charts: ['recharts'],
-          query: ['@tanstack/react-query'],
-          animations: ['framer-motion'],
-          
-          // Data processing
-          'data-utils': ['date-fns', 'uuid'],
-          'file-utils': ['jspdf', 'jspdf-autotable', 'xlsx', 'papaparse'],
-          
-          // Utility chunks
-          utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
-          icons: ['lucide-react']
+          if (id.includes('node_modules')) {
+            if (id.includes('react-router-dom')) return 'router';
+            if (id.includes('@radix-ui')) return 'ui-core';
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('@tanstack/react-query')) return 'query';
+            if (id.includes('framer-motion')) return 'animations';
+            if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('react') || id.includes('react-dom')) return 'vendor';
+            return 'vendor-misc';
+          }
         }
       }
     },
@@ -76,7 +72,10 @@ export default defineConfig(({ mode }) => ({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu'
     ],
-    exclude: SUPABASE_PKGS
+    exclude: SUPABASE_PKGS,
+    esbuildOptions: {
+      target: 'esnext',
+    }
   },
   ssr: {
     noExternal: SUPABASE_PKGS

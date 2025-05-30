@@ -1,114 +1,53 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { ErrorService } from '@/services/errorHandling/errorService';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+
+export interface OptimizedSupplier {
+  id: string;
+  name: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  created_at: string;
+  claims_count?: number;
+  total_cost?: number;
+}
 
 export const useOptimizedSuppliers = () => {
   return useQuery({
-    queryKey: ['suppliers'],
-    queryFn: async () => {
+    queryKey: ['optimized-suppliers'],
+    queryFn: async (): Promise<OptimizedSupplier[]> => {
       try {
-        const { data, error } = await supabase
+        const { data: suppliers, error } = await supabase
           .from('suppliers')
-          .select('*')
+          .select(`
+            id,
+            name,
+            contact_name,
+            contact_email,
+            contact_phone,
+            created_at
+          `)
           .is('deleted_at', null)
           .order('name');
 
-        if (error) throw error;
-        return data || [];
+        if (error) {
+          console.error('Error fetching suppliers:', error);
+          throw error;
+        }
+
+        // TODO: Add claims count and total cost aggregation
+        return (suppliers || []).map(supplier => ({
+          ...supplier,
+          claims_count: 0,
+          total_cost: 0
+        }));
       } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'laste leverandører', {
-          component: 'useOptimizedSuppliers',
-          severity: 'high'
-        });
+        console.error('Error in useOptimizedSuppliers:', error);
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => ErrorService.shouldRetryQuery(failureCount, error),
-  });
-};
-
-export const useCreateSupplier = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (supplierData: any) => {
-      try {
-        const { data, error } = await supabase
-          .from('suppliers')
-          .insert([supplierData])
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'opprette leverandør', {
-          component: 'useCreateSupplier',
-          severity: 'medium'
-        });
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      toast({
-        title: "Leverandør opprettet",
-        description: "Leverandøren er lagt til i systemet",
-      });
-    },
-    onError: (error) => {
-      console.error('Create supplier error:', error);
-      toast({
-        title: "Feil",
-        description: "Kunne ikke opprette leverandør",
-        variant: "destructive"
-      });
-    }
-  });
-};
-
-export const useUpdateSupplier = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      try {
-        const { data, error } = await supabase
-          .from('suppliers')
-          .update(updates)
-          .eq('id', id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'oppdatere leverandør', {
-          component: 'useUpdateSupplier',
-          severity: 'medium'
-        });
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      toast({
-        title: "Leverandør oppdatert",
-        description: "Endringene er lagret",
-      });
-    },
-    onError: (error) => {
-      console.error('Update supplier error:', error);
-      toast({
-        title: "Feil",
-        description: "Kunne ikke oppdatere leverandør",
-        variant: "destructive"
-      });
-    }
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    retry: 2,
   });
 };

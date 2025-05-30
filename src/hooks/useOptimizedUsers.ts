@@ -1,71 +1,62 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { ErrorService } from '@/services/errorHandling/errorService';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+
+export interface UserWithPermissions {
+  id: string;
+  name: string;
+  email: string;
+  user_role: string;
+  department: string;
+  created_at: string;
+  seller_no?: number;
+  permissions?: string[];
+}
 
 export const useOptimizedUsers = () => {
   return useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
+    queryKey: ['optimized-users'],
+    queryFn: async (): Promise<UserWithPermissions[]> => {
       try {
-        const { data, error } = await supabase
+        const { data: users, error: usersError } = await supabase
           .from('users')
           .select('*')
           .order('name');
 
-        if (error) throw error;
-        return data || [];
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          throw usersError;
+        }
+
+        // Fetch permissions for all users
+        const { data: permissions, error: permissionsError } = await supabase
+          .from('user_permissions')
+          .select('user_id, permission_name');
+
+        if (permissionsError) {
+          console.error('Error fetching permissions:', permissionsError);
+          // Don't throw here, just log and continue without permissions
+        }
+
+        // Map permissions to users
+        const permissionsByUser = permissions?.reduce((acc, perm) => {
+          if (!acc[perm.user_id]) {
+            acc[perm.user_id] = [];
+          }
+          acc[perm.user_id].push(perm.permission_name);
+          return acc;
+        }, {} as Record<string, string[]>) || {};
+
+        return (users || []).map(user => ({
+          ...user,
+          permissions: permissionsByUser[user.id] || []
+        }));
       } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'laste brukere', {
-          component: 'useOptimizedUsers',
-          severity: 'high'
-        });
+        console.error('Error in useOptimizedUsers:', error);
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => ErrorService.shouldRetryQuery(failureCount, error),
-  });
-};
-
-export const useCreateUser = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (userData: any) => {
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .insert([userData])
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        ErrorService.handleSupabaseError(error as any, 'opprette bruker', {
-          component: 'useCreateUser',
-          severity: 'high'
-        });
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast({
-        title: "Bruker opprettet",
-        description: "Brukeren er lagt til i systemet",
-      });
-    },
-    onError: (error) => {
-      console.error('Create user error:', error);
-      toast({
-        title: "Feil",
-        description: "Kunne ikke opprette bruker",
-        variant: "destructive"
-      });
-    }
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
   });
 };

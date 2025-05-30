@@ -1,139 +1,155 @@
 
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from './contexts/AuthContext';
-import { CookieConsentProvider } from './contexts/CookieConsentContext';
-import { DashboardFiltersProvider } from './contexts/DashboardFiltersContext';
-import { ErrorBoundary } from './components/shared/ErrorBoundary';
-import DashboardLayout from './components/layout/DashboardLayout';
-import OptimizedDashboard from './components/dashboard/OptimizedDashboard';
-import UserManagement from './pages/UserManagement';
-import Reports from './pages/Reports';
-import { RequireAuth } from './components/auth/RequireAuth';
-import Login from './pages/Login';
-import ClaimsList from './pages/ClaimsList';
-import ClaimDetail from './pages/ClaimDetail';
-import Suppliers from './pages/Suppliers';
-import Installations from './pages/Installations';
-import InstallationDetail from './pages/InstallationDetail';
-import FGasCertificates from './pages/FGasCertificates';
-import InvoiceImport from './pages/InvoiceImport';
-import { Register } from './components/auth/Register';
-import { ForgotPassword } from './components/auth/ForgotPassword';
-import { ResetPassword } from './components/auth/ResetPassword';
-import { Impersonate } from './components/admin/Impersonate';
-import { AddClaimModal } from './components/claims/AddClaimModal';
-import { EditClaimModal } from './components/claims/EditClaimModal';
-import { SupplierDetails } from './components/suppliers/SupplierDetails';
-import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
-import { UserDetails } from './components/users/UserDetails';
-import { AddUserModal } from './components/users/AddUserModal';
-import { EditUserModal } from './components/users/EditUserModal';
-import { AddCertificateModal } from './components/certificates/AddCertificateModal';
-import { EditCertificateModal } from './components/certificates/EditCertificateModal';
-import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
+import { useEffect, useState } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { FullPageLoader } from "@/components/shared/LoadingSpinner";
 
-// Optimized QueryClient configuration
+// Lazy load pages for better performance
+import { lazy, Suspense } from "react";
+
+const Login = lazy(() => import("@/pages/Login"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const ClaimsList = lazy(() => import("@/pages/ClaimsList"));
+const ClaimDetail = lazy(() => import("@/pages/ClaimDetail"));
+const ClaimWizard = lazy(() => import("@/pages/ClaimWizard"));
+const Suppliers = lazy(() => import("@/pages/Suppliers"));
+const UserManagement = lazy(() => import("@/pages/UserManagement"));
+const Reports = lazy(() => import("@/pages/Reports"));
+const Installations = lazy(() => import("@/pages/Installations"));
+const InstallationDetail = lazy(() => import("@/pages/InstallationDetail"));
+const FGasCertificates = lazy(() => import("@/pages/FGasCertificates"));
+const InvoiceImport = lazy(() => import("@/pages/InvoiceImport"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+
+// Protected route wrapper
+const ProtectedRoute = lazy(() => import("@/components/ProtectedRoute"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors
         if (error && typeof error === 'object' && 'status' in error) {
-          return (error as any).status >= 500 && failureCount < 2;
+          const status = error.status as number;
+          if (status >= 400 && status < 500) return false;
         }
-        return failureCount < 2;
+        return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
-    },
-    mutations: {
-      retry: 1,
     },
   },
 });
 
-const App = () => {
+function App() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Router>
+        <TooltipProvider>
           <AuthProvider>
-            <CookieConsentProvider>
-              <DashboardFiltersProvider>
-                <div className="min-h-screen bg-background w-full">
+            <BrowserRouter>
+              <div className="min-h-screen bg-background">
+                {!isOnline && (
+                  <div className="bg-destructive text-destructive-foreground text-center py-2 text-sm">
+                    Du er offline. Noen funksjoner kan være begrenset.
+                  </div>
+                )}
+                <Suspense fallback={<FullPageLoader text="Laster side..." />}>
                   <Routes>
                     <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password/:token" element={<ResetPassword />} />
-                    
-                    <Route path="/impersonate/:userId" element={<Impersonate />} />
-
-                    <Route path="/" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
-                    <Route path="/dashboard" element={<RequireAuth><DashboardLayout><OptimizedDashboard /></DashboardLayout></RequireAuth>} />
-                    <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimsList /></DashboardLayout></RequireAuth>} />
-                    <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetail /></DashboardLayout></RequireAuth>} />
-                    <Route path="/installations" element={<RequireAuth><DashboardLayout><Installations /></DashboardLayout></RequireAuth>} />
-                    <Route path="/installations/:id" element={<RequireAuth><DashboardLayout><InstallationDetail /></DashboardLayout></RequireAuth>} />
-                    <Route path="/suppliers" element={<RequireAuth><DashboardLayout><Suppliers /></DashboardLayout></RequireAuth>} />
-                    <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
-                    <Route path="/users" element={<RequireAuth><DashboardLayout><UserManagement /></DashboardLayout></RequireAuth>} />
-                    <Route path="/users/:id" element={<RequireAuth><DashboardLayout><UserDetails /></DashboardLayout></RequireAuth>} />
-                    <Route path="/reports" element={<RequireAuth><DashboardLayout><Reports /></DashboardLayout></RequireAuth>} />
-                    <Route path="/certificates" element={<RequireAuth><DashboardLayout><FGasCertificates /></DashboardLayout></RequireAuth>} />
-                    <Route path="/import" element={<RequireAuth><DashboardLayout><InvoiceImport /></DashboardLayout></RequireAuth>} />
-                    <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
-
-                    {/* Modals as routes wrapped in ErrorBoundary */}
-                    <Route path="/claims/add" element={
-                      <ErrorBoundary>
-                        <AddClaimModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Navigate to="/dashboard" replace />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/claims/edit/:id" element={
-                      <ErrorBoundary>
-                        <EditClaimModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/suppliers/add" element={
-                      <ErrorBoundary>
-                        <AddSupplierModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/claims" element={
+                      <ProtectedRoute>
+                        <ClaimsList />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/users/add" element={
-                      <ErrorBoundary>
-                        <AddUserModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/claims/new" element={
+                      <ProtectedRoute>
+                        <ClaimWizard />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/users/edit/:id" element={
-                      <ErrorBoundary>
-                        <EditUserModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/claims/:id" element={
+                      <ProtectedRoute>
+                        <ClaimDetail />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/certificates/add" element={
-                      <ErrorBoundary>
-                        <AddCertificateModal open={true} onClose={() => { window.history.back(); }} />
-                      </ErrorBoundary>
+                    <Route path="/suppliers" element={
+                      <ProtectedRoute>
+                        <Suppliers />
+                      </ProtectedRoute>
                     } />
-                    <Route path="/certificates/edit/:id" element={
-                      <ErrorBoundary>
-                        <EditCertificateModal open={true} onClose={() => { window.history.back(); }} certificate={null} />
-                      </ErrorBoundary>
+                    <Route path="/users" element={
+                      <ProtectedRoute>
+                        <UserManagement />
+                      </ProtectedRoute>
                     } />
+                    <Route path="/reports" element={
+                      <ProtectedRoute>
+                        <Reports />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/installations" element={
+                      <ProtectedRoute>
+                        <Installations />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/installations/:id" element={
+                      <ProtectedRoute>
+                        <InstallationDetail />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/certificates" element={
+                      <ProtectedRoute>
+                        <FGasCertificates />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/import" element={
+                      <ProtectedRoute>
+                        <InvoiceImport />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
-                  <Toaster />
-                </div>
-              </DashboardFiltersProvider>
-            </CookieConsentProvider>
+                </Suspense>
+              </div>
+              <Toaster />
+              <Sonner />
+            </BrowserRouter>
           </AuthProvider>
-        </Router>
+        </TooltipProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ErrorBoundary>
   );
-};
+}
 
 export default App;
