@@ -87,6 +87,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPending, startTransition] = useTransition();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await logout();
@@ -107,7 +108,7 @@ export function AppSidebar() {
   });
 
   return (
-    <Sidebar>
+    <Sidebar className={isMobile ? "fixed inset-y-0 left-0 z-50 w-64" : ""}>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Reklamasjonssystem</SidebarGroupLabel>
@@ -118,17 +119,19 @@ export function AppSidebar() {
                   <SidebarMenuButton 
                     asChild
                     isActive={location.pathname === item.url || (item.url !== '/dashboard' && location.pathname.startsWith(item.url))}
+                    className={isMobile ? "h-12 text-base" : ""}
                   >
                     <a 
                       href={item.url}
-                      onMouseEnter={() => item.preload?.().catch(console.warn)}
+                      onMouseEnter={() => !isMobile && item.preload?.().catch(console.warn)}
                       onFocus={() => item.preload?.().catch(console.warn)}
                       onClick={(e) => {
                         e.preventDefault();
                         handleNavigation(item.url);
                       }}
+                      className={isMobile ? "touch-manipulation" : ""}
                     >
-                      <item.icon />
+                      <item.icon className={isMobile ? "w-5 h-5" : ""} />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -143,7 +146,12 @@ export function AppSidebar() {
           <div className="text-sm text-gray-600 mb-2">
             Innlogget som: {user?.name}
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full">
+          <Button 
+            variant="outline" 
+            size={isMobile ? "default" : "sm"} 
+            onClick={handleSignOut} 
+            className={`w-full ${isMobile ? 'h-12 text-base touch-manipulation' : ''}`}
+          >
             Logg ut
           </Button>
         </div>
