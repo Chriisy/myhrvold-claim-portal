@@ -57,6 +57,21 @@ export class PWAManager {
             });
           }
         });
+
+        // Listen for messages from service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          console.log('PWA: Message from service worker:', event.data);
+          
+          if (event.data.type === 'sync-success') {
+            window.dispatchEvent(new CustomEvent('sync-success', {
+              detail: event.data.data
+            }));
+          } else if (event.data.type === 'sync-failed') {
+            window.dispatchEvent(new CustomEvent('sync-failed', {
+              detail: event.data.data
+            }));
+          }
+        });
       } catch (error) {
         console.error('Service Worker registration failed:', error);
       }
@@ -131,6 +146,86 @@ export class PWAManager {
       }
     }
     return null;
+  }
+
+  // Send a test push notification
+  async sendTestNotification(title: string, body: string, options: NotificationOptions = {}) {
+    const permission = await this.requestNotificationPermission();
+    
+    if (permission === 'granted') {
+      const defaultOptions: NotificationOptions = {
+        body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        vibrate: [100, 50, 100],
+        tag: 'test-notification',
+        requireInteraction: false,
+        silent: false,
+        ...options
+      };
+
+      new Notification(title, defaultOptions);
+      return true;
+    }
+    
+    return false;
+  }
+
+  // Trigger background sync
+  async triggerBackgroundSync(tag: string = 'background-sync'): Promise<boolean> {
+    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.sync.register(tag);
+        console.log('Background sync registered:', tag);
+        return true;
+      } catch (error) {
+        console.error('Background sync registration failed:', error);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // Force service worker update
+  async forceUpdate(): Promise<boolean> {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          await registration.update();
+          
+          // If there's a waiting worker, tell it to skip waiting
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            return true;
+          }
+        }
+      } catch (error) {
+        console.error('Force update failed:', error);
+      }
+    }
+    return false;
+  }
+
+  // Check if app is running as PWA
+  isRunningAsPWA(): boolean {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           (window.navigator as any).standalone === true ||
+           document.referrer.includes('android-app://');
+  }
+
+  // Get network status
+  getNetworkStatus(): { online: boolean; type?: string; downlink?: number } {
+    const connection = (navigator as any).connection || 
+                      (navigator as any).mozConnection || 
+                      (navigator as any).webkitConnection;
+    
+    return {
+      online: navigator.onLine,
+      type: connection?.effectiveType,
+      downlink: connection?.downlink
+    };
   }
 
   private urlBase64ToUint8Array(base64String: string): Uint8Array {

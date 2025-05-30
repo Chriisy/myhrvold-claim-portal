@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
@@ -20,7 +21,6 @@ import { EditClaimModal } from './components/claims/EditClaimModal';
 import { ClaimDetails } from './components/claims/ClaimDetails';
 import { SupplierDetails } from './components/suppliers/SupplierDetails';
 import { AddSupplierModal } from './components/suppliers/AddSupplierModal';
-import { EditSupplierModal } from './components/suppliers/EditSupplierModal';
 import { UserDetails } from './components/users/UserDetails';
 import { AddUserModal } from './components/users/AddUserModal';
 import { EditUserModal } from './components/users/EditUserModal';
@@ -30,6 +30,8 @@ import { EditCertificateModal } from './components/certificates/EditCertificateM
 import { InternalControlDashboard } from './components/certificates/internal-control/InternalControlDashboard';
 import { PWAInstallButton } from '@/components/shared/PWAInstallButton';
 import { TouchOptimizedNav } from '@/components/shared/TouchOptimizedNav';
+import { PushNotificationSettings } from '@/components/shared/PushNotificationSettings';
+import { OfflineFormHandler } from '@/components/shared/OfflineFormHandler';
 import { pwaManager } from '@/utils/pwa';
 import { useEffect } from 'react';
 
@@ -79,12 +81,12 @@ const App = () => {
                   <Route path="/reports" element={<RequireAuth><DashboardLayout><ReportDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/f-gas-certificates" element={<RequireAuth><DashboardLayout><FGasCertificateDashboard /></DashboardLayout></RequireAuth>} />
                   <Route path="/internal-control" element={<RequireAuth><DashboardLayout><InternalControlDashboard /></DashboardLayout></RequireAuth>} />
+                  <Route path="/pwa-settings" element={<RequireAuth><DashboardLayout><div className="p-6 space-y-6"><PushNotificationSettings /><OfflineFormHandler /></div></DashboardLayout></RequireAuth>} />
 
                   {/* Modals as routes */}
                   <Route path="/claims/add" element={<AddClaimModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/claims/edit/:id" element={<EditClaimModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/suppliers/add" element={<AddSupplierModal open={true} onClose={() => { window.history.back(); }} />} />
-                  <Route path="/suppliers/edit/:id" element={<EditSupplierModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/users/add" element={<AddUserModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/users/edit/:id" element={<EditUserModal open={true} onClose={() => { window.history.back(); }} />} />
                   <Route path="/f-gas-certificates/add" element={<AddCertificateModal open={true} onClose={() => { window.history.back(); }} />} />
