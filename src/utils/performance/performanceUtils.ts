@@ -1,79 +1,75 @@
 
-import { useCallback, useRef, useEffect } from 'react';
-import { debounce } from 'lodash';
+import { useCallback, useRef } from 'react';
 
-// Debounce hook
 export const useDebounce = <T extends (...args: any[]) => any>(
   callback: T,
   delay: number
 ): T => {
-  const debouncedCallback = useRef(debounce(callback, delay));
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
-    debouncedCallback.current = debounce(callback, delay);
-  }, [callback, delay]);
-
-  return useCallback((...args: Parameters<T>) => {
-    return debouncedCallback.current(...args);
-  }, []) as T;
+  return useCallback(
+    ((...args: Parameters<T>) => {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => callback(...args), delay);
+    }) as T,
+    [callback, delay]
+  );
 };
 
-// Throttle hook
 export const useThrottle = <T extends (...args: any[]) => any>(
   callback: T,
   delay: number
 ): T => {
-  const lastRun = useRef(Date.now());
+  const lastCallRef = useRef<number>(0);
 
-  return useCallback((...args: Parameters<T>) => {
-    if (Date.now() - lastRun.current >= delay) {
-      callback(...args);
-      lastRun.current = Date.now();
-    }
-  }, [callback, delay]) as T;
+  return useCallback(
+    ((...args: Parameters<T>) => {
+      const now = Date.now();
+      if (now - lastCallRef.current >= delay) {
+        lastCallRef.current = now;
+        return callback(...args);
+      }
+    }) as T,
+    [callback, delay]
+  );
 };
 
-// Performance monitoring
-export const usePerformanceMonitor = (componentName: string) => {
-  const renderStart = useRef<number>(0);
-  const mountCount = useRef<number>(0);
+export const memoize = <T extends (...args: any[]) => any>(fn: T): T => {
+  const cache = new Map();
+  return ((...args: Parameters<T>) => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  }) as T;
+};
 
-  useEffect(() => {
-    mountCount.current += 1;
-    console.log(`${componentName} mounted (${mountCount.current} times)`);
+export const batchUpdates = <T>(
+  updates: (() => void)[],
+  batchSize: number = 10
+): Promise<void> => {
+  return new Promise((resolve) => {
+    let currentIndex = 0;
     
-    return () => {
-      console.log(`${componentName} unmounted`);
+    const processBatch = () => {
+      const endIndex = Math.min(currentIndex + batchSize, updates.length);
+      
+      for (let i = currentIndex; i < endIndex; i++) {
+        updates[i]();
+      }
+      
+      currentIndex = endIndex;
+      
+      if (currentIndex < updates.length) {
+        setTimeout(processBatch, 0);
+      } else {
+        resolve();
+      }
     };
-  }, [componentName]);
-
-  const startRender = useCallback(() => {
-    renderStart.current = performance.now();
-  }, []);
-
-  const endRender = useCallback(() => {
-    const renderTime = performance.now() - renderStart.current;
-    if (renderTime > 16) {
-      console.warn(`${componentName} slow render: ${renderTime.toFixed(2)}ms`);
-    }
-  }, [componentName]);
-
-  return { startRender, endRender };
-};
-
-// Memory efficient list virtualization
-export const useVirtualization = (
-  items: any[],
-  itemHeight: number,
-  containerHeight: number
-) => {
-  const visibleCount = Math.ceil(containerHeight / itemHeight);
-  const startIndex = 0; // This would be dynamic based on scroll position
-  const endIndex = Math.min(startIndex + visibleCount + 1, items.length);
-  
-  return {
-    visibleItems: items.slice(startIndex, endIndex),
-    offsetY: startIndex * itemHeight,
-    totalHeight: items.length * itemHeight
-  };
+    
+    processBatch();
+  });
 };

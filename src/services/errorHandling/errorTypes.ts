@@ -16,22 +16,10 @@ export interface RetryConfig {
 
 export interface ErrorContext {
   component?: string;
-  action?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface SecureContext {
-  component: string;
-  action: string;
-  timestamp: string;
-  sessionId: string;
-  userAgent: string;
-  url: string;
-}
-
-export interface ValidationRules {
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: RegExp;
+  action?: string;
+  timestamp?: string;
+  sessionId?: string;
+  userAgent?: string;
+  url?: string;
 }

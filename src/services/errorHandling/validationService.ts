@@ -1,8 +1,6 @@
 
-import { ValidationRules } from './errorTypes';
-
 export class ValidationService {
-  static validateInput(input: any, rules: ValidationRules): { isValid: boolean; errors: string[] } {
+  static validateInput(input: any, rules: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
     
     if (rules.required && (!input || input === '')) {
