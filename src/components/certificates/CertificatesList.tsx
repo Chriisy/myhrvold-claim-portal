@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from './EmptyState';
 import { AddCertificateModal } from './AddCertificateModal';
+import { EditCertificateModal } from './EditCertificateModal';
 import { 
   Table, 
   TableBody, 
@@ -14,7 +15,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Shield, Calendar, User, Building } from 'lucide-react';
+import { Shield, Calendar, User, Building, Edit } from 'lucide-react';
 
 interface CertificatesListProps {
   filterType: 'personal' | 'company' | 'all';
@@ -23,6 +24,8 @@ interface CertificatesListProps {
 export const CertificatesList = ({ filterType }: CertificatesListProps) => {
   const { data: certificates = [], isLoading, error } = useFGasCertificates(filterType);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -52,6 +55,11 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
         Kat. {category}
       </Badge>
     );
+  };
+
+  const handleEditClick = (certificate: any) => {
+    setSelectedCertificate(certificate);
+    setEditModalOpen(true);
   };
 
   if (isLoading) {
@@ -86,74 +94,98 @@ export const CertificatesList = ({ filterType }: CertificatesListProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="w-5 h-5" />
-          F-gass Sertifikater
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Sertifikatnummer</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Kategori</TableHead>
-              <TableHead>Innehaver</TableHead>
-              <TableHead>Fødselsdato</TableHead>
-              <TableHead>Utstedelsesdato</TableHead>
-              <TableHead>Utløpsdato</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {certificates.map((cert) => (
-              <TableRow key={cert.id}>
-                <TableCell className="font-medium">{cert.certificate_number}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {cert.certificate_type === 'personal' ? (
-                      <User className="w-4 h-4" />
-                    ) : (
-                      <Building className="w-4 h-4" />
-                    )}
-                    {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {cert.category && getCategoryBadge(cert.category)}
-                </TableCell>
-                <TableCell>{cert.holder_name}</TableCell>
-                <TableCell>
-                  {cert.birth_date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {getStatusBadge(cert.status)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            F-gass Sertifikater
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="w-full overflow-x-auto" style={{ maxHeight: '70vh' }}>
+            <Table>
+              <TableHeader className="sticky top-0 bg-white border-b z-10">
+                <TableRow>
+                  <TableHead>Sertifikatnummer</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead>Innehaver</TableHead>
+                  <TableHead>Fødselsdato</TableHead>
+                  <TableHead>Utstedelsesdato</TableHead>
+                  <TableHead>Utløpsdato</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Handlinger</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {certificates.map((cert) => (
+                  <TableRow key={cert.id}>
+                    <TableCell className="font-medium">{cert.certificate_number}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {cert.certificate_type === 'personal' ? (
+                          <User className="w-4 h-4" />
+                        ) : (
+                          <Building className="w-4 h-4" />
+                        )}
+                        {cert.certificate_type === 'personal' ? 'Personlig' : 'Bedrift'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {cert.category && getCategoryBadge(cert.category)}
+                    </TableCell>
+                    <TableCell>{cert.holder_name}</TableCell>
+                    <TableCell>
+                      {cert.birth_date && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          {new Date(cert.birth_date).toLocaleDateString('nb-NO')}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        {new Date(cert.issue_date).toLocaleDateString('nb-NO')}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        {new Date(cert.expiry_date).toLocaleDateString('nb-NO')}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(cert.status)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditClick(cert)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <EditCertificateModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedCertificate(null);
+        }}
+        certificate={selectedCertificate}
+      />
+    </>
   );
 };
 
