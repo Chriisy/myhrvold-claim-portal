@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -187,14 +186,13 @@ export const EditCertificateModal = ({ open, onClose, certificate }: EditCertifi
               <div>
                 <Label htmlFor="holder_user_id">Koble til bruker (valgfritt)</Label>
                 <Select 
-                  value={formData.holder_user_id} 
-                  onValueChange={(value) => setFormData({...formData, holder_user_id: value})}
+                  value={formData.holder_user_id || undefined} 
+                  onValueChange={(value) => setFormData({...formData, holder_user_id: value || ''})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg bruker..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ingen bruker</SelectItem>
                     {users?.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name} ({user.email})

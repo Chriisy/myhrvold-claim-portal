@@ -142,8 +142,8 @@ export const AddCertificateModal = ({ open, onClose }: AddCertificateModalProps)
               <div>
                 <Label htmlFor="holder_user_id">Koble til bruker (valgfritt)</Label>
                 <Select 
-                  value={formData.holder_user_id} 
-                  onValueChange={(value) => setFormData({...formData, holder_user_id: value})}
+                  value={formData.holder_user_id || undefined} 
+                  onValueChange={(value) => setFormData({...formData, holder_user_id: value || ''})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Velg bruker..." />
