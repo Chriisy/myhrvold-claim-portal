@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
@@ -15,6 +16,7 @@ import ClaimsList from './pages/ClaimsList';
 import ClaimDetail from './pages/ClaimDetail';
 import Suppliers from './pages/Suppliers';
 import Installations from './pages/Installations';
+import InstallationDetail from './pages/InstallationDetail';
 import FGasCertificates from './pages/FGasCertificates';
 import InvoiceImport from './pages/InvoiceImport';
 import { Register } from './components/auth/Register';
@@ -62,7 +64,7 @@ const App = () => {
           <AuthProvider>
             <CookieConsentProvider>
               <DashboardFiltersProvider>
-                <div className="min-h-screen bg-background">
+                <div className="min-h-screen bg-background w-full">
                   <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
@@ -76,6 +78,7 @@ const App = () => {
                     <Route path="/claims" element={<RequireAuth><DashboardLayout><ClaimsList /></DashboardLayout></RequireAuth>} />
                     <Route path="/claims/:id" element={<RequireAuth><DashboardLayout><ClaimDetail /></DashboardLayout></RequireAuth>} />
                     <Route path="/installations" element={<RequireAuth><DashboardLayout><Installations /></DashboardLayout></RequireAuth>} />
+                    <Route path="/installations/:id" element={<RequireAuth><DashboardLayout><InstallationDetail /></DashboardLayout></RequireAuth>} />
                     <Route path="/suppliers" element={<RequireAuth><DashboardLayout><Suppliers /></DashboardLayout></RequireAuth>} />
                     <Route path="/suppliers/:id" element={<RequireAuth><DashboardLayout><SupplierDetails /></DashboardLayout></RequireAuth>} />
                     <Route path="/users" element={<RequireAuth><DashboardLayout><UserManagement /></DashboardLayout></RequireAuth>} />

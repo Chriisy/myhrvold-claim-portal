@@ -4,9 +4,47 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, CheckSquare, Wrench, Clock, Plus, Calendar } from 'lucide-react';
+import { FileText, CheckSquare, Wrench, Clock, Plus, Calendar, Upload, Eye, Download } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 export function InternalControlDashboard() {
+  const [documents, setDocuments] = useState([
+    { id: 1, name: 'HMS Prosedyre v2.1', type: 'Prosedyre', updated: '2024-01-15', status: 'Aktiv' },
+    { id: 2, name: 'Sikkerhetsinstruks', type: 'Instruks', updated: '2024-01-10', status: 'Til godkjenning' },
+  ]);
+
+  const [checklists, setChecklists] = useState([
+    { id: 1, name: 'Ukentlig sikkerhetskontroll', items: 12, completed: 8, lastCheck: '2024-01-14' },
+    { id: 2, name: 'Månedsrapport utstyr', items: 20, completed: 15, lastCheck: '2024-01-12' },
+  ]);
+
+  const [maintenanceLog, setMaintenanceLog] = useState([
+    { id: 1, equipment: 'Kompressor A1', type: 'Vedlikehold', date: '2024-01-15', technician: 'Ole Hansen', status: 'Fullført' },
+    { id: 2, equipment: 'Kjøleaggregat B2', type: 'Inspeksjon', date: '2024-01-16', technician: 'Kari Nordahl', status: 'Planlagt' },
+  ]);
+
+  const handleUploadDocument = () => {
+    toast({
+      title: "Dokument lastet opp",
+      description: "Nytt dokument er lagt til i systemet",
+    });
+  };
+
+  const handleCreateChecklist = () => {
+    toast({
+      title: "Sjekkliste opprettet",
+      description: "Ny sjekkliste er opprettet og klar for bruk",
+    });
+  };
+
+  const handleAddMaintenance = () => {
+    toast({
+      title: "Vedlikehold registrert",
+      description: "Nytt vedlikehold er registrert i journalen",
+    });
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -36,9 +74,9 @@ export function InternalControlDashboard() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">24</div>
+                <div className="text-2xl font-bold">{documents.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  +2 fra forrige måned
+                  {documents.filter(d => d.status === 'Aktiv').length} godkjente
                 </p>
               </CardContent>
             </Card>
@@ -49,9 +87,9 @@ export function InternalControlDashboard() {
                 <CheckSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">7</div>
+                <div className="text-2xl font-bold">{checklists.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  3 forfaller denne uken
+                  Aktive sjekklister
                 </p>
               </CardContent>
             </Card>
@@ -62,9 +100,9 @@ export function InternalControlDashboard() {
                 <Wrench className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">{maintenanceLog.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  Planlagte aktiviteter
+                  Registrerte aktiviteter
                 </p>
               </CardContent>
             </Card>
@@ -77,7 +115,7 @@ export function InternalControlDashboard() {
               <CardContent>
                 <div className="text-2xl font-bold text-red-500">3</div>
                 <p className="text-xs text-muted-foreground">
-                  Krever umiddelbar oppmerksomhet
+                  Krever oppmerksomhet
                 </p>
               </CardContent>
             </Card>
@@ -90,38 +128,20 @@ export function InternalControlDashboard() {
                 <CardDescription>Siste gjennomførte internkontroller</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Ukentlig sikkerhetskontroll</p>
-                    <p className="text-sm text-gray-600">Utført av: Ole Hansen</p>
+                {checklists.map(checklist => (
+                  <div key={checklist.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{checklist.name}</p>
+                      <p className="text-sm text-gray-600">{checklist.completed}/{checklist.items} elementer</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={checklist.completed === checklist.items ? "default" : "secondary"}>
+                        {checklist.completed === checklist.items ? "Komplett" : "Pågår"}
+                      </Badge>
+                      <p className="text-xs text-gray-500">{checklist.lastCheck}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant="default">Godkjent</Badge>
-                    <p className="text-xs text-gray-500">2 timer siden</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Månedsrapport utstyr</p>
-                    <p className="text-sm text-gray-600">Utført av: Kari Nordahl</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="secondary">Avvik funnet</Badge>
-                    <p className="text-xs text-gray-500">1 dag siden</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Brannsikkerhet kontroll</p>
-                    <p className="text-sm text-gray-600">Utført av: Lars Olsen</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="default">Godkjent</Badge>
-                    <p className="text-xs text-gray-500">3 dager siden</p>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
 
@@ -131,47 +151,23 @@ export function InternalControlDashboard() {
                 <CardDescription>Planlagte kontroller og vedlikehold</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Årlig kalibrering målutstyr</p>
-                    <p className="text-sm text-gray-600">Ansvarlig: Teknisk avdeling</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="outline">Om 2 dager</Badge>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      15. jan
+                {maintenanceLog.map(item => (
+                  <div key={item.id} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{item.equipment}</p>
+                      <p className="text-sm text-gray-600">Ansvarlig: {item.technician}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={item.status === 'Fullført' ? "default" : "outline"}>
+                        {item.status}
+                      </Badge>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {item.date}
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Kvartalsvis HMS-gjennomgang</p>
-                    <p className="text-sm text-gray-600">Ansvarlig: HMS-koordinator</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="outline">Om 1 uke</Badge>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      20. jan
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Revisjon av prosedyrer</p>
-                    <p className="text-sm text-gray-600">Ansvarlig: Kvalitetsleder</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="destructive">Forfallt</Badge>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      10. jan
-                    </div>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -180,22 +176,48 @@ export function InternalControlDashboard() {
         <TabsContent value="documents" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Rutinedokumenter</h2>
-            <Button>
+            <Button onClick={handleUploadDocument}>
               <Plus className="w-4 h-4 mr-2" />
-              Nytt dokument
+              Last opp dokument
             </Button>
           </div>
           
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-gray-500">
-                <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-medium mb-2">Ingen dokumenter ennå</h3>
-                <p className="text-sm">Last opp ditt første rutinedokument for å komme i gang</p>
-                <Button className="mt-4" variant="outline">
-                  Last opp dokument
-                </Button>
-              </div>
+              {documents.length === 0 ? (
+                <div className="text-center text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">Ingen dokumenter ennå</h3>
+                  <p className="text-sm">Last opp ditt første rutinedokument for å komme i gang</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {documents.map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="w-8 h-8 text-blue-500" />
+                        <div>
+                          <h3 className="font-medium">{doc.name}</h3>
+                          <p className="text-sm text-gray-600">{doc.type} • Oppdatert {doc.updated}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={doc.status === 'Aktiv' ? 'default' : 'secondary'}>
+                          {doc.status}
+                        </Badge>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-1" />
+                          Vis
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-4 h-4 mr-1" />
+                          Last ned
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -203,7 +225,7 @@ export function InternalControlDashboard() {
         <TabsContent value="checklists" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Digitale Sjekklister</h2>
-            <Button>
+            <Button onClick={handleCreateChecklist}>
               <Plus className="w-4 h-4 mr-2" />
               Ny sjekkliste
             </Button>
@@ -211,14 +233,36 @@ export function InternalControlDashboard() {
           
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-gray-500">
-                <CheckSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-medium mb-2">Ingen sjekklister ennå</h3>
-                <p className="text-sm">Opprett din første digitale sjekkliste for å standardisere kontrollprosesser</p>
-                <Button className="mt-4" variant="outline">
-                  Opprett sjekkliste
-                </Button>
-              </div>
+              {checklists.length === 0 ? (
+                <div className="text-center text-gray-500">
+                  <CheckSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">Ingen sjekklister ennå</h3>
+                  <p className="text-sm">Opprett din første digitale sjekkliste for å standardisere kontrollprosesser</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {checklists.map(checklist => (
+                    <div key={checklist.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <CheckSquare className="w-8 h-8 text-green-500" />
+                        <div>
+                          <h3 className="font-medium">{checklist.name}</h3>
+                          <p className="text-sm text-gray-600">{checklist.items} elementer • Sist sjekket {checklist.lastCheck}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{checklist.completed}/{checklist.items}</div>
+                          <div className="text-xs text-gray-500">Fullført</div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Utfør kontroll
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -226,7 +270,7 @@ export function InternalControlDashboard() {
         <TabsContent value="maintenance" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Vedlikeholdsjournal</h2>
-            <Button>
+            <Button onClick={handleAddMaintenance}>
               <Plus className="w-4 h-4 mr-2" />
               Ny vedlikeholdsoppgave
             </Button>
@@ -234,14 +278,38 @@ export function InternalControlDashboard() {
           
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-gray-500">
-                <Wrench className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-medium mb-2">Ingen vedlikeholdsoppgaver ennå</h3>
-                <p className="text-sm">Registrer ditt første vedlikehold for å holde oversikt over alle aktiviteter</p>
-                <Button className="mt-4" variant="outline">
-                  Registrer vedlikehold
-                </Button>
-              </div>
+              {maintenanceLog.length === 0 ? (
+                <div className="text-center text-gray-500">
+                  <Wrench className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">Ingen vedlikeholdsoppgaver ennå</h3>
+                  <p className="text-sm">Registrer ditt første vedlikehold for å holde oversikt over alle aktiviteter</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {maintenanceLog.map(item => (
+                    <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Wrench className="w-8 h-8 text-orange-500" />
+                        <div>
+                          <h3 className="font-medium">{item.equipment}</h3>
+                          <p className="text-sm text-gray-600">{item.type} • {item.technician}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={item.status === 'Fullført' ? 'default' : 'outline'}>
+                          {item.status}
+                        </Badge>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{item.date}</div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Detaljer
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

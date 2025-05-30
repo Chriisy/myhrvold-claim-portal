@@ -2,10 +2,14 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface ProjectStatusSelectorProps {
+  projectId: string;
   currentStatus: string;
-  onStatusChange: (status: string) => void;
+  onStatusUpdate: () => void;
 }
 
 const statusOptions = [
@@ -15,32 +19,70 @@ const statusOptions = [
   { value: 'Avvik', label: 'Avvik', color: 'bg-red-100 text-red-800' }
 ];
 
-export const ProjectStatusSelector = ({ currentStatus, onStatusChange }: ProjectStatusSelectorProps) => {
+export const ProjectStatusSelector = ({ projectId, currentStatus, onStatusUpdate }: ProjectStatusSelectorProps) => {
+  const queryClient = useQueryClient();
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const { error } = await supabase
+        .from('installation_projects')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+          ...(newStatus === 'Ferdig' ? { completed_at: new Date().toISOString() } : {})
+        })
+        .eq('id', projectId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['installation-project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['installation-projects'] });
+      onStatusUpdate();
+      toast({
+        title: "Status oppdatert",
+        description: "Prosjektstatus har blitt oppdatert",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Feil ved oppdatering",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleStatusChange = (newStatus: string) => {
+    updateStatusMutation.mutate(newStatus);
+  };
+
   const currentStatusOption = statusOptions.find(option => option.value === currentStatus);
 
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-sm font-medium">Status:</span>
-      <Select value={currentStatus} onValueChange={onStatusChange}>
-        <SelectTrigger className="w-32">
-          <SelectValue>
-            {currentStatusOption && (
-              <Badge className={currentStatusOption.color}>
-                {currentStatusOption.label}
-              </Badge>
-            )}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {statusOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              <Badge className={option.color}>
-                {option.label}
-              </Badge>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select 
+      value={currentStatus} 
+      onValueChange={handleStatusChange}
+      disabled={updateStatusMutation.isPending}
+    >
+      <SelectTrigger className="w-40">
+        <SelectValue>
+          {currentStatusOption && (
+            <Badge className={currentStatusOption.color}>
+              {currentStatusOption.label}
+            </Badge>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {statusOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            <Badge className={option.color}>
+              {option.label}
+            </Badge>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
