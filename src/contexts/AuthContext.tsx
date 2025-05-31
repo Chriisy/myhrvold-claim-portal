@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { cleanupAuthState } from '@/utils/authUtils';
 import { Database } from '@/integrations/supabase/types';
-import { handleSupabaseError } from '@/utils/supabaseErrorHandler';
 
 type UserRole = Database['public']['Enums']['user_role'];
 type Department = Database['public']['Enums']['department'];
@@ -46,12 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const loadingUserRef = useRef<string | null>(null);
 
-  // Memoize the expensive user profile loading function
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     try {
-      console.log('Loading user profile for:', supabaseUser.email);
-      
-      // Use Promise.all to fetch user data and permissions in parallel
       const [userResult, permissionsResult] = await Promise.all([
         supabase
           .from('users')
@@ -70,18 +65,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (!userResult.data) {
-        console.warn('User not found in database');
         setUser(null);
         return;
       }
 
       const permissions = permissionsResult.data?.map(p => p.permission_name) || [];
-      
-      console.log('User profile loaded:', {
-        id: userResult.data.id,
-        role: userResult.data.user_role,
-        permissions: permissions
-      });
       
       setUser({
         id: userResult.data.id,
@@ -93,8 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         seller_no: userResult.data.seller_no,
         permissions: permissions as PermissionType[],
       });
-      
-      console.log('User set successfully with role:', userResult.data.user_role);
     } catch (error) {
       console.error('Error in loadUserProfile:', error);
       setUser(null);
@@ -102,45 +88,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Memoize the permission check function
   const hasPermission = useCallback((permission: string): boolean => {
     if (!user) {
-      console.log('hasPermission: No user');
       return false;
     }
     
-    console.log('Checking permission:', permission, 'for user role:', user.user_role);
-    
-    // Admin has all permissions
     if (user.user_role === 'admin') {
-      console.log('User is admin, has permission:', permission);
       return true;
     }
     
-    // Check specific permissions
     if (user.permissions && user.permissions.includes(permission as PermissionType)) {
-      console.log('User has specific permission:', permission);
       return true;
     }
     
-    // Role-based permissions
     const rolePermissions = {
       'saksbehandler': ['view_all_claims', 'edit_all_claims', 'create_claims', 'approve_claims'],
       'avdelingsleder': ['view_department_claims', 'edit_all_claims', 'create_claims', 'approve_claims', 'view_reports'],
       'tekniker': ['edit_own_claims', 'create_claims'],
-      'admin': [] // Handled above
+      'admin': []
     };
     
     const userRolePermissions = rolePermissions[user.user_role] || [];
-    const hasRolePermission = userRolePermissions.includes(permission);
-    
-    console.log('Role-based permission check:', permission, 'result:', hasRolePermission);
-    return hasRolePermission;
+    return userRolePermissions.includes(permission);
   }, [user]);
 
-  // Memoize the login function
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    console.log('Login attempt for:', email);
     setIsLoading(true);
     
     try {
@@ -148,9 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
-        console.log('Global sign out completed');
       } catch (err) {
-        console.log('Global sign out failed (continuing anyway):', err);
+        // Continue anyway
       }
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -165,7 +136,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user && data.session) {
-        console.log('Login successful, user:', data.user.email);
         return true;
       }
 
@@ -178,9 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Memoize the logout function
   const logout = useCallback(async () => {
-    console.log('Logout initiated');
     try {
       cleanupAuthState();
       loadingUserRef.current = null;
@@ -202,23 +170,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listeners');
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
-      
       setSession(session);
       
       if (session?.user) {
-        // Prevent multiple simultaneous user profile loads for the same user
         if (loadingUserRef.current === session.user.id) {
-          console.log('Already loading user profile for:', session.user.id);
           return;
         }
         
         loadingUserRef.current = session.user.id;
         
-        // Use requestIdleCallback for better performance
         if ('requestIdleCallback' in window) {
           requestIdleCallback(async () => {
             try {
@@ -259,13 +220,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       
       if (session?.user) {
-        // Prevent multiple simultaneous user profile loads for the same user
         if (loadingUserRef.current === session.user.id) {
-          console.log('Already loading user profile for:', session.user.id);
           return;
         }
         
@@ -302,12 +260,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
-      console.log('AuthProvider: Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, [loadUserProfile]);
 
-  // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     user,
     session,

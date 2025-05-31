@@ -5,7 +5,6 @@ import { queryKeys } from '@/lib/queryKeys';
 import { DASHBOARD_CONSTANTS } from '@/lib/dashboard-constants';
 import { DashboardFilters } from '@/types/dashboard';
 
-// Helper function to assign colors to suppliers using constants
 const getSupplierColor = (supplierName: string) => {
   const colors = DASHBOARD_CONSTANTS.COLORS.CHART_PALETTE;
   const hash = supplierName.split('').reduce((a, b) => {
@@ -19,10 +18,7 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
   return useQuery({
     queryKey: queryKeys.dashboard.supplierDistribution(filters),
     queryFn: async () => {
-      console.log('useSupplierDistribution - Starting query with filters:', filters);
-      
       try {
-        // First, check if we have any cost data at all
         const { data: costCheck, error: costCheckError } = await supabase
           .from('cost_line')
           .select('id, amount')
@@ -30,16 +26,11 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           .limit(5);
         
         if (costCheckError) {
-          console.error('useSupplierDistribution - Error checking cost data:', costCheckError);
+          console.error('Error checking cost data:', costCheckError);
           throw costCheckError;
         }
         
-        console.log('useSupplierDistribution - Cost data sample:', costCheck);
-        
-        // If no cost data, fall back to claim count by supplier
         if (!costCheck || costCheck.length === 0) {
-          console.log('useSupplierDistribution - No cost data found, falling back to claim count');
-          
           let claimQuery = supabase
             .from('claims')
             .select(`
@@ -64,11 +55,10 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           const { data: claimData, error: claimError } = await claimQuery;
           
           if (claimError) {
-            console.error('useSupplierDistribution - Claim query error:', claimError);
+            console.error('Claim query error:', claimError);
             throw claimError;
           }
           
-          // Group by supplier name and count claims
           const supplierCounts = claimData?.reduce((acc, claim) => {
             const supplierName = claim.suppliers?.name || 'Ukjent';
             acc[supplierName] = (acc[supplierName] || 0) + 1;
@@ -78,7 +68,6 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           const total = Object.values(supplierCounts).reduce((sum, count) => sum + count, 0);
           
           if (total === 0) {
-            console.log('useSupplierDistribution - No claims found in date range');
             return [];
           }
           
@@ -91,11 +80,9 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
             }))
             .sort((a, b) => b.amount - a.amount);
           
-          console.log('useSupplierDistribution - Fallback result (claim count):', result);
           return result;
         }
         
-        // Original query for cost-based distribution
         let query = supabase
           .from('cost_line')
           .select(`
@@ -111,7 +98,7 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           .gte('claims.created_at', filters.date_range.start.toISOString())
           .lte('claims.created_at', filters.date_range.end.toISOString())
           .is('claims.deleted_at', null)
-          .gt('amount', 0); // Only include costs > 0
+          .gt('amount', 0);
 
         if (filters.supplier_id) {
           query = query.eq('claims.supplier_id', filters.supplier_id);
@@ -126,13 +113,10 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         const { data, error } = await query;
 
         if (error) {
-          console.error('useSupplierDistribution - Cost query error:', error);
+          console.error('Cost query error:', error);
           throw error;
         }
 
-        console.log('useSupplierDistribution - Cost data found:', data?.length || 0);
-
-        // Group by supplier
         const supplierTotals = data?.reduce((acc, line) => {
           const supplierName = line.claims?.suppliers?.name || 'Ukjent';
           acc[supplierName] = (acc[supplierName] || 0) + Number(line.amount);
@@ -142,8 +126,6 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
         const total = Object.values(supplierTotals).reduce((sum, amount) => sum + amount, 0);
 
         if (total === 0) {
-          console.log('useSupplierDistribution - No cost data in date range, falling back to claim count');
-          // Fallback to claim count if no costs
           return [];
         }
 
@@ -156,18 +138,16 @@ export const useSupplierDistribution = (filters: DashboardFilters) => {
           }))
           .sort((a, b) => b.amount - a.amount);
 
-        console.log('useSupplierDistribution - Final result:', result);
         return result;
         
       } catch (error) {
-        console.error('useSupplierDistribution - Unexpected error:', error);
+        console.error('Unexpected error in supplier distribution:', error);
         throw error;
       }
     },
     staleTime: DASHBOARD_CONSTANTS.CACHE_TIMES.STALE_TIME,
     gcTime: DASHBOARD_CONSTANTS.CACHE_TIMES.GC_TIME,
     retry: (failureCount, error) => {
-      console.log('useSupplierDistribution - Retry attempt:', failureCount, error);
       return failureCount < 2;
     },
   });
