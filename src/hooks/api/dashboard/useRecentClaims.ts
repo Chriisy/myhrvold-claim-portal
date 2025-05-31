@@ -46,12 +46,10 @@ export const useRecentClaims = (filters: DashboardFilters) => {
 
       if (error) throw error;
 
-      // Get cost totals for each claim in batches to optimize queries
       const claimIds = claims?.map(claim => claim.id) || [];
       
       if (claimIds.length === 0) return [];
 
-      // Batch query for all cost lines and credit notes
       const [costResult, creditResult] = await Promise.all([
         supabase
           .from('cost_line')
@@ -63,7 +61,6 @@ export const useRecentClaims = (filters: DashboardFilters) => {
           .in('claim_id', claimIds)
       ]);
 
-      // Calculate totals efficiently
       const costTotals = costResult.data?.reduce((acc, line) => {
         acc[line.claim_id] = (acc[line.claim_id] || 0) + Number(line.amount);
         return acc;
@@ -79,7 +76,7 @@ export const useRecentClaims = (filters: DashboardFilters) => {
         totalCost: (costTotals[claim.id] || 0) - (creditTotals[claim.id] || 0)
       })) || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };

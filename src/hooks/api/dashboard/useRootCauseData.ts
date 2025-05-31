@@ -31,7 +31,6 @@ export const useRootCauseData = (filters: DashboardFilters) => {
 
       if (error) throw error;
 
-      // Group by root cause
       const rootCauseCounts = data?.reduce((acc, claim) => {
         const rootCause = claim.root_cause || 'Ukjent';
         acc[rootCause] = (acc[rootCause] || 0) + 1;

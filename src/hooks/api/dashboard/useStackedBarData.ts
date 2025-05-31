@@ -41,7 +41,6 @@ export const useStackedBarData = (filters: DashboardFilters) => {
 
       if (error) throw error;
 
-      // Get top 5 accounts by total amount
       const accountTotals = data?.reduce((acc, line) => {
         const account = line.konto_nr || 0;
         acc[account] = (acc[account] || 0) + Number(line.amount);
@@ -53,7 +52,6 @@ export const useStackedBarData = (filters: DashboardFilters) => {
         .slice(0, DASHBOARD_CONSTANTS.QUERY_LIMITS.TOP_ACCOUNTS)
         .map(([account]) => Number(account));
 
-      // Group by month and account
       const monthlyData = data?.reduce((acc, line) => {
         const month = format(new Date(line.date), 'MMM yyyy');
         const account = line.konto_nr || 0;
@@ -65,13 +63,11 @@ export const useStackedBarData = (filters: DashboardFilters) => {
         return acc;
       }, {} as Record<string, Record<number, number>>) || {};
 
-      // Convert to chart format
       const chartData = Object.entries(monthlyData).map(([month, accounts]) => ({
         month,
         ...accounts
       }));
 
-      // Generate colors for accounts
       const accountColors = topAccounts.reduce((acc, account, index) => {
         acc[account] = DASHBOARD_CONSTANTS.COLORS.CHART_PALETTE[index % DASHBOARD_CONSTANTS.COLORS.CHART_PALETTE.length];
         return acc;

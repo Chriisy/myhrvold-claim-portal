@@ -17,7 +17,6 @@ export function QuickStatsCards() {
       const startToday = startOfDay(today);
       const endToday = endOfDay(today);
 
-      // Get today's new claims
       let newTodayQuery = supabase
         .from('claims')
         .select('id')
@@ -25,14 +24,12 @@ export function QuickStatsCards() {
         .lte('created_at', endToday.toISOString())
         .is('deleted_at', null);
 
-      // Get claims waiting for response (status 'Avventer')
       let waitingQuery = supabase
         .from('claims')
         .select('id')
         .eq('status', 'Avventer')
         .is('deleted_at', null);
 
-      // Get overdue claims (past due_date and not closed)
       let overdueQuery = supabase
         .from('claims')
         .select('id')
@@ -40,7 +37,6 @@ export function QuickStatsCards() {
         .not('status', 'in', '("Bokført","Lukket")')
         .is('deleted_at', null);
 
-      // Apply filters if set
       if (filters.supplier_id) {
         newTodayQuery = newTodayQuery.eq('supplier_id', filters.supplier_id);
         waitingQuery = waitingQuery.eq('supplier_id', filters.supplier_id);
@@ -73,7 +69,7 @@ export function QuickStatsCards() {
         overdue: overdueResult.data?.length || 0
       };
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 
   if (isLoading) {

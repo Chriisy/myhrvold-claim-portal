@@ -14,7 +14,6 @@ const SupplierDistributionChart = memo(() => {
   const { data: supplierData, isLoading, isError, error } = useSupplierDistribution(filters);
 
   if (isError) {
-    console.error('SupplierDistribution error:', error);
     return (
       <Card className="card-hover">
         <CardHeader>
@@ -55,7 +54,6 @@ const SupplierDistributionChart = memo(() => {
     );
   }
 
-  // Check if we have data
   if (!supplierData || supplierData.length === 0) {
     return (
       <Card className="card-hover">

@@ -18,7 +18,6 @@ interface LiveKPIData {
 export const useLiveKPIs = () => {
   const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Cleanup on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -37,30 +36,25 @@ export const useLiveKPIs = () => {
       const yesterday = startOfDay(subDays(now, 1));
 
       try {
-        // Get claims data for different periods with error handling
         const [todayResult, weekResult, monthResult, yesterdayResult] = await Promise.all([
-          // Today's claims
           supabase
             .from('claims')
             .select('id, status, created_at, warranty')
             .gte('created_at', today.toISOString())
             .is('deleted_at', null),
           
-          // This week's claims
           supabase
             .from('claims')
             .select('id, category, closed_at, created_at')
             .gte('created_at', thisWeek.toISOString())
             .is('deleted_at', null),
           
-          // This month's claims
           supabase
             .from('claims')
             .select('id, warranty')
             .gte('created_at', thisMonth.toISOString())
             .is('deleted_at', null),
           
-          // Yesterday's claims for trend
           supabase
             .from('claims')
             .select('id')
@@ -69,7 +63,6 @@ export const useLiveKPIs = () => {
             .is('deleted_at', null)
         ]);
 
-        // Handle potential errors from Supabase calls
         if (todayResult.error) throw new Error(`Today claims error: ${todayResult.error.message}`);
         if (weekResult.error) throw new Error(`Week claims error: ${weekResult.error.message}`);
         if (monthResult.error) throw new Error(`Month claims error: ${monthResult.error.message}`);
@@ -80,24 +73,21 @@ export const useLiveKPIs = () => {
         const monthClaims = monthResult.data?.length || 0;
         const yesterdayClaims = yesterdayResult.data?.length || 0;
 
-        // Calculate average resolution time for this week with null safety
         const closedThisWeek = weekResult.data?.filter(claim => claim.closed_at) || [];
         const avgResolutionTime = closedThisWeek.length > 0 
           ? closedThisWeek.reduce((sum, claim) => {
               const created = new Date(claim.created_at);
               const closed = new Date(claim.closed_at!);
               const days = Math.floor((closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-              return sum + Math.max(0, days); // Ensure non-negative values
+              return sum + Math.max(0, days);
             }, 0) / closedThisWeek.length
           : 0;
 
-        // Calculate warranty recovery rate with null safety
         const warrantyClaimsThisMonth = monthResult.data?.filter(claim => claim.warranty) || [];
         const warrantyRecoveryRate = monthClaims > 0 
           ? (warrantyClaimsThisMonth.length / monthClaims) * 100 
           : 0;
 
-        // Find top issue category this week with better error handling
         const categoryCount = weekResult.data?.reduce((acc, claim) => {
           const cat = claim.category || 'Ukjent';
           acc[cat] = (acc[cat] || 0) + 1;
@@ -107,12 +97,10 @@ export const useLiveKPIs = () => {
         const topIssueCategory = Object.entries(categoryCount)
           .sort(([,a], [,b]) => b - a)[0]?.[0] || 'Ingen data';
 
-        // Calculate trend direction with safer comparison
         let trendDirection: 'up' | 'down' | 'stable' = 'stable';
         if (todayClaims > yesterdayClaims) trendDirection = 'up';
         else if (todayClaims < yesterdayClaims) trendDirection = 'down';
 
-        // Calculate cost savings with realistic estimation
         const costSavingsToday = Math.round(todayClaims * 2500);
 
         return {
@@ -126,8 +114,6 @@ export const useLiveKPIs = () => {
           trendDirection
         };
       } catch (error) {
-        console.error('Error fetching live KPI data:', error);
-        // Return safe defaults on error
         return {
           todayClaims: 0,
           weekClaims: 0,
@@ -140,9 +126,9 @@ export const useLiveKPIs = () => {
         };
       }
     },
-    refetchInterval: 60000, // Reduced to 1 minute to be less aggressive
-    staleTime: 30000, // Data is fresh for 30 seconds
-    retry: 2, // Limit retries to prevent excessive API calls
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
+    refetchInterval: 60000,
+    staleTime: 30000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 };

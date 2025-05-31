@@ -65,7 +65,6 @@ export const LiveKPICards = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Today's Claims with Trend */}
       <Card className="relative overflow-hidden">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center justify-between">
@@ -89,7 +88,6 @@ export const LiveKPICards = () => {
         </CardContent>
       </Card>
 
-      {/* Average Resolution Time */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center justify-between">
@@ -111,7 +109,6 @@ export const LiveKPICards = () => {
         </CardContent>
       </Card>
 
-      {/* Warranty Recovery Rate */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center justify-between">
@@ -133,7 +130,6 @@ export const LiveKPICards = () => {
         </CardContent>
       </Card>
 
-      {/* Top Issue & Cost Savings */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center justify-between">
