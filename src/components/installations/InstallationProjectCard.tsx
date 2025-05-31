@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, User, Calendar, ExternalLink } from 'lucide-react';
+import { MapPin, User, Calendar, ExternalLink, Building, Hash } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface InstallationProject {
@@ -11,6 +11,8 @@ interface InstallationProject {
   project_name: string;
   customer_name: string | null;
   location: string | null;
+  msnr: string | null;
+  address: string | null;
   status: 'Ny' | 'Påbegynt' | 'Ferdig' | 'Avvik';
   assigned_technician_id: string | null;
   created_at: string;
@@ -56,6 +58,20 @@ export const InstallationProjectCard = ({ project, onUpdate }: InstallationProje
           <div className="flex items-center text-sm text-gray-600">
             <User className="w-4 h-4 mr-2" />
             {project.customer_name}
+          </div>
+        )}
+        
+        {project.msnr && (
+          <div className="flex items-center text-sm text-gray-600">
+            <Hash className="w-4 h-4 mr-2" />
+            MSNR: {project.msnr}
+          </div>
+        )}
+
+        {project.address && (
+          <div className="flex items-center text-sm text-gray-600">
+            <Building className="w-4 h-4 mr-2" />
+            {project.address}
           </div>
         )}
         

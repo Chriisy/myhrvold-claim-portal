@@ -1,79 +1,56 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ProjectStatusSelector } from './ProjectStatusSelector';
 
-interface CreateProjectDialogProps {
+interface EditProjectDialogProps {
+  project: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onProjectCreated: () => void;
+  onUpdate: () => void;
 }
 
-export const CreateProjectDialog = ({ open, onOpenChange, onProjectCreated }: CreateProjectDialogProps) => {
+export const EditProjectDialog = ({ project, open, onOpenChange, onUpdate }: EditProjectDialogProps) => {
   const [formData, setFormData] = useState({
-    project_name: '',
-    customer_name: '',
-    location: '',
-    msnr: '',
-    address: '',
-    status: 'Ny',
-    notes: ''
+    project_name: project?.project_name || '',
+    customer_name: project?.customer_name || '',
+    location: project?.location || '',
+    msnr: project?.msnr || '',
+    address: project?.address || '',
+    status: project?.status || 'Ny',
+    notes: project?.notes || ''
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const resetForm = () => {
-    setFormData({
-      project_name: '',
-      customer_name: '',
-      location: '',
-      msnr: '',
-      address: '',
-      status: 'Ny',
-      notes: ''
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
+    
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Ikke innlogget');
-
       const { error } = await supabase
         .from('installation_projects')
-        .insert({
-          ...formData,
-          created_by: user.user.id
-        });
+        .update(formData)
+        .eq('id', project.id);
 
       if (error) throw error;
 
       toast({
-        title: "Prosjekt opprettet",
-        description: `${formData.project_name} er opprettet`,
+        title: "Prosjekt oppdatert",
+        description: "Endringene er lagret",
       });
 
-      resetForm();
-      onProjectCreated();
+      onUpdate();
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Feil",
-        description: "Kunne ikke opprette prosjekt",
+        description: "Kunne ikke oppdatere prosjekt",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -81,7 +58,7 @@ export const CreateProjectDialog = ({ open, onOpenChange, onProjectCreated }: Cr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Opprett nytt prosjekt</DialogTitle>
+          <DialogTitle>Rediger prosjekt</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -154,8 +131,8 @@ export const CreateProjectDialog = ({ open, onOpenChange, onProjectCreated }: Cr
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
               Avbryt
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? 'Oppretter...' : 'Opprett prosjekt'}
+            <Button type="submit" className="flex-1">
+              Lagre endringer
             </Button>
           </div>
         </form>
